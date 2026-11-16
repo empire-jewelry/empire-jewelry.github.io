@@ -40,7 +40,8 @@
       zoomOpen: 'Enlarge', zoomClose: 'Close', zoomIn: 'Zoom in', zoomOut: 'Zoom out',
       zoomHint: 'Tap the picture to zoom in, drag to move.',
       helloMap: 'Hello Empire Jewelry, I designed this Lebanon map pendant on your website:',
-      mapText: 'Lebanon'
+      mapText: 'Lebanon', mapName: 'LEBANON',
+      mapCities: { tripoli: 'TRIPOLI', beirut: 'BEIRUT', saida: 'SAIDA', tyre: 'TYRE' }
     },
     ar: {
       helloName: 'مرحباً Empire Jewelry، صممت هذه القلادة بالاسم على موقعكم:',
@@ -66,7 +67,8 @@
       zoomOpen: 'تكبير', zoomClose: 'إغلاق', zoomIn: 'تكبير', zoomOut: 'تصغير',
       zoomHint: 'اضغط على الصورة للتكبير، واسحب لتحريكها.',
       helloMap: 'مرحباً Empire Jewelry، صممت قلادة خريطة لبنان هذه على موقعكم:',
-      mapText: 'لبنان'
+      mapText: 'لبنان', mapName: 'لبنان',
+      mapCities: { tripoli: 'طرابلس', beirut: 'بيروت', saida: 'صيدا', tyre: 'صور' }
     }
   }[LANG];
 
@@ -184,9 +186,26 @@
     const top = [61.5, 0], center = [39.7, 47.0];
     // frei hängend dreht sich die Karte, bis der Schwerpunkt genau unter der Öse liegt
     const rot = Math.atan2(center[0] - top[0], center[1] - top[1]) * 180 / Math.PI;
-    const cities = { beirut: [20.4, 48.9], tripoli: [37.7, 15.2], saida: [13.8, 69.1], tyre: [5.1, 86.9],
-      nabatieh: [19.3, 80.1], zahle: [40.7, 51.3], baalbek: [56.5, 41.5], jbeil: [28.0, 34.8] };
-    return { d, pts, top, center, rot, axis: -57.2, cities };
+    // Orte und Flüsse (aus Länge/Breite mit derselben Projektion, grob, nur für Herz und Gravur)
+    const cities = { beirut: [20.4, 48.9], tripoli: [37.7, 15.2], saida: [13.8, 69.1], tyre: [5.1, 86.9], nabatieh: [19.3, 80.1],
+      zahle: [40.7, 51.3], baalbek: [56.5, 41.5], jbeil: [28.0, 34.8], jounieh: [26.5, 43.4], batroun: [28.5, 26.8],
+      zgharta: [40.7, 17.6], halba: [49.9, 9.0], hermel: [65.1, 18.2], aley: [25.5, 53.8], baabda: [22.4, 52.5],
+      beiteddine: [24.4, 60.5], jezzine: [24.4, 70.3], marjayoun: [24.9, 81.3], bintjbeil: [16.8, 96.1], rashaya: [37.7, 72.8] };
+    const rivers = [[[52.4, 43.4], [48.3, 48.3], [43.3, 54.4], [38.2, 60.5], [31.6, 67.9], [28.5, 72.8], [25.5, 78.9], [22.9, 83.2], [18.8, 83.2], [13.2, 83.2], [7.6, 82.6]],
+      [[62.6, 23.7], [65.1, 18.8], [68.7, 13.3], [71.2, 8.4]], [[40.2, 37.8], [35.6, 37.2], [31.6, 37.8], [27.5, 37.8]],
+      [[35.6, 44.0], [30.5, 44.6], [25.5, 44.6]], [[30.5, 51.3], [25.5, 50.7], [21.9, 48.3]], [[28.0, 59.3], [22.9, 59.9], [17.8, 60.5]],
+      [[26.5, 61.7], [21.4, 65.4], [14.8, 67.9]], [[20.4, 74.6], [16.3, 74.0], [11.2, 73.4]], [[47.3, 26.8], [43.3, 21.9], [39.2, 17.6], [37.7, 15.2]],
+      [[50.9, 17.6], [46.8, 14.6], [43.3, 10.9]], [[35.6, 75.8], [30.5, 85.0], [27.0, 89.9]]];
+    // Punkt innerhalb des Umrisses? (für das Herz, damit es nicht über den Rand geht)
+    const inside = (x, y) => {
+      let c = false;
+      for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+        const [xi, yi] = pts[i], [xj, yj] = pts[j];
+        if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+      }
+      return c;
+    };
+    return { d, pts, top, center, rot, axis: -57.2, cities, rivers, inside };
   })();
   // Zeder wie auf der Flagge (Einheitsfeld, Breite 1)
   const CEDAR_FLAG = 'M0-.5L.09-.38L.04-.37L.19-.24L.08-.23L.31-.08L.12-.07L.43 .1L.16 .11L.5 .29L.06 .29L.06 .48L-.06 .48L-.06 .29L-.5 .29L-.16 .11L-.43 .1L-.12-.07L-.31-.08L-.08-.23L-.19-.24L-.04-.37L-.09-.38Z';
@@ -273,7 +292,7 @@
   const state = {
     piece: 'pendant', gold: 'yellow', karat: '18k', text: TXT.fallbackName, text2: '', textAlt: '', text2Alt: '', join: 'heart', style: 'script',
     accent: 'none', underline: 'none', thick: 'std', chain: 'cable', motif: 'butterfly', enamel: 'none',
-    stone: 'none', size: '', len: '', notes: '', mapDesign: 'flag', mapText: ''
+    stone: 'none', size: '', len: '', notes: '', mapDesign: 'flag', mapText: '', mapHeart: 'none'
   };
   let touched = false;   // erst nach der ersten Änderung Bilder vorbereiten
   const controls = Array.from(document.querySelectorAll('[data-sync] [data-key]'));
@@ -768,7 +787,33 @@
   }
 
   // ---------- Libanon-Karte als Anhänger (Gold, Gravur, Flagge, bunt bemalt) ----------
-  const mapFont = () => (isArabic(nameText(state.mapText) || TXT.mapText) ? FONTS.calligraphy : FONTS.script);
+  const mapFont = () => {
+    if (state.mapDesign === 'cities') return LANG === 'ar' ? FONTS.modern : FONTS.block;   // Städtenamen wie gestempelt
+    return isArabic(nameText(state.mapText) || TXT.mapText) ? FONTS.calligraphy : FONTS.script;
+  };
+  // Herz-Ausschnitt: so nah wie möglich am gewählten Ort, aber ganz innerhalb der Karte
+  function heartSpot(town, r) {
+    let p = LEB.cities[town];
+    if (!p) return null;
+    const [cx, cy] = LEB.center;
+    for (let t = 0; t <= 1; t += 0.04) {
+      const x = p[0] + (cx - p[0]) * t, y = p[1] + (cy - p[1]) * t;
+      let ok = true;
+      for (let a = 0; a < 16 && ok; a++) ok = LEB.inside(x + Math.cos(a * Math.PI / 8) * r, y + Math.sin(a * Math.PI / 8) * r);
+      if (ok) return [x, y];
+    }
+    return [cx, cy];
+  }
+  // weiche Linie durch Punkte (Flüsse)
+  function smoothPath(P) {
+    let d = 'M' + P[0][0] + ' ' + P[0][1];
+    for (let i = 0; i < P.length - 1; i++) {
+      const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
+      d += 'C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + ' ' +
+        (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + ' ' + p2[0] + ' ' + p2[1];
+    }
+    return d;
+  }
   // Ausdehnung der gedrehten Karte, gemessen vom Aufhängepunkt (Karten-Einheiten)
   const LEB_BOX = (() => {
     const a = LEB.rot * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
@@ -814,9 +859,55 @@
     const enamel = design === 'flag' || design === 'paint';
     // 1) Goldplatte mit Licht-Filter (Kante, Glanz, Schatten), darauf Glanz und Gravur
     const g = el('g', { transform: tf, filter: plate }, ctx.g);
-    el('path', { d: LEB.d, fill: metal, stroke: metal, 'stroke-width': 0.8, 'stroke-linejoin': 'round' }, g);
-    const inside = el('g', { 'clip-path': 'url(#' + clipId + ')' }, g);
+    // ausgesägtes Herz am gewählten Ort (durchsichtig; der Filter gibt dem Loch eine Kante und Schatten)
+    let body = g;
+    if ((design === 'gold' || design === 'cities') && LEB.cities[state.mapHeart]) {
+      const hr = 4.6;                                   // halbe Herzbreite (Karten-Einheiten)
+      const hp = heartSpot(state.mapHeart, hr + 1.8);
+      const mid = ctx.id + '-heart';
+      const mk = el('mask', { id: mid, maskUnits: 'userSpaceOnUse', x: -20, y: -20, width: 120, height: 140 }, ctx.defs);
+      el('rect', { x: -20, y: -20, width: 120, height: 140, fill: '#fff' }, mk);
+      el('path', { d: CHARMS.heart, fill: '#000', transform: 'translate(' + hp[0].toFixed(1) + ' ' + hp[1].toFixed(1) + ') rotate(' + (-LEB.rot).toFixed(2) + ') scale(' + (hr * 2.2) + ')' }, mk);
+      body = el('g', { mask: 'url(#' + mid + ')' }, g);
+    }
+    el('path', { d: LEB.d, fill: metal, stroke: metal, 'stroke-width': 0.8, 'stroke-linejoin': 'round' }, body);
+    const inside = el('g', { 'clip-path': 'url(#' + clipId + ')' }, body);
     const [cx, cy] = LEB.center;
+    if (design === 'cities') {
+      // gravierte Karte: Flüsse als Linien, Städte mit Punkt und Namen, „LEBANON“ groß in der Mitte
+      const F = mapFont();
+      const engrave = (d, w) => {
+        el('path', { d, fill: 'none', stroke: '#fff', 'stroke-opacity': 0.55, 'stroke-width': w, 'stroke-linecap': 'round', transform: 'translate(0.25 0.35)' }, inside);
+        el('path', { d, fill: 'none', stroke: ctx.dark, 'stroke-opacity': 0.6, 'stroke-width': w, 'stroke-linecap': 'round' }, inside);
+      };
+      LEB.rivers.forEach(r => engrave(smoothPath(r), 0.6));
+      // Schrift liegt gerade (wie beim Tragen), Feld ab der Spitze
+      const ug = el('g', { transform: 'translate(' + T[0] + ' ' + T[1] + ') rotate(' + (-LEB.rot).toFixed(2) + ')' }, inside);
+      const toU = p => { const dx = p[0] - T[0], dy = p[1] - T[1]; return [dx * B.c - dy * B.s, dx * B.s + dy * B.c]; };
+      // gestempelte Schrift: dunkle Rille mit feiner Kontur, darunter heller Rand
+      const label = (txt, x, y, size, anchor, maxW) => {
+        const els = [['#fff', 0.6, 0.3, 0.4], [ctx.dark, 0.9, 0, 0]].map(([fill, op, dx, dy]) => {
+          const e = el('text', { x: x + dx, y: y + dy, direction: 'ltr', 'text-anchor': anchor, 'font-family': F.family, 'font-weight': F.weight, 'font-size': size, fill, 'fill-opacity': op, stroke: fill, 'stroke-opacity': op * 0.8, 'stroke-width': (size * 0.06).toFixed(2), 'stroke-linejoin': 'round' }, ug);
+          if (LANG !== 'ar') e.setAttribute('letter-spacing', (size * 0.04).toFixed(2));
+          e.textContent = txt;
+          return e;
+        });
+        const w = els[1].getComputedTextLength();
+        if (w > maxW) els.forEach(e => e.setAttribute('font-size', (size * maxW / w).toFixed(2)));
+      };
+      // Herz an einer der beschrifteten Städte: Name unter das Herz statt neben den Punkt
+      const heartU = LEB.cities[state.mapHeart] ? toU(heartSpot(state.mapHeart, 6.4)) : null;
+      [['tripoli', 30], ['beirut', 22], ['saida', 21], ['tyre', 14]].forEach(([id, maxW]) => {
+        const u = toU(LEB.cities[id]);
+        if (heartU && state.mapHeart === id) {
+          label(TXT.mapCities[id], heartU[0] - 5, heartU[1] + 9.6, 5.2, 'start', maxW);
+          return;
+        }
+        el('circle', { cx: u[0] + 1.4, cy: u[1], r: 0.95, fill: ctx.dark, 'fill-opacity': 0.8 }, ug);
+        label(TXT.mapCities[id], u[0] + 3, u[1] + 1.8, 5.2, 'start', maxW);
+      });
+      label(TXT.mapName, 2, 46, LANG === 'ar' ? 11 : 7.6, 'middle', 30);
+    }
     if (!enamel) {
       // polierter Glanz: heller Streifen oben, etwas dunkler unten
       const sid = ctx.id + '-sheen';
@@ -848,12 +939,13 @@
       const ein = el('g', { 'clip-path': 'url(#' + clipId + ')' }, eg);
       const up = el('g', { transform: 'translate(' + T[0] + ' ' + T[1] + ') rotate(' + (-LEB.rot).toFixed(2) + ')' }, ein);
       if (design === 'flag') {
-        // wie die Flagge: rot, weiß, rot (ein Viertel, die Hälfte, ein Viertel), Zeder in der Mitte
-        const q = B.y1 / 4;
-        el('rect', { x: -40, y: -10, width: 80, height: q + 10, fill: '#d0242e' }, up);
-        el('rect', { x: -40, y: q, width: 80, height: 2 * q, fill: '#faf8f3' }, up);
-        el('rect', { x: -40, y: 3 * q, width: 80, height: q + 10, fill: '#d0242e' }, up);
-        el('path', { d: CEDAR_FLAG, transform: 'translate(-2 ' + (2 * q - 11).toFixed(1) + ') scale(24)', fill: '#13924a' }, up);
+        // wie die Flagge und die Vorlagen: oben ein schmalerer roter Streifen (der Norden ist breit),
+        // breites Weiß mit Zeder, unten rot
+        const y1 = B.y1 * 0.21, y2 = B.y1 * 0.74;
+        el('rect', { x: -40, y: -10, width: 80, height: y1 + 10, fill: '#d0242e' }, up);
+        el('rect', { x: -40, y: y1, width: 80, height: y2 - y1, fill: '#faf8f3' }, up);
+        el('rect', { x: -40, y: y2, width: 80, height: 40, fill: '#d0242e' }, up);
+        el('path', { d: CEDAR_FLAG, transform: 'translate(-1 ' + (B.y1 * 0.42).toFixed(1) + ') scale(25)', fill: '#13924a' }, up);
       } else {
         // bunte Emaille mit Goldlinien dazwischen: Himmel, Sonne, Berge mit Zeder, Häuser, Meer
         const line = { stroke: metal, 'stroke-width': 0.6, 'stroke-linejoin': 'round' };
@@ -1210,7 +1302,7 @@
   const KEYS = {
     studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len', 'karat'],
     builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size', 'karat'],
-    map: ['mapDesign', 'mapText', 'gold', 'karat', 'chain', 'len']
+    map: ['mapDesign', 'mapText', 'gold', 'karat', 'chain', 'len', 'mapHeart']
   };
   const LINK = { studio: ['s', '#name'], builder: ['b', '#design'], map: ['m', '#lebanon'] };
   function designUrl(kind) {
@@ -1499,7 +1591,15 @@
     const svg = el('svg', { viewBox: '-3 -3 83 106', 'aria-hidden': 'true' });
     el('path', { d: LEB.d }, el('clipPath', { id: cid }, el('defs', null, svg)));
     const gold = '#d9b25a';
-    el('path', { d: LEB.d, fill: gold }, svg);
+    const defs = svg.querySelector('defs');
+    if (kind === 'gold') {
+      // Herz ausgesägt
+      const mk = el('mask', { id: cid + 'h', maskUnits: 'userSpaceOnUse', x: -5, y: -5, width: 90, height: 110 }, defs);
+      el('rect', { x: -5, y: -5, width: 90, height: 110, fill: '#fff' }, mk);
+      el('path', { d: CHARMS.heart, fill: '#000', transform: 'translate(29 47) scale(22)' }, mk);
+    }
+    const base = el('path', { d: LEB.d, fill: gold }, svg);
+    if (kind === 'gold') base.setAttribute('mask', 'url(#' + cid + 'h)');
     const g = el('g', { 'clip-path': 'url(#' + cid + ')' }, svg);
     if (kind === 'flag') {
       el('rect', { x: -5, y: -5, width: 90, height: 31, fill: '#d22b33' }, g);
@@ -1511,6 +1611,9 @@
       el('rect', { x: 22, y: 44, width: 14, height: 10, fill: '#fbe3ec' }, g);
     } else if (kind === 'engrave') {
       el('path', { d: 'M18 72L58 18M24 76L62 26', stroke: '#7d5c17', 'stroke-width': 4, 'stroke-linecap': 'round' }, g);
+    } else if (kind === 'cities') {
+      LEB.rivers.slice(0, 3).forEach(r => el('path', { d: smoothPath(r), fill: 'none', stroke: '#7d5c17', 'stroke-width': 3, 'stroke-linecap': 'round' }, g));
+      ['tripoli', 'beirut', 'saida'].forEach(c => el('circle', { cx: LEB.cities[c][0] + 3, cy: LEB.cities[c][1], r: 4, fill: '#7d5c17' }, g));
     }
     el('path', { d: LEB.d, fill: 'none', stroke: '#9c7726', 'stroke-width': kind === 'gold' || kind === 'engrave' ? 3 : 5, 'stroke-linejoin': 'round' }, svg);
     span.appendChild(svg);

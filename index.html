@@ -254,6 +254,7 @@
             <legend class="field-label">Style</legend>
             <label class="chip"><input type="radio" name="m-design" value="gold" data-key="mapDesign"><span class="map-ico" data-map="gold" aria-hidden="true"></span><span class="chip-t">Polished gold</span></label>
             <label class="chip"><input type="radio" name="m-design" value="engrave" data-key="mapDesign"><span class="map-ico" data-map="engrave" aria-hidden="true"></span><span class="chip-t">Engraved words</span></label>
+            <label class="chip"><input type="radio" name="m-design" value="cities" data-key="mapDesign"><span class="map-ico" data-map="cities" aria-hidden="true"></span><span class="chip-t">Map with cities</span></label>
             <label class="chip"><input type="radio" name="m-design" value="flag" data-key="mapDesign" checked><span class="map-ico" data-map="flag" aria-hidden="true"></span><span class="chip-t">Flag in enamel</span></label>
             <label class="chip"><input type="radio" name="m-design" value="paint" data-key="mapDesign"><span class="map-ico" data-map="paint" aria-hidden="true"></span><span class="chip-t">Painted in colours</span></label>
           </fieldset>
@@ -262,6 +263,34 @@
             <legend class="field-label">Words to engrave</legend>
             <input class="name-input" id="m-text" type="text" value="Lebanon" maxlength="14" autocomplete="off" spellcheck="false" dir="auto" data-key="mapText" aria-describedby="m-text-hint">
             <p class="small" id="m-text-hint">A name, a date or a few words, in Arabic or English.</p>
+          </fieldset>
+
+          <fieldset data-field="mapHeart" data-label="Heart cut-out" data-design="gold cities">
+            <legend class="field-label" id="m-heart-label">Heart cut-out on your town</legend>
+            <select class="select" data-key="mapHeart" aria-labelledby="m-heart-label" aria-describedby="m-heart-hint">
+              <option value="none">No heart</option>
+              <option value="aley">Aley</option>
+              <option value="baabda">Baabda</option>
+              <option value="baalbek">Baalbek</option>
+              <option value="batroun">Batroun</option>
+              <option value="beirut" selected>Beirut</option>
+              <option value="beiteddine">Beiteddine (Chouf)</option>
+              <option value="bintjbeil">Bint Jbeil</option>
+              <option value="halba">Halba (Akkar)</option>
+              <option value="hermel">Hermel</option>
+              <option value="jbeil">Jbeil (Byblos)</option>
+              <option value="jezzine">Jezzine</option>
+              <option value="jounieh">Jounieh</option>
+              <option value="marjayoun">Marjayoun</option>
+              <option value="nabatieh">Nabatieh</option>
+              <option value="rashaya">Rashaya</option>
+              <option value="saida">Saida</option>
+              <option value="tripoli">Tripoli</option>
+              <option value="tyre">Tyre (Sour)</option>
+              <option value="zahle">Zahle</option>
+              <option value="zgharta">Zgharta</option>
+            </select>
+            <p class="small" id="m-heart-hint">Your town is not in the list? Tell us in the WhatsApp chat.</p>
           </fieldset>
 
           <fieldset class="chips" data-field="gold" data-label="Gold">
@@ -561,7 +590,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=28" defer></script>
+  <script src="js/main.js?v=29" defer></script>
   <script src="js/ring.js?v=6" defer></script>
   <script src="js/music.js?v=3" defer></script>
 </body>

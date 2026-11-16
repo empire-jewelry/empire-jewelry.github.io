@@ -254,6 +254,7 @@
             <legend class="field-label">التصميم</legend>
             <label class="chip"><input type="radio" name="m-design" value="gold" data-key="mapDesign"><span class="map-ico" data-map="gold" aria-hidden="true"></span><span class="chip-t">ذهب لامع</span></label>
             <label class="chip"><input type="radio" name="m-design" value="engrave" data-key="mapDesign"><span class="map-ico" data-map="engrave" aria-hidden="true"></span><span class="chip-t">كلمات محفورة</span></label>
+            <label class="chip"><input type="radio" name="m-design" value="cities" data-key="mapDesign"><span class="map-ico" data-map="cities" aria-hidden="true"></span><span class="chip-t">خريطة بالمدن</span></label>
             <label class="chip"><input type="radio" name="m-design" value="flag" data-key="mapDesign" checked><span class="map-ico" data-map="flag" aria-hidden="true"></span><span class="chip-t">العلم بالمينا</span></label>
             <label class="chip"><input type="radio" name="m-design" value="paint" data-key="mapDesign"><span class="map-ico" data-map="paint" aria-hidden="true"></span><span class="chip-t">ملوّنة بالمينا</span></label>
           </fieldset>
@@ -262,6 +263,34 @@
             <legend class="field-label">الكلمات المحفورة</legend>
             <input class="name-input" id="m-text" type="text" value="لبنان" maxlength="14" autocomplete="off" spellcheck="false" dir="auto" data-key="mapText" aria-describedby="m-text-hint">
             <p class="small" id="m-text-hint">اسم أو تاريخ أو كلمات قليلة، بالعربية أو بالإنجليزية.</p>
+          </fieldset>
+
+          <fieldset data-field="mapHeart" data-label="قلب مفرّغ" data-design="gold cities">
+            <legend class="field-label" id="m-heart-label">قلب مفرّغ على بلدتك</legend>
+            <select class="select" data-key="mapHeart" aria-labelledby="m-heart-label" aria-describedby="m-heart-hint">
+              <option value="none">بدون قلب</option>
+              <option value="batroun">البترون</option>
+              <option value="baabda">بعبدا</option>
+              <option value="baalbek">بعلبك</option>
+              <option value="bintjbeil">بنت جبيل</option>
+              <option value="beiteddine">بيت الدين (الشوف)</option>
+              <option value="beirut" selected>بيروت</option>
+              <option value="jbeil">جبيل</option>
+              <option value="jezzine">جزين</option>
+              <option value="jounieh">جونية</option>
+              <option value="halba">حلبا (عكار)</option>
+              <option value="rashaya">راشيا</option>
+              <option value="zahle">زحلة</option>
+              <option value="zgharta">زغرتا</option>
+              <option value="tyre">صور</option>
+              <option value="saida">صيدا</option>
+              <option value="tripoli">طرابلس</option>
+              <option value="aley">عاليه</option>
+              <option value="marjayoun">مرجعيون</option>
+              <option value="nabatieh">النبطية</option>
+              <option value="hermel">الهرمل</option>
+            </select>
+            <p class="small" id="m-heart-hint">بلدتك ليست في القائمة؟ أخبرنا في محادثة واتساب.</p>
           </fieldset>
 
           <fieldset class="chips" data-field="gold" data-label="الذهب">
@@ -561,7 +590,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="../js/main.js?v=28" defer></script>
+  <script src="../js/main.js?v=29" defer></script>
   <script src="../js/ring.js?v=6" defer></script>
   <script src="../js/music.js?v=3" defer></script>
 </body>
