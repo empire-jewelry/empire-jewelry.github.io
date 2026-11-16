@@ -715,7 +715,7 @@
 
   const DRAW = {
     necklace(ctx) {
-      if (onBust('necklace')) {
+      if (ctx.model) {
         const C = bustCurve(state.len);
         const pl = namePlate(ctx, C.front[0], C.front[1] + 6, 112, 40, true, a =>
           ((curveY(C.left, a.L[0]) - a.L[1]) + (curveY(C.right, a.R[0]) - a.R[1])) / 2 + 1.4, 36);
@@ -737,7 +737,7 @@
     },
     pendant(ctx) {
       const mo = MOTIFS[state.motif];
-      if (onBust('pendant')) {
+      if (ctx.model) {
         const C = bustCurve(state.size), s = 0.5, hx = C.front[0], hy = C.front[1] + 2;
         linkChain(ctx, bustPath(C.left, [hx - 1.5, hy - 3], -1));
         linkChain(ctx, bustPath(C.right, [hx + 1.5, hy - 3], 1));
@@ -753,7 +753,7 @@
     },
     initial(ctx) {
       let hx = 200, hy = 150, cy = 203, R = 42;
-      if (onBust('initial')) {
+      if (ctx.model) {
         const C = bustCurve(state.size);
         R = 19; hx = C.front[0]; hy = C.front[1] + 2; cy = hy + R + 4;
         linkChain(ctx, bustPath(C.left, [hx - 1.5, hy - 3], -1));
@@ -826,15 +826,17 @@
     const id = svg.dataset.pid;
     const piece = svg.dataset.piece || state.piece;
     const m = METALS[state.gold] || METALS.yellow;
+    // Nahansicht (data-view="close"): nur die Kette, ohne Hals
+    const model = onBust(piece) && svg.dataset.view !== 'close';
     svg.replaceChildren();
     const defs = el('defs', null, svg);
-    if (onBust(piece)) {
+    if (model) {
       el('image', { href: IMG + 'neck.webp', x: 0, y: 0, width: 400, height: BUST.h || 300, preserveAspectRatio: 'xMidYMid slice' }, svg);
     } else background(svg, id, defs);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     // auf der Büste näher heran (Kette und Anhänger in echter Größe, trotzdem gut lesbar)
     let vy = 0;
-    if (onBust(piece)) {
+    if (model) {
       // Ausschnitt folgt der Kettenlänge (längere Kette = tiefer)
       const C = bustCurve(piece === 'necklace' ? state.len : state.size);
       vy = Math.max(0, Math.min((BUST.h || 300) - 300, C.front[1] - 212));
@@ -843,14 +845,14 @@
     const grad = el('linearGradient', { id: id + '-metal', gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 120, y2: 60, spreadMethod: 'reflect' }, defs);
     m.forEach((c, i) => el('stop', { offset: i / (m.length - 1), 'stop-color': c }, grad));
     const sh = el('filter', { id: id + '-sh', x: '-10%', y: '-10%', width: '120%', height: '130%' }, defs);
-    el('feDropShadow', { dx: 0.7, dy: 1.4, stdDeviation: 0.9, 'flood-color': '#3a2412', 'flood-opacity': onBust(piece) ? 0.38 : 0.28 }, sh);
+    el('feDropShadow', { dx: 0.7, dy: 1.4, stdDeviation: 0.9, 'flood-color': '#3a2412', 'flood-opacity': model ? 0.38 : 0.28 }, sh);
     const glow = el('filter', { id: id + '-glow', x: '-150%', y: '-150%', width: '400%', height: '400%' }, defs);
     el('feGaussianBlur', { stdDeviation: 1.6 }, glow);
     const clip = el('clipPath', { id: id + '-clip' }, defs);
     const waiting = ANIM && svg === heroSvg && !svg._seen;
     const clipRect = el('rect', { x: -20, y: vy - 20, width: waiting ? 0 : 440, height: 340 }, clip);
 
-    const ctx = { id, defs, metal: 'url(#' + id + '-metal)', dark: m[0], glints: [], chains: [], textBox: null, linkScale: onBust(piece) ? 0.9 : 1 };
+    const ctx = { id, defs, metal: 'url(#' + id + '-metal)', dark: m[0], glints: [], chains: [], textBox: null, model, linkScale: model ? 0.9 : 1 };
     ctx.under = el('g', null, svg);
     const wrapG = el('g', { 'clip-path': 'url(#' + id + '-clip)' }, svg);
     ctx.chainG = el('g', { filter: 'url(#' + id + '-sh)' }, wrapG);
@@ -1084,11 +1086,8 @@
     })().catch(() => '');
     return fontCache[family];
   }
-  async function exportPng(form) {
-    const svg = form.closest('section').querySelector('svg.preview');
-    const fam = font().family.split(',')[0].replace(/"/g, '').trim();
-    const css = await fontCss(fam);
-    const W = 1200, H = 900;
+  // Eine Vorschau (SVG) als Bild mit eingebetteter Schrift und eingebetteten Fotos
+  async function svgImage(svg, css, W, H) {
     const clone = svg.cloneNode(true);
     clone.setAttribute('xmlns', NS);
     clone.setAttribute('width', W);
@@ -1102,7 +1101,8 @@
     defs.insertBefore(st, defs.firstChild);
     const rg = el('radialGradient', { id: 'x-bg', cx: '50%', cy: '42%', r: '75%' }, defs);
     [['0', '#fdfcf9'], ['0.62', '#f3f0ea'], ['1', '#e4dfd5']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, rg));
-    const bgRect = el('rect', { x: -5, y: -5, width: 410, height: 310, fill: 'url(#x-bg)' });
+    const vb = (clone.getAttribute('viewBox') || '0 0 400 300').split(/\s+/).map(Number);
+    const bgRect = el('rect', { x: vb[0] - 5, y: vb[1] - 5, width: vb[2] + 10, height: vb[3] + 10, fill: 'url(#x-bg)' });
     clone.insertBefore(bgRect, defs.nextSibling);
     for (const im of Array.from(clone.querySelectorAll('image'))) {
       const blob = await (await fetch(im.getAttribute('href'))).blob();
@@ -1112,6 +1112,21 @@
     const img = new Image();
     img.src = url;
     await img.decode();
+    URL.revokeObjectURL(url);
+    return img;
+  }
+
+  async function exportPng(form) {
+    const sec = form.closest('section');
+    const close = sec.querySelector('svg.preview-close');
+    const views = close ? [close, sec.querySelector('svg.preview:not(.preview-close)')] : [sec.querySelector('svg.preview')];
+    const fam = font().family.split(',')[0].replace(/"/g, '').trim();
+    const css = await fontCss(fam);
+    // Namenskette: Nahansicht der Kette und Hals-Foto nebeneinander, sonst eine Ansicht
+    const VW = close ? 900 : 1200, VH = close ? 675 : 900, gap = close ? 6 : 0;
+    const W = VW * views.length + gap * (views.length - 1), H = VH;
+    const imgs = [];
+    for (const v of views) imgs.push(await svgImage(v, css, VW, VH));
     const L = lines(form);
     const pad = 56, lh = 42;
     const c = document.createElement('canvas');
@@ -1120,8 +1135,10 @@
     const x = c.getContext('2d');
     x.fillStyle = '#ffffff';
     x.fillRect(0, 0, c.width, c.height);
-    x.drawImage(img, 0, 0, W, H);
-    URL.revokeObjectURL(url);
+    imgs.forEach((im, k) => {
+      const pos = LANG === 'ar' ? imgs.length - 1 - k : k;
+      x.drawImage(im, pos * (VW + gap), 0, VW, VH);
+    });
     const rtl = LANG === 'ar';
     x.direction = rtl ? 'rtl' : 'ltr';
     x.textAlign = rtl ? 'right' : 'left';

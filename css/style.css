@@ -407,3 +407,16 @@ html[lang="ar"] .how-steps li::before { content: counter(step, arabic-indic); }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+/* Namenskette: Hals-Ansicht und Nahansicht der Kette nebeneinander */
+.studio-stage { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #e4dfd5; }
+.studio-stage .preview-close { background: radial-gradient(90% 80% at 50% 42%, #fdfcf9 0%, #f3f0ea 62%, #e4dfd5 100%); }
+/* Handy: Nahansicht groß, Hals-Foto klein als Bild im Bild */
+@media (max-width: 699px) {
+  .studio-stage { grid-template-columns: 1fr; }
+  .studio-stage .preview:not(.preview-close) {
+    position: absolute; inset-inline-start: 8px; top: 8px; z-index: 1;
+    width: 30%; max-height: none; border: 2px solid #fff; border-radius: 6px;
+    box-shadow: 0 6px 14px -8px rgba(40, 35, 20, .6);
+  }
+}
