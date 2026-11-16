@@ -365,9 +365,32 @@
   }
 
   // ---------- Namensplatte ----------
-  // Baut Name(n), Verbinder, Anhänger, Unterstrich und Krone als eine Goldplatte.
-  // Rückgabe in SVG-Koordinaten: Box und die Punkte, an denen die Kette eingehängt wird.
-  function namePlate(ctx, cx, baseY, maxW, maxSize, allowSecond) {
+  // Metall der Platte abtasten (im Layout, auf einer unsichtbaren Leinwand): äußerste Punkte links/rechts.
+  // Dort sitzen wie bei echten Namensketten die kleinen Ösen, in die die Kette eingehängt wird.
+  const inkCanvas = document.createElement('canvas');
+  function inkEnds(draw, x0, x1, yTop, yBot) {
+    const SC = 3, pad = 8;
+    const w = Math.max(1, Math.ceil((x1 - x0 + pad * 2) * SC)), h = Math.max(1, Math.ceil((yBot - yTop + pad * 2) * SC));
+    inkCanvas.width = w; inkCanvas.height = h;
+    const c = inkCanvas.getContext('2d', { willReadFrequently: true });
+    c.setTransform(SC, 0, 0, SC, (pad - x0) * SC, (pad - yTop) * SC);
+    c.fillStyle = c.strokeStyle = '#000';
+    c.direction = 'ltr'; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    draw(c);
+    const data = c.getImageData(0, 0, w, h).data;
+    let L = null, R = null;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) if (data[(y * w + x) * 4 + 3] > 90) { if (!L || x < L[0]) L = [x, y]; break; }
+      for (let x = w - 1; x >= 0; x--) if (data[(y * w + x) * 4 + 3] > 90) { if (!R || x > R[0]) R = [x, y]; break; }
+    }
+    const back = q => q && [q[0] / SC - pad + x0, q[1] / SC - pad + yTop];
+    return { L: back(L), R: back(R) };
+  }
+
+  // Baut Name(n), Verbinder, Anhänger, Unterstrich, Krone und die Ösen als eine Goldplatte.
+  // fit(anchors) darf eine senkrechte Verschiebung liefern (Platte hängt an der Kette).
+  // Rückgabe in SVG-Koordinaten: Box und die Einhängepunkte L/R.
+  function namePlate(ctx, cx, baseY, maxW, maxSize, allowSecond, fit) {
     const F = font();
     const raw1 = shownName(1);
     const raw2 = allowSecond ? shownName(2) : '';
@@ -376,7 +399,8 @@
     const S = 40;                       // Layout-Schriftgröße, danach skaliert
     const fs = S * F.scale;
     plateFilter(ctx);
-    const fg = el('g', { filter: 'url(#' + ctx.id + '-plate)' }, ctx.g);
+    const pg = el('g', null, ctx.g);
+    const fg = el('g', { filter: 'url(#' + ctx.id + '-plate)' }, pg);
     if (!raw1) fg.setAttribute('opacity', 0.4);
     const outer = el('g', null, fg);
     const edge = el('use', { href: '#' + ctx.id + '-pi', fill: ctx.dark, stroke: ctx.dark }, outer);
@@ -410,6 +434,7 @@
       if (it.kind === 'text') {
         const bb = it.el.getBBox();
         it.el.setAttribute('x', x - bb.x);
+        it.x = x - bb.x;
         it.w = bb.width;
       } else {
         it.w = it.size * 1.05;
@@ -427,26 +452,60 @@
     const left = 0, right = x - gap;
 
     // Krone über dem ersten Buchstaben
+    let crown = null;
     if (state.accent === 'crown') {
       let r = null;
       try { r = t1.getExtentOfChar(0); } catch (e) { r = null; }
       const bb1 = t1.getBBox();
-      const ccx = r ? r.x + r.width / 2 : bb1.x + fs * 0.3;
-      el('path', { d: CHARMS.crown, transform: 'translate(' + ccx + ' ' + (bb1.y - fs * 0.05) + ') scale(' + fs * 0.42 + ')', 'stroke-width': 0.6 / (fs * 0.42) }, inner);
+      crown = { x: r ? r.x + r.width / 2 : bb1.x + fs * 0.3, y: bb1.y - fs * 0.05, s: fs * 0.42 };
+      el('path', { d: CHARMS.crown, transform: 'translate(' + crown.x + ' ' + crown.y + ') scale(' + crown.s + ')', 'stroke-width': 0.6 / crown.s }, inner);
     }
 
     // Unterstrich: Schwung oder gerader Steg (Druckschrift braucht einen Steg, sonst halten die Buchstaben nicht)
     let ul = state.underline;
     if (F.kind === 'print' && ul === 'none') ul = 'bar';
+    let ulPath = null, ulBar = null;
     if (ul === 'swash') {
       const y0 = fs * 0.12, W = right - left;
-      el('path', {
-        d: 'M' + (left - fs * 0.04) + ' ' + (y0 - fs * 0.02) + 'C' + (left + W * 0.3) + ' ' + (y0 + fs * 0.12) + ' ' + (right - W * 0.3) + ' ' + (y0 + fs * 0.02) + ' ' + (right + fs * 0.08) + ' ' + (y0 - fs * 0.12),
-        fill: 'none', 'stroke-width': fs * 0.07, 'stroke-linecap': 'round'
-      }, inner);
+      ulPath = 'M' + (left - fs * 0.04) + ' ' + (y0 - fs * 0.02) + 'C' + (left + W * 0.3) + ' ' + (y0 + fs * 0.12) + ' ' + (right - W * 0.3) + ' ' + (y0 + fs * 0.02) + ' ' + (right + fs * 0.08) + ' ' + (y0 - fs * 0.12);
+      el('path', { d: ulPath, fill: 'none', 'stroke-width': fs * 0.07, 'stroke-linecap': 'round' }, inner);
     } else if (ul === 'bar') {
-      el('rect', { x: left - fs * 0.02, y: -fs * 0.02, width: right - left + fs * 0.04, height: fs * 0.075, rx: fs * 0.03, 'stroke-width': 0.3 }, inner);
+      ulBar = [left - fs * 0.02, -fs * 0.02, right - left + fs * 0.04, fs * 0.075];
+      el('rect', { x: ulBar[0], y: ulBar[1], width: ulBar[2], height: ulBar[3], rx: fs * 0.03, 'stroke-width': 0.3 }, inner);
     }
+
+    // äußerste Metallpunkte suchen (Schrift, Anhänger, Stein, Unterstrich)
+    const pre = inner.getBBox();
+    const ink = inkEnds(c => {
+      c.font = F.weight + ' ' + fs + 'px ' + F.family;
+      try { c.letterSpacing = (F.spacing ? F.spacing * fs : 0) + 'px'; } catch (e) { /* ältere Browser */ }
+      c.lineWidth = F.thin ? 1.2 : 0.35;
+      items.forEach(it => {
+        if (it.kind === 'text') {
+          // linke Kante aus der SVG-Box (stimmt auch auf der arabischen Seite, wo die Schreibrichtung rechts-nach-links ist)
+          const bx = it.el.getBBox().x;
+          c.fillText(it.el.textContent, bx, 0); c.strokeText(it.el.textContent, bx, 0);
+        }
+        else if (it.kind === 'charm') {
+          c.save(); c.translate(it.cx, midY); c.scale(it.size, it.size);
+          const p2 = new Path2D(CHARMS[it.name]);
+          if (it.name === 'infinity') { c.lineWidth = fs * 0.06 / it.size; c.stroke(p2); } else c.fill(p2);
+          c.restore();
+        } else if (it.kind === 'stone') {
+          c.beginPath(); c.arc(it.cx, midY, it.size * 0.45 + 1.6, 0, Math.PI * 2); c.fill();
+        }
+      });
+      if (crown) { c.save(); c.translate(crown.x, crown.y); c.scale(crown.s, crown.s); c.fill(new Path2D(CHARMS.crown)); c.restore(); }
+      if (ulPath) { c.lineWidth = fs * 0.07; c.lineCap = 'round'; c.stroke(new Path2D(ulPath)); }
+      if (ulBar) c.fillRect(ulBar[0], ulBar[1], ulBar[2], ulBar[3]);
+    }, pre.x, pre.x + pre.width, pre.y, Math.min(pre.y + pre.height, fs * 0.3));
+
+    // Ösen an beiden Enden (Teil der Platte, bekommen Relief und Glanz mit)
+    const R = fs * 0.075;
+    const aL = ink.L || [pre.x, midY], aR = ink.R || [pre.x + pre.width, midY];
+    const eL = [aL[0] - R * 0.5, aL[1]], eR = [aR[0] + R * 0.5, aR[1]];
+    [eL, eR].forEach(e => el('circle', { cx: e[0], cy: e[1], r: R * 0.62, fill: 'none', 'stroke-width': R * 0.5 }, inner));
+    const hookL = [eL[0] - R * 0.62, eL[1]], hookR = [eR[0] + R * 0.62, eR[1]];
 
     // auf Zielgröße bringen und zentrieren
     const bb = inner.getBBox();
@@ -455,15 +514,65 @@
     outer.setAttribute('transform', 'translate(' + tx.toFixed(2) + ' ' + baseY + ') scale(' + k.toFixed(4) + ')');
     const off = state.thick === 'thick' ? 1.6 : 0.9;
     edge.setAttribute('transform', 'translate(' + (off * 0.6 / k).toFixed(3) + ' ' + (off / k).toFixed(3) + ')');
+    const conv = q => [tx + q[0] * k, baseY + q[1] * k];
+    let L = conv(hookL), Rr = conv(hookR);
+
+    // an die Kette hängen: senkrecht verschieben
+    let dy = 0;
+    if (fit) {
+      dy = fit({ L, R: Rr }) || 0;
+      pg.setAttribute('transform', 'translate(0 ' + dy.toFixed(2) + ')');
+      L = [L[0], L[1] + dy]; Rr = [Rr[0], Rr[1] + dy];
+    }
 
     // Stein (rund) als eigenes Teil oben drauf
+    const keepG = ctx.g; ctx.g = pg;
     items.forEach(it => { if (it.kind === 'stone') drawStone(ctx, tx + it.cx * k, baseY + midY * k, it.size * 0.45 * k); });
-    items.forEach(it => { if (it.kind === 'charm' && it.accent) ctx.glints.push([tx + it.cx * k, baseY + midY * k]); });
+    ctx.g = keepG;
+    if (dy) ctx.glints = ctx.glints.map(g => [g[0], g[1] + dy]);
+    items.forEach(it => { if (it.kind === 'charm' && it.accent) ctx.glints.push([tx + it.cx * k, baseY + midY * k + dy]); });
 
-    const box = { x: tx + bb.x * k, y: baseY + bb.y * k, width: bb.width * k, height: bb.height * k };
-    const t1bb = textEls[0].getBBox();
-    const ym = baseY + (t1bb.y + t1bb.height * 0.55) * k;
-    return { box, ym, left: box.x + 1.5, right: box.x + box.width - 1.5, textEls, k, tx };
+    const box = { x: tx + bb.x * k, y: baseY + bb.y * k + dy, width: bb.width * k, height: bb.height * k };
+    return { box, L, R: Rr, textEls, k, tx, eyeR: R * 0.62 * k };
+  }
+
+  // ---------- Büste (gerendert in Blender) und Kettenverlauf darauf ----------
+  const IMG = (LANG === 'ar' ? '../' : '') + 'img/';
+  let BUST = null;
+  const bustReady = fetch(IMG + 'bust.json').then(r => r.json()).then(j => { BUST = j; }).catch(() => {});
+  const onBust = piece => !!BUST && (piece === 'necklace' || piece === 'pendant' || piece === 'initial');
+  function bustCurve(lenText) {
+    const n = parseInt(lenText, 10) || 45;
+    const key = [40, 42, 45, 50].reduce((a, b) => (Math.abs(b - n) < Math.abs(a - n) ? b : a), 45);
+    return BUST.curves[String(key)];
+  }
+  function curveY(pts, x) {
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i];
+      if ((x - a[0]) * (x - b[0]) <= 0 && a[0] !== b[0]) return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]);
+    }
+    return pts[pts.length - 1][1];
+  }
+  // weicher Pfad vom Einhängepunkt durch die berechneten Kettenpunkte bis hinter den Hals
+  function bustPath(pts, start, side) {
+    let i0 = pts.findIndex(q => (side < 0 ? q[0] < start[0] - 4 : q[0] > start[0] + 4));
+    if (i0 < 0) i0 = pts.length - 1;
+    const rest = pts.slice(i0).filter((q, i, a) => i % 5 === 0 || i === a.length - 1);
+    const P = [start].concat(rest);
+    let d = 'M' + P[0][0].toFixed(2) + ' ' + P[0][1].toFixed(2);
+    for (let i = 0; i < P.length - 1; i++) {
+      const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
+      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+      d += 'C' + c1[0].toFixed(2) + ' ' + c1[1].toFixed(2) + ' ' + c2[0].toFixed(2) + ' ' + c2[1].toFixed(2) + ' ' + p2[0].toFixed(2) + ' ' + p2[1].toFixed(2);
+    }
+    return d;
+  }
+  // Biegering durch die Öse, daran die Kette
+  function hook(ctx, at, side, path) {
+    const jx = at[0] + side * 1.3, jy = at[1];
+    el('ellipse', { cx: jx, cy: jy, rx: 1.15, ry: 2.3, fill: 'none', stroke: ctx.metal, 'stroke-width': 0.95, transform: 'rotate(' + (side * 25) + ' ' + jx + ' ' + jy + ')' }, ctx.g);
+    linkChain(ctx, path([jx + side * 1.0, jy]));
   }
 
   // ---------- Motive ----------
@@ -500,28 +609,53 @@
 
   const DRAW = {
     necklace(ctx) {
+      if (onBust('necklace')) {
+        const C = bustCurve(state.len);
+        const pl = namePlate(ctx, C.front[0], C.front[1] + 10, 112, 40, true, a =>
+          ((curveY(C.left, a.L[0]) - a.L[1]) + (curveY(C.right, a.R[0]) - a.R[1])) / 2 + 1.2);
+        hook(ctx, pl.L, -1, st => bustPath(C.left, st, -1));
+        hook(ctx, pl.R, 1, st => bustPath(C.right, st, 1));
+        ctx.textBox = pl.box;
+        return;
+      }
       const pl = namePlate(ctx, 200, 196, 272, 76, true);
-      chain2(ctx, pl);
+      hook(ctx, pl.L, -1, st => 'M44 -12C58 110 ' + (st[0] - 74) + ' ' + (st[1] - 16) + ' ' + st[0] + ' ' + st[1]);
+      hook(ctx, pl.R, 1, st => 'M356 -12C342 110 ' + (st[0] + 74) + ' ' + (st[1] - 16) + ' ' + st[0] + ' ' + st[1]);
       ctx.textBox = pl.box;
     },
     bracelet(ctx) {
       const pl = namePlate(ctx, 200, 170, 220, 60, false);
-      linkChain(ctx, 'M6 112C42 150 ' + (pl.left - 60) + ' ' + (pl.ym + 8) + ' ' + pl.left + ' ' + pl.ym);
-      linkChain(ctx, 'M394 112C358 150 ' + (pl.right + 60) + ' ' + (pl.ym + 8) + ' ' + pl.right + ' ' + pl.ym);
-      jumpRing(ctx, pl.left, pl.ym); jumpRing(ctx, pl.right, pl.ym);
+      hook(ctx, pl.L, -1, st => 'M6 112C42 150 ' + (st[0] - 60) + ' ' + (st[1] + 8) + ' ' + st[0] + ' ' + st[1]);
+      hook(ctx, pl.R, 1, st => 'M394 112C358 150 ' + (st[0] + 60) + ' ' + (st[1] + 8) + ' ' + st[0] + ' ' + st[1]);
       ctx.textBox = pl.box;
     },
     pendant(ctx) {
-      const mo = MOTIFS[state.motif], s = 0.95, hx = 200, hy = 160;
+      const mo = MOTIFS[state.motif];
+      if (onBust('pendant')) {
+        const C = bustCurve(state.size), s = 0.62, hx = C.front[0], hy = C.front[1] + 2;
+        linkChain(ctx, bustPath(C.left, [hx - 1.5, hy - 3], -1));
+        linkChain(ctx, bustPath(C.right, [hx + 1.5, hy - 3], 1));
+        bail(ctx, hx, hy);
+        placeMotif(ctx, mo, hx - mo.hang[0] * s, hy + 4 - mo.hang[1] * s, s, 1);
+        return;
+      }
+      const s = 0.95, hx = 200, hy = 160;
       linkChain(ctx, 'M48 -12C56 100 170 150 ' + (hx - 1.5) + ' ' + (hy - 4));
       linkChain(ctx, 'M352 -12C344 100 230 150 ' + (hx + 1.5) + ' ' + (hy - 4));
       bail(ctx, hx, hy);
       placeMotif(ctx, mo, hx - mo.hang[0] * s, hy + 4 - mo.hang[1] * s, s, 1);
     },
     initial(ctx) {
-      const hx = 200, hy = 150, cy = 203, R = 42;
-      linkChain(ctx, 'M48 -12C56 96 170 138 ' + (hx - 1.5) + ' ' + (hy - 4));
-      linkChain(ctx, 'M352 -12C344 96 230 138 ' + (hx + 1.5) + ' ' + (hy - 4));
+      let hx = 200, hy = 150, cy = 203, R = 42;
+      if (onBust('initial')) {
+        const C = bustCurve(state.size);
+        R = 26; hx = C.front[0]; hy = C.front[1] + 2; cy = hy + R + 5;
+        linkChain(ctx, bustPath(C.left, [hx - 1.5, hy - 3], -1));
+        linkChain(ctx, bustPath(C.right, [hx + 1.5, hy - 3], 1));
+      } else {
+        linkChain(ctx, 'M48 -12C56 96 170 138 ' + (hx - 1.5) + ' ' + (hy - 4));
+        linkChain(ctx, 'M352 -12C344 96 230 138 ' + (hx + 1.5) + ' ' + (hy - 4));
+      }
       bail(ctx, hx, hy);
       el('circle', { cx: hx, cy, r: R, fill: ctx.metal, stroke: ctx.dark, 'stroke-opacity': 0.35, 'stroke-width': 0.8 }, ctx.g);
       el('circle', { cx: hx, cy, r: R - 4, fill: 'none', stroke: '#fff', 'stroke-opacity': 0.3, 'stroke-width': 1 }, ctx.g);
@@ -530,12 +664,12 @@
       const F = font();
       const a = {
         x: hx, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
-        'font-family': F.family, 'font-weight': F.weight, 'font-size': 50 * F.scale
+        'font-family': F.family, 'font-weight': F.weight, 'font-size': R * 1.2 * F.scale
       };
       el('text', Object.assign({}, a, { y: cy + 1.2, fill: '#fff', opacity: 0.45 }), ctx.g).textContent = letter;
       el('text', Object.assign({}, a, { fill: ctx.dark, opacity: raw ? 0.85 : 0.35 }), ctx.g).textContent = letter;
-      if (STONE[state.stone]) drawStone(ctx, hx + 13, hy + 13, 5.4);
-      ctx.glints.push([hx - 24, cy - 22], [hx + 22, cy + 22], [hx - 30, cy + 12]);
+      if (STONE[state.stone]) drawStone(ctx, hx + R * 0.31, hy + R * 0.31, R * 0.13);
+      ctx.glints.push([hx - R * 0.57, cy - R * 0.52], [hx + R * 0.52, cy + R * 0.52], [hx - R * 0.71, cy + R * 0.29]);
     },
     ring(ctx) {
       const cx = 200, cy = 160, rx = 112, ry = 50, w = 24;
@@ -582,23 +716,22 @@
       });
     }
   };
-  function chain2(ctx, pl) {
-    linkChain(ctx, 'M44 -12C58 110 ' + (pl.left - 74) + ' ' + (pl.ym - 16) + ' ' + pl.left + ' ' + pl.ym);
-    linkChain(ctx, 'M356 -12C342 110 ' + (pl.right + 74) + ' ' + (pl.ym - 16) + ' ' + pl.right + ' ' + pl.ym);
-    jumpRing(ctx, pl.left, pl.ym); jumpRing(ctx, pl.right, pl.ym);
-  }
-
   function render(svg) {
     const id = svg.dataset.pid;
     const piece = svg.dataset.piece || state.piece;
     const m = METALS[state.gold] || METALS.yellow;
     svg.replaceChildren();
     const defs = el('defs', null, svg);
-    background(svg, id, defs);
+    if (onBust(piece)) {
+      el('image', { href: IMG + 'bust.webp', x: 0, y: 0, width: 400, height: 300, preserveAspectRatio: 'xMidYMid slice' }, svg);
+    } else background(svg, id, defs);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    // auf der Büste näher heran (Kette und Anhänger in echter Größe, trotzdem gut lesbar)
+    svg.setAttribute('viewBox', onBust(piece) ? '50 40 300 225' : '0 0 400 300');
     const grad = el('linearGradient', { id: id + '-metal', gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 120, y2: 60, spreadMethod: 'reflect' }, defs);
     m.forEach((c, i) => el('stop', { offset: i / (m.length - 1), 'stop-color': c }, grad));
     const sh = el('filter', { id: id + '-sh', x: '-10%', y: '-10%', width: '120%', height: '130%' }, defs);
-    el('feDropShadow', { dx: 0.8, dy: 1.8, stdDeviation: 1.2, 'flood-color': '#3b2c08', 'flood-opacity': 0.28 }, sh);
+    el('feDropShadow', { dx: 0.9, dy: 1.6, stdDeviation: 1.0, 'flood-color': '#24170a', 'flood-opacity': onBust(piece) ? 0.42 : 0.28 }, sh);
     const glow = el('filter', { id: id + '-glow', x: '-150%', y: '-150%', width: '400%', height: '400%' }, defs);
     el('feGaussianBlur', { stdDeviation: 1.6 }, glow);
     const clip = el('clipPath', { id: id + '-clip' }, defs);
@@ -847,6 +980,10 @@
     [['0', '#fdfcf9'], ['0.62', '#f3f0ea'], ['1', '#e4dfd5']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, rg));
     const bgRect = el('rect', { x: -5, y: -5, width: 410, height: 310, fill: 'url(#x-bg)' });
     clone.insertBefore(bgRect, defs.nextSibling);
+    for (const im of Array.from(clone.querySelectorAll('image'))) {
+      const blob = await (await fetch(im.getAttribute('href'))).blob();
+      im.setAttribute('href', await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); }));
+    }
     const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' }));
     const img = new Image();
     img.src = url;
@@ -1122,7 +1259,7 @@
     }
   }), { threshold: 0.4 });
 
-  fontsReady().then(() => {
+  Promise.all([fontsReady(), bustReady]).then(() => {
     renderAll();
     previews.forEach(s => io.observe(s));
     if (shared) {
