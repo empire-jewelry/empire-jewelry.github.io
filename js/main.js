@@ -400,7 +400,7 @@
   // äußerste Punkte links/rechts (Ösen für die Kette), unterster Punkt an einer Stelle (Ringe für Anhänger),
   // oberster Punkt über dem ersten Buchstaben (Krone).
   const inkCanvas = document.createElement('canvas');
-  function inkScan(draw, x0, x1, yTop, yBot, yCut) {
+  function inkScan(draw, x0, x1, yTop, yBot, yCut, fs) {
     const SC = 3, pad = 8;
     const w = Math.max(1, Math.ceil((x1 - x0 + pad * 2) * SC)), h = Math.max(1, Math.ceil((yBot - yTop + pad * 2) * SC));
     inkCanvas.width = w; inkCanvas.height = h;
@@ -415,10 +415,35 @@
     const py = uy => Math.round((uy - yTop + pad) * SC);
     const back = q => q && [q[0] / SC - pad + x0, q[1] / SC - pad + yTop];
     const cutRow = Math.min(h, py(yCut));
+    // zusammenhängende Metallstücke suchen: Punkte und kleine Zeichen (z. B. die Punkte unter ي) hängen lose
+    // und dürfen keine Öse tragen, die Kette gehört an den ersten bzw. letzten Buchstaben
+    const lab = new Int32Array(w * h), area = [0], box = [null];
+    const stack = [];
+    for (let i = 0; i < w * h; i++) {
+      if (lab[i] || data[i * 4 + 3] <= 90) continue;
+      const id = area.length;
+      let n = 0, xa = w, xb = 0, ya = h, yb = 0;
+      lab[i] = id; stack.push(i);
+      while (stack.length) {
+        const j = stack.pop(), x = j % w, y = (j - x) / w;
+        n++;
+        if (x < xa) xa = x; if (x > xb) xb = x; if (y < ya) ya = y; if (y > yb) yb = y;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          const k = ny * w + nx;
+          if (!lab[k] && data[k * 4 + 3] > 90) { lab[k] = id; stack.push(k); }
+        }
+      }
+      area.push(n); box.push([xa, xb, ya, yb]);
+    }
+    // lose = schmaler als 0,36 und flacher als 0,22 Schriftgrößen (Buchstaben wie ر oder ز sind größer)
+    const loose = box.map(bx => !!bx && (bx[1] - bx[0] + 1) / SC < 0.36 * fs && (bx[3] - bx[2] + 1) / SC < 0.22 * fs);
+    const holds = (x, y) => { const id = lab[y * w + x]; return id > 0 && !loose[id]; };
     let L = null, R = null;
     for (let y = 0; y < cutRow; y++) {
-      for (let x = 0; x < w; x++) if (ink(x, y)) { if (!L || x < L[0]) L = [x, y]; break; }
-      for (let x = w - 1; x >= 0; x--) if (ink(x, y)) { if (!R || x > R[0]) R = [x, y]; break; }
+      for (let x = 0; x < w; x++) if (holds(x, y)) { if (!L || x < L[0]) L = [x, y]; break; }
+      for (let x = w - 1; x >= 0; x--) if (holds(x, y)) { if (!R || x > R[0]) R = [x, y]; break; }
     }
     function bottomAt(ux, half) {
       const xa = Math.max(0, px(ux - half)), xb = Math.min(w - 1, px(ux + half));
@@ -561,7 +586,7 @@
       });
       if (ulPath) { c.lineWidth = fs * 0.05; c.lineCap = 'round'; c.stroke(new Path2D(ulPath)); }
       if (ulBar) c.fillRect(ulBar[0], ulBar[1], ulBar[2], ulBar[3]);
-    }, pre.x, pre.x + pre.width, pre.y - fs * 0.05, pre.y + pre.height + fs * 0.05, fs * 0.3);
+    }, pre.x, pre.x + pre.width, pre.y - fs * 0.05, pre.y + pre.height + fs * 0.05, fs * 0.3, fs);
 
     // Krone sitzt oben auf dem ersten Buchstaben
     if (wantCrown) {
