@@ -9,6 +9,9 @@
   const WA_NUMBER = '96170894976'; // aus den Instagram-Texten (70894976), bitte bestätigen lassen
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ANIM = !!window.gsap && !REDUCE;
+  // Handy/Tablet: keine Glanz- und Glitzer-Effekte an der Kette (die Licht-Filter der Goldschrift
+  // müssten dafür in jedem Bild neu berechnet werden, das ruckelt auf Handys)
+  const LITE = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
   const NS = 'http://www.w3.org/2000/svg';
   const wa = text => 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(text);
 
@@ -916,7 +919,7 @@
     gsap.to(o, { t: 1, duration: dur, ease: 'power1.inOut', onUpdate: () => c.grad.setAttribute('gradientTransform', 'translate(' + o.t * 240 + ' ' + o.t * 120 + ')') });
   }
   function fx(svg, n) {
-    if (!ANIM || !svg._visible) return;
+    if (!ANIM || LITE || !svg._visible) return;
     const now = performance.now();
     if (now - (svg._lastFx || 0) < 450) return;
     svg._lastFx = now;
@@ -1547,7 +1550,7 @@
     }
     // später nachgeladene Schriften: neu zeichnen, damit Breiten stimmen
     if (document.fonts) document.fonts.addEventListener('loadingdone', () => renderAll());
-    if (ANIM) {
+    if (ANIM && !LITE) {
       setInterval(() => {
         if (document.hidden) return;
         previews.forEach(s => {
