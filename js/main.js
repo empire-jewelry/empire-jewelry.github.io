@@ -30,7 +30,10 @@
       linkLabel: 'See my design: ',
       making: 'Making the picture…',
       saved: 'Picture saved. You can attach it in WhatsApp.',
-      saveFail: 'The picture could not be made. Send the message instead: it contains a link to your design.'
+      saveFail: 'The picture could not be made. Send the message instead: it lists every detail of your design.',
+      pastePhone: 'Picture copied. In WhatsApp, long-press the message box, tap Paste and send the picture.',
+      pasteDesk: 'Picture copied. In WhatsApp, press Ctrl+V to add it, then send.',
+      pasteFail: 'The picture could not be copied. Tap “Save as picture” and attach it in WhatsApp.'
     },
     ar: {
       helloName: 'مرحباً Empire Jewelry، صممت هذه القلادة بالاسم على موقعكم:',
@@ -49,7 +52,10 @@
       linkLabel: 'شاهد تصميمي: ',
       making: 'جارٍ تجهيز الصورة…',
       saved: 'تم حفظ الصورة. يمكنك إرفاقها في واتساب.',
-      saveFail: 'تعذّر تجهيز الصورة. أرسل الرسالة، فهي تحتوي على رابط لتصميمك.'
+      saveFail: 'تعذّر تجهيز الصورة. أرسل الرسالة، فهي تحتوي على كل تفاصيل تصميمك.',
+      pastePhone: 'تم نسخ الصورة. في واتساب اضغط مطولاً على خانة الكتابة، ثم «لصق»، وأرسل الصورة.',
+      pasteDesk: 'تم نسخ الصورة. في واتساب اضغط Ctrl+V لإضافتها، ثم أرسل.',
+      pasteFail: 'تعذّر نسخ الصورة. اضغط «احفظ كصورة» وأرفقها في واتساب.'
     }
   }[LANG];
 
@@ -235,6 +241,7 @@
     accent: 'none', underline: 'none', thick: 'std', chain: 'cable', motif: 'butterfly', enamel: 'none',
     stone: 'none', size: '', len: '', notes: ''
   };
+  let touched = false;   // erst nach der ersten Änderung Bilder vorbereiten
   const controls = Array.from(document.querySelectorAll('[data-sync] [data-key]'));
   const seen = new Set();
   controls.forEach(c => {
@@ -936,7 +943,7 @@
     const L = lines(form);
     const hello = form.dataset.form === 'studio' ? TXT.helloName : TXT.hello;
     return hello + '\n\n' + L.map(([k, v]) => '• ' + k + ': ' + v).join('\n') + '\n\n' + TXT.ask +
-      '\n\n' + TXT.linkLabel + designUrl(form.dataset.form);
+      '';
   }
   function updateOutputs() {
     forms.forEach(form => {
@@ -950,6 +957,7 @@
       const msg = message(form);
       form.querySelectorAll('[data-wa]').forEach(a => { a.href = wa(msg); });
     });
+    if (touched) preparePng();
   }
 
   // ---------- Entwurf als Bild (PNG): Skizze + Angaben, Schrift wird eingebettet ----------
@@ -1025,6 +1033,47 @@
     return new Promise(r => c.toBlob(r, 'image/png'));
   }
   window.__exportPng = exportPng;
+
+  // Bild des Entwurfs vorbereiten, sobald sich nichts mehr ändert (dann ist es beim Tippen auf Senden sofort da)
+  const pngCache = new Map();
+  let pngTimer = null;
+  function preparePng() {
+    clearTimeout(pngTimer);
+    pngTimer = setTimeout(() => {
+      forms.forEach(form => {
+        const key = message(form) + state.gold + state.chain + state.accent;
+        const c = pngCache.get(form);
+        if (c && c.key === key) return;
+        const blob = exportPng(form).catch(() => null);
+        pngCache.set(form, { key, blob });
+      });
+    }, 900);
+  }
+  function pngFor(form) {
+    const key = message(form) + state.gold + state.chain + state.accent;
+    const c = pngCache.get(form);
+    if (c && c.key === key) return c.blob;
+    const blob = exportPng(form);
+    pngCache.set(form, { key, blob });
+    return blob;
+  }
+  // WhatsApp kann über einen Link nur Text übernehmen. Darum: Bild kopieren, Chat öffnen, Kunde fügt es ein.
+  forms.forEach(form => form.querySelectorAll('[data-wa]').forEach(a => a.addEventListener('click', async e => {
+    if (!(navigator.clipboard && window.ClipboardItem)) return;   // dann nur Text, wie bisher
+    e.preventDefault();
+    const href = a.href;
+    const status = form.querySelector('[data-save-status]');
+    const phone = window.matchMedia('(pointer: coarse)').matches;
+    try {
+      const write = navigator.clipboard.write([new ClipboardItem({ 'image/png': Promise.resolve(pngFor(form)).then(b => b || Promise.reject(new Error('png'))) })]);
+      await Promise.race([write, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 2500))]);
+      if (status) status.textContent = phone ? TXT.pastePhone : TXT.pasteDesk;
+    } catch (err) {
+      if (status) status.textContent = TXT.pasteFail;
+    }
+    const w = window.open(href, '_blank');
+    if (w) w.opener = null; else location.href = href;
+  })));
   forms.forEach(form => {
     const btn = form.querySelector('[data-save]');
     const status = form.querySelector('[data-save-status]');
@@ -1074,6 +1123,7 @@
     const k = c.dataset && c.dataset.key;
     if (!k || (c.type === 'radio' && !c.checked) || state[k] === c.value) return;
     state[k] = c.value;
+    touched = true;
     if (k === 'textAlt' || k === 'text2Alt') altEdited[k] = !!c.value.trim();
     if (k === 'text') altEdited.textAlt = false;
     if (k === 'text2') altEdited.text2Alt = false;
