@@ -63,7 +63,7 @@
   };
 
   const METALS = {
-    yellow: ['#6e5113', '#b98f2e', '#f5e2a2', '#d2aa4c', '#8a671c'],
+    yellow: ['#7d5c17', '#cfa443', '#fcecb6', '#e2bb5c', '#9c7726'],
     rose: ['#7a473a', '#c28674', '#f7d6ca', '#d59d8b', '#8d5848'],
     white: ['#6c7075', '#b6bac0', '#f8f8f6', '#cdd1d5', '#7e848a']
   };
@@ -309,7 +309,12 @@
 
   // ---------- Kette Glied für Glied ----------
   function linkChain(ctx, d) {
-    const T = CHAINS[state.chain] || CHAINS.cable;
+    const T0 = CHAINS[state.chain] || CHAINS.cable;
+    const f = ctx.linkScale || 1;
+    const T = Object.assign({}, T0, {
+      step: T0.step && T0.step * f, solid: T0.solid && T0.solid * f, mark: T0.mark && T0.mark * f,
+      pattern: T0.pattern && T0.pattern.map(v => v * f)
+    });
     const guide = el('path', { d, fill: 'none', stroke: 'none' }, ctx.chainG);
     ctx.chains.push(guide);
     const L = guide.getTotalLength();
@@ -390,7 +395,7 @@
   // Baut Name(n), Verbinder, Anhänger, Unterstrich, Krone und die Ösen als eine Goldplatte.
   // fit(anchors) darf eine senkrechte Verschiebung liefern (Platte hängt an der Kette).
   // Rückgabe in SVG-Koordinaten: Box und die Einhängepunkte L/R.
-  function namePlate(ctx, cx, baseY, maxW, maxSize, allowSecond, fit) {
+  function namePlate(ctx, cx, baseY, maxW, maxSize, allowSecond, fit, maxH) {
     const F = font();
     const raw1 = shownName(1);
     const raw2 = allowSecond ? shownName(2) : '';
@@ -509,7 +514,9 @@
 
     // auf Zielgröße bringen und zentrieren
     const bb = inner.getBBox();
-    const k = Math.min(maxSize / S, maxW / Math.max(1, bb.width));
+    // Größe: höchstens maxW breit, maxSize Schriftgröße; auf der Büste zusätzlich echte Höhe (maxH) wie bei echten Namensketten
+    let k = Math.min(maxSize / S, maxW / Math.max(1, bb.width));
+    if (maxH) k = Math.min(k, maxH / Math.max(1, bb.height));
     const tx = cx - (bb.x + bb.width / 2) * k;
     outer.setAttribute('transform', 'translate(' + tx.toFixed(2) + ' ' + baseY + ') scale(' + k.toFixed(4) + ')');
     const off = state.thick === 'thick' ? 1.6 : 0.9;
@@ -536,10 +543,11 @@
     return { box, L, R: Rr, textEls, k, tx, eyeR: R * 0.62 * k };
   }
 
-  // ---------- Büste (gerendert in Blender) und Kettenverlauf darauf ----------
+  // ---------- Hals-Foto (Pexels, cottonbro studio) und Kettenverlauf darauf ----------
+  // neck.json: Kettenverlauf je Länge in SVG-Einheiten (Breite 400), festgelegt in Empire_Jewelry_Werkstatt\neck_photo.py
   const IMG = (LANG === 'ar' ? '../' : '') + 'img/';
   let BUST = null;
-  const bustReady = fetch(IMG + 'bust.json').then(r => r.json()).then(j => { BUST = j; }).catch(() => {});
+  const bustReady = fetch(IMG + 'neck.json').then(r => r.json()).then(j => { BUST = j; }).catch(() => {});
   const onBust = piece => !!BUST && (piece === 'necklace' || piece === 'pendant' || piece === 'initial');
   function bustCurve(lenText) {
     const n = parseInt(lenText, 10) || 45;
@@ -611,8 +619,8 @@
     necklace(ctx) {
       if (onBust('necklace')) {
         const C = bustCurve(state.len);
-        const pl = namePlate(ctx, C.front[0], C.front[1] + 10, 112, 40, true, a =>
-          ((curveY(C.left, a.L[0]) - a.L[1]) + (curveY(C.right, a.R[0]) - a.R[1])) / 2 + 1.2);
+        const pl = namePlate(ctx, C.front[0], C.front[1] + 6, 112, 40, true, a =>
+          ((curveY(C.left, a.L[0]) - a.L[1]) + (curveY(C.right, a.R[0]) - a.R[1])) / 2 + 1.4, 36);
         hook(ctx, pl.L, -1, st => bustPath(C.left, st, -1));
         hook(ctx, pl.R, 1, st => bustPath(C.right, st, 1));
         ctx.textBox = pl.box;
@@ -632,7 +640,7 @@
     pendant(ctx) {
       const mo = MOTIFS[state.motif];
       if (onBust('pendant')) {
-        const C = bustCurve(state.size), s = 0.62, hx = C.front[0], hy = C.front[1] + 2;
+        const C = bustCurve(state.size), s = 0.5, hx = C.front[0], hy = C.front[1] + 2;
         linkChain(ctx, bustPath(C.left, [hx - 1.5, hy - 3], -1));
         linkChain(ctx, bustPath(C.right, [hx + 1.5, hy - 3], 1));
         bail(ctx, hx, hy);
@@ -649,7 +657,7 @@
       let hx = 200, hy = 150, cy = 203, R = 42;
       if (onBust('initial')) {
         const C = bustCurve(state.size);
-        R = 26; hx = C.front[0]; hy = C.front[1] + 2; cy = hy + R + 5;
+        R = 19; hx = C.front[0]; hy = C.front[1] + 2; cy = hy + R + 4;
         linkChain(ctx, bustPath(C.left, [hx - 1.5, hy - 3], -1));
         linkChain(ctx, bustPath(C.right, [hx + 1.5, hy - 3], 1));
       } else {
@@ -723,22 +731,28 @@
     svg.replaceChildren();
     const defs = el('defs', null, svg);
     if (onBust(piece)) {
-      el('image', { href: IMG + 'bust.webp', x: 0, y: 0, width: 400, height: 300, preserveAspectRatio: 'xMidYMid slice' }, svg);
+      el('image', { href: IMG + 'neck.webp', x: 0, y: 0, width: 400, height: BUST.h || 300, preserveAspectRatio: 'xMidYMid slice' }, svg);
     } else background(svg, id, defs);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     // auf der Büste näher heran (Kette und Anhänger in echter Größe, trotzdem gut lesbar)
-    svg.setAttribute('viewBox', onBust(piece) ? '50 40 300 225' : '0 0 400 300');
+    let vy = 0;
+    if (onBust(piece)) {
+      // Ausschnitt folgt der Kettenlänge (längere Kette = tiefer)
+      const C = bustCurve(piece === 'necklace' ? state.len : state.size);
+      vy = Math.max(0, Math.min((BUST.h || 300) - 300, C.front[1] - 212));
+    }
+    svg.setAttribute('viewBox', '0 ' + vy.toFixed(1) + ' 400 300');
     const grad = el('linearGradient', { id: id + '-metal', gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 120, y2: 60, spreadMethod: 'reflect' }, defs);
     m.forEach((c, i) => el('stop', { offset: i / (m.length - 1), 'stop-color': c }, grad));
     const sh = el('filter', { id: id + '-sh', x: '-10%', y: '-10%', width: '120%', height: '130%' }, defs);
-    el('feDropShadow', { dx: 0.9, dy: 1.6, stdDeviation: 1.0, 'flood-color': '#24170a', 'flood-opacity': onBust(piece) ? 0.42 : 0.28 }, sh);
+    el('feDropShadow', { dx: 0.7, dy: 1.4, stdDeviation: 0.9, 'flood-color': '#3a2412', 'flood-opacity': onBust(piece) ? 0.38 : 0.28 }, sh);
     const glow = el('filter', { id: id + '-glow', x: '-150%', y: '-150%', width: '400%', height: '400%' }, defs);
     el('feGaussianBlur', { stdDeviation: 1.6 }, glow);
     const clip = el('clipPath', { id: id + '-clip' }, defs);
     const waiting = ANIM && svg === heroSvg && !svg._seen;
-    const clipRect = el('rect', { x: -20, y: -20, width: waiting ? 0 : 440, height: 340 }, clip);
+    const clipRect = el('rect', { x: -20, y: vy - 20, width: waiting ? 0 : 440, height: 340 }, clip);
 
-    const ctx = { id, defs, metal: 'url(#' + id + '-metal)', dark: m[0], glints: [], chains: [], textBox: null };
+    const ctx = { id, defs, metal: 'url(#' + id + '-metal)', dark: m[0], glints: [], chains: [], textBox: null, linkScale: onBust(piece) ? 0.9 : 1 };
     ctx.under = el('g', null, svg);
     const wrapG = el('g', { 'clip-path': 'url(#' + id + '-clip)' }, svg);
     ctx.chainG = el('g', { filter: 'url(#' + id + '-sh)' }, wrapG);
