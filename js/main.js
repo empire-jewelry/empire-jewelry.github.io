@@ -24,7 +24,13 @@
       chain: 'Chain length', ring: 'Ring size', bracelet: 'Bracelet length', notSure: 'Not sure',
       cm: n => n + ' cm', ringSize: n => 'EU ' + n,
       karat: ', 18k', similar: 'Similar to the photo:',
-      fallbackName: 'Layla', amp: '&', sketch: 'Sketch:', menu: 'Menu', close: 'Close'
+      fallbackName: 'Layla', amp: '&', sketch: 'Sketch:', menu: 'Menu', close: 'Close',
+      altAr1: 'Name in Arabic letters', altAr2: 'Second name in Arabic letters',
+      altEn1: 'Name in English letters', altEn2: 'Second name in English letters',
+      linkLabel: 'See my design: ',
+      making: 'Making the picture…',
+      saved: 'Picture saved. You can attach it in WhatsApp.',
+      saveFail: 'The picture could not be made. Send the message instead: it contains a link to your design.'
     },
     ar: {
       helloName: 'مرحباً Empire Jewelry، صممت هذه القلادة بالاسم على موقعكم:',
@@ -37,7 +43,13 @@
       chain: 'طول السلسلة', ring: 'مقاس الخاتم', bracelet: 'طول الإسوارة', notSure: 'لا أعرف',
       cm: n => n + ' سم', ringSize: n => 'مقاس ' + n,
       karat: ' عيار ١٨', similar: 'مثل الصورة:',
-      fallbackName: 'ليلى', amp: 'و', sketch: 'رسم:', menu: 'القائمة', close: 'إغلاق'
+      fallbackName: 'ليلى', amp: 'و', sketch: 'رسم:', menu: 'القائمة', close: 'إغلاق',
+      altAr1: 'الاسم بالأحرف العربية', altAr2: 'الاسم الثاني بالأحرف العربية',
+      altEn1: 'الاسم بالأحرف الإنجليزية', altEn2: 'الاسم الثاني بالأحرف الإنجليزية',
+      linkLabel: 'شاهد تصميمي: ',
+      making: 'جارٍ تجهيز الصورة…',
+      saved: 'تم حفظ الصورة. يمكنك إرفاقها في واتساب.',
+      saveFail: 'تعذّر تجهيز الصورة. أرسل الرسالة، فهي تحتوي على رابط لتصميمك.'
     }
   }[LANG];
 
@@ -76,6 +88,75 @@
     katibeh: { family: '"Katibeh", "Aref Ruqaa", serif', weight: 400, scale: 1.2, kind: 'arabic' }
   };
   const font = () => FONTS[state.style] || FONTS.script;
+
+  // ---------- Namen in die andere Schrift übertragen (nur als Vorschlag, der Kunde prüft) ----------
+  const NAMES = {
+    'layla laila leila leyla': 'ليلى', 'ali': 'علي', 'mohammad mohamad mohammed muhammad mohamed': 'محمد',
+    'ahmad ahmed': 'أحمد', 'hassan': 'حسن', 'hussein hussain houssein': 'حسين', 'fatima fatme fatma': 'فاطمة',
+    'zahraa zahra': 'زهراء', 'zeinab zainab zaynab': 'زينب', 'maryam mariam': 'مريم', 'malak': 'ملاك',
+    'sara sarah': 'سارة', 'nour noor nur': 'نور', 'rania': 'رانيا', 'lina': 'لينا', 'lara': 'لارا', 'maya': 'مايا',
+    'tala': 'تالا', 'dana': 'دانا', 'reem rim': 'ريم', 'rola roula': 'رولا', 'hiba': 'هبة', 'ghina': 'غنى',
+    'batoul batool': 'بتول', 'kawthar kawsar': 'كوثر', 'nadine': 'نادين', 'celine': 'سيلين',
+    'yasmine yasmin': 'ياسمين', 'aya': 'آية', 'joud jood': 'جود', 'hala': 'هلا', 'rayan rayyan': 'ريان',
+    'jad': 'جاد', 'karim kareem': 'كريم', 'hadi': 'هادي', 'mahdi mehdi': 'مهدي', 'abbas': 'عباس',
+    'khaled khalid': 'خالد', 'omar': 'عمر', 'youssef yousef yusuf': 'يوسف', 'ibrahim': 'إبراهيم',
+    'mustafa moustafa': 'مصطفى', 'hamza': 'حمزة', 'kassem qassem qasim': 'قاسم', 'jaafar jafar': 'جعفر',
+    'abdallah abdullah': 'عبدالله', 'elie': 'إيلي', 'georges george': 'جورج', 'charbel': 'شربل', 'rita': 'ريتا',
+    'nadia': 'نادية', 'samira': 'سميرة', 'amira': 'أميرة', 'salma': 'سلمى', 'lamar': 'لمار', 'lynn lyn': 'لين',
+    'maria': 'ماريا', 'mira': 'ميرا', 'rana': 'رنا', 'ruba': 'ربى', 'farah': 'فرح', 'ziad': 'زياد', 'rami': 'رامي',
+    'bilal': 'بلال', 'adam': 'آدم', 'ayman': 'أيمن', 'tarek tarik': 'طارق', 'yara': 'يارا', 'zein zain': 'زين',
+    'israa isra': 'إسراء', 'mohsen': 'محسن', 'jana': 'جنى', 'line': 'لين', 'ritaj': 'رتاج'
+  };
+  const LAT2AR = {}, AR2LAT = {};
+  Object.keys(NAMES).forEach(k => {
+    const ar = NAMES[k], first = k.split(' ')[0];
+    k.split(' ').forEach(w => { LAT2AR[w] = ar; });
+    if (!AR2LAT[ar]) AR2LAT[ar] = first.charAt(0).toUpperCase() + first.slice(1);
+  });
+  function toArabic(s) {
+    return s.split(/\s+/).map(word => {
+      const w = word.toLowerCase();
+      if (LAT2AR[w]) return LAT2AR[w];
+      let out = '';
+      for (let i = 0; i < w.length; i++) {
+        const two = w.slice(i, i + 2);
+        const DG = { sh: 'ش', kh: 'خ', gh: 'غ', th: 'ث', dh: 'ذ', ch: 'ش', ou: 'و', oo: 'و', ee: 'ي', ei: 'ي', ai: 'اي', ay: 'اي', aa: 'ا' };
+        if (DG[two]) { out += DG[two]; i++; continue; }
+        const c = w[i];
+        if (i === 0 && c === 'a') { out += 'أ'; continue; }
+        if (i === 0 && (c === 'e' || c === 'i')) { out += 'إ'; continue; }
+        const M = { a: 'ا', b: 'ب', c: 'ك', d: 'د', e: '', f: 'ف', g: 'ج', h: 'ه', i: 'ي', j: 'ج', k: 'ك', l: 'ل', m: 'م', n: 'ن', o: 'و', p: 'ب', q: 'ق', r: 'ر', s: 'س', t: 'ت', u: 'و', v: 'ف', w: 'و', x: 'كس', y: 'ي', z: 'ز' };
+        out += M[c] !== undefined ? M[c] : c;
+      }
+      return out;
+    }).join(' ');
+  }
+  function toLatin(s) {
+    return s.split(/\s+/).map(word => {
+      if (AR2LAT[word]) return AR2LAT[word];
+      const M = { 'ا': 'a', 'أ': 'a', 'إ': 'i', 'آ': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'j', 'ح': 'h', 'خ': 'kh', 'د': 'd', 'ذ': 'dh', 'ر': 'r', 'ز': 'z', 'س': 's', 'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 'z', 'ع': 'a', 'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n', 'ه': 'h', 'و': 'ou', 'ي': 'i', 'ى': 'a', 'ة': 'a', 'ء': '', 'ئ': '', 'ؤ': '' };
+      const t = Array.from(word).map(c => (M[c] !== undefined ? M[c] : c)).join('');
+      return t.charAt(0).toUpperCase() + t.slice(1);
+    }).join(' ');
+  }
+  // Was auf die Kette kommt: passt die Schrift nicht zur Sprache des Namens, gilt der Name in der anderen Schrift
+  function shownName(which) {
+    const t = nameText(which === 2 ? state.text2 : state.text);
+    if (!t) return '';
+    if ((font().kind === 'arabic') === isArabic(t)) return t;
+    return nameText(which === 2 ? state.text2Alt : state.textAlt) || t;
+  }
+  const fallbackName = () => (font().kind === 'arabic' ? 'ليلى' : 'Layla');
+  const mismatch = () => { const t = nameText(state.text); return !!t && (font().kind === 'arabic') !== isArabic(t); };
+  const altEdited = { textAlt: false, text2Alt: false };
+  function refreshAlt() {
+    const toAr = font().kind === 'arabic';
+    [['text', 'textAlt'], ['text2', 'text2Alt']].forEach(([src, dst]) => {
+      if (altEdited[dst]) return;
+      const t = nameText(state[src]);
+      state[dst] = t && toAr !== isArabic(t) ? (toAr ? toArabic(t) : toLatin(t)) : '';
+    });
+  }
 
   // Motive im Feld 0..100. hang = Aufhängepunkt, stone = Platz für den Stein, glints = Funkelpunkte
   const P = (d, r) => ({ t: 'path', a: { d }, r });
@@ -150,7 +231,7 @@
 
   // ---------- Zustand (Startwerte aus dem HTML) ----------
   const state = {
-    piece: 'pendant', gold: 'yellow', text: TXT.fallbackName, text2: '', join: 'heart', style: 'script',
+    piece: 'pendant', gold: 'yellow', text: TXT.fallbackName, text2: '', textAlt: '', text2Alt: '', join: 'heart', style: 'script',
     accent: 'none', underline: 'none', thick: 'std', chain: 'cable', motif: 'butterfly', enamel: 'none',
     stone: 'none', size: '', len: '', notes: ''
   };
@@ -288,9 +369,9 @@
   // Rückgabe in SVG-Koordinaten: Box und die Punkte, an denen die Kette eingehängt wird.
   function namePlate(ctx, cx, baseY, maxW, maxSize, allowSecond) {
     const F = font();
-    const raw1 = nameText(state.text);
-    const raw2 = allowSecond ? nameText(state.text2) : '';
-    const n1 = raw1 || TXT.fallbackName;
+    const raw1 = shownName(1);
+    const raw2 = allowSecond ? shownName(2) : '';
+    const n1 = raw1 || fallbackName();
     const rtl = isArabic(n1);
     const S = 40;                       // Layout-Schriftgröße, danach skaliert
     const fs = S * F.scale;
@@ -444,8 +525,8 @@
       bail(ctx, hx, hy);
       el('circle', { cx: hx, cy, r: R, fill: ctx.metal, stroke: ctx.dark, 'stroke-opacity': 0.35, 'stroke-width': 0.8 }, ctx.g);
       el('circle', { cx: hx, cy, r: R - 4, fill: 'none', stroke: '#fff', 'stroke-opacity': 0.3, 'stroke-width': 1 }, ctx.g);
-      const raw = nameText(state.text);
-      const letter = firstLetter(raw || TXT.fallbackName);
+      const raw = shownName(1);
+      const letter = firstLetter(raw || fallbackName());
       const F = font();
       const a = {
         x: hx, y: cy, 'text-anchor': 'middle', 'dominant-baseline': 'central',
@@ -475,14 +556,14 @@
         id: arcId, fill: 'none',
         d: 'M' + (cx - rx + 10) + ' ' + (cy + 1) + 'A' + (rx - 10) + ' ' + (ry + off) + ' 0 0 0 ' + (cx + rx - 10) + ' ' + (cy + 1)
       }, ctx.defs);
-      const raw = nameText(state.text), F = font();
+      const raw = shownName(1), F = font();
       const size = (hasStone ? 15 : 17) * F.scale;
       const t = el('text', {
         'font-family': F.family, 'font-weight': F.weight, 'font-size': size,
         fill: ctx.dark, opacity: raw ? 0.8 : 0.35, 'dominant-baseline': 'central'
       }, ctx.g);
       const tp = el('textPath', { href: '#' + arcId, startOffset: '50%', 'text-anchor': 'middle' }, t);
-      tp.textContent = raw || TXT.fallbackName;
+      tp.textContent = raw || fallbackName();
       const len = t.getComputedTextLength();
       if (len > 170) t.setAttribute('font-size', size * 170 / len);
       if (hasStone) drawStone(ctx, cx, cy + ry - w / 2, 7);
@@ -534,7 +615,7 @@
     // Motive und Ringe bekommen den einfachen Schatten, die Namensplatte ihren eigenen Filter
     if (piece === 'necklace' || piece === 'bracelet') ctx.g = plainG; else ctx.g = shapeG;
     DRAW[piece](ctx);
-    ctx.sparks = el('g', { 'pointer-events': 'none' }, svg);
+    ctx.sparks = el('g', { class: 'sparks', 'pointer-events': 'none' }, svg);
     ctx.grad = grad;
     ctx.clipRect = clipRect;
     svg._ctx = ctx;
@@ -593,7 +674,7 @@
     svg._seen = true;
     if (!ANIM) return;
     const r = svg._ctx.clipRect;
-    const rtl = isArabic(nameText(state.text) || TXT.fallbackName);
+    const rtl = isArabic(shownName(1) || fallbackName());
     const tl = gsap.timeline();
     if (rtl) tl.fromTo(r, { attr: { x: 420, width: 0 } }, { attr: { x: -20, width: 440 }, duration: 1.5, ease: 'power2.inOut' });
     else tl.fromTo(r, { attr: { width: 0 } }, { attr: { width: 440 }, duration: 1.5, ease: 'power2.inOut' });
@@ -620,9 +701,22 @@
       sizeLabel.textContent = TXT[kind];
     }
   }
+  // Felder ein-/ausblenden: je nach Stück, zweitem Namen und ob der Name in die andere Schrift muss
   function updateFields() {
-    if (builder) builder.querySelectorAll('[data-show]').forEach(f => { f.hidden = !f.dataset.show.split(' ').includes(state.piece); });
-    document.querySelectorAll('[data-needs]').forEach(f => { f.hidden = !String(state[f.dataset.needs] || '').trim(); });
+    const mm = mismatch(), toAr = font().kind === 'arabic';
+    document.querySelectorAll('[data-form] fieldset').forEach(f => {
+      let hide = false;
+      if (f.dataset.show && f.closest('[data-form="builder"]')) hide = !f.dataset.show.split(' ').includes(state.piece);
+      if (f.dataset.needs && !String(state[f.dataset.needs] || '').trim()) hide = true;
+      if (f.dataset.alt) {
+        if (!mm || (f.dataset.alt === '2' && !nameText(state.text2))) hide = true;
+        const lab = f.dataset.alt === '2' ? (toAr ? TXT.altAr2 : TXT.altEn2) : (toAr ? TXT.altAr1 : TXT.altEn1);
+        f.dataset.label = lab;
+        const lg = f.querySelector('legend');
+        if (lg) lg.textContent = lab;
+      }
+      f.hidden = hide;
+    });
   }
   function syncControls(source) {
     controls.forEach(c => {
@@ -639,8 +733,9 @@
       if (!F) return;
       // passt die Schrift nicht zur Sprache des Namens, zeigt die Kachel ein Beispiel in ihrer Schrift
       let t = n;
-      if (F.kind === 'arabic' && !ar) t = 'ليلى';
-      if (F.kind !== 'arabic' && ar) t = 'Layla';
+      const curAr = font().kind === 'arabic';
+      if (F.kind === 'arabic' && !ar) t = (curAr && state.textAlt) || toArabic(n);
+      if (F.kind !== 'arabic' && ar) t = (!curAr && state.textAlt) || toLatin(n);
       s.textContent = F.upper && !isArabic(t) ? t.toUpperCase() : t;
     });
   }
@@ -667,6 +762,35 @@
     });
     return out;
   }
+  // ---------- Entwurf als Link: öffnet genau diese Gestaltung wieder ----------
+  const KEYS = {
+    studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len'],
+    builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size']
+  };
+  function designUrl(kind) {
+    const o = { f: kind };
+    KEYS[kind].forEach(k => { if (state[k]) o[k] = state[k]; });
+    const bytes = new TextEncoder().encode(JSON.stringify(o));
+    let bin = '';
+    bytes.forEach(b => { bin += String.fromCharCode(b); });
+    const d = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return location.origin + location.pathname + '?d=' + d + (kind === 'studio' ? '#name' : '#design');
+  }
+  function readDesign() {
+    const d = new URLSearchParams(location.search).get('d');
+    if (!d) return null;
+    try {
+      const bin = atob(d.replace(/-/g, '+').replace(/_/g, '/'));
+      const o = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+      return o && KEYS[o.f] ? o : null;
+    } catch (e) { return null; }
+  }
+  function message(form) {
+    const L = lines(form);
+    const hello = form.dataset.form === 'studio' ? TXT.helloName : TXT.hello;
+    return hello + '\n\n' + L.map(([k, v]) => '• ' + k + ': ' + v).join('\n') + '\n\n' + TXT.ask +
+      '\n\n' + TXT.linkLabel + designUrl(form.dataset.form);
+  }
   function updateOutputs() {
     forms.forEach(form => {
       const L = lines(form);
@@ -676,11 +800,111 @@
         const dd = document.createElement('dd'); dd.textContent = v;
         return [dt, dd];
       }));
-      const hello = form.dataset.form === 'studio' ? TXT.helloName : TXT.hello;
-      const msg = hello + '\n\n' + L.map(([k, v]) => '• ' + k + ': ' + v).join('\n') + '\n\n' + TXT.ask;
+      const msg = message(form);
       form.querySelectorAll('[data-wa]').forEach(a => { a.href = wa(msg); });
     });
   }
+
+  // ---------- Entwurf als Bild (PNG): Skizze + Angaben, Schrift wird eingebettet ----------
+  const fontCache = {};
+  function fontCss(family) {
+    if (fontCache[family]) return fontCache[family];
+    const link = Array.from(document.querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis.com"]'))
+      .find(l => decodeURIComponent(l.href).replace(/\+/g, ' ').includes('family=' + family));
+    if (!link) return Promise.resolve('');
+    fontCache[family] = (async () => {
+      const css = await (await fetch(link.href)).text();
+      const blocks = (css.match(/@font-face\s*{[^}]*}/g) || []).filter(b => b.includes("'" + family + "'"));
+      const parts = await Promise.all(blocks.map(async b => {
+        const m = b.match(/url\((https:[^)]+)\)/);
+        if (!m) return '';
+        const bytes = new Uint8Array(await (await fetch(m[1])).arrayBuffer());
+        let bin = '';
+        for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+        return b.replace(m[1], 'data:font/woff2;base64,' + btoa(bin));
+      }));
+      return parts.join('\n');
+    })().catch(() => '');
+    return fontCache[family];
+  }
+  async function exportPng(form) {
+    const svg = form.closest('section').querySelector('svg.preview');
+    const fam = font().family.split(',')[0].replace(/"/g, '').trim();
+    const css = await fontCss(fam);
+    const W = 1200, H = 900;
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('xmlns', NS);
+    clone.setAttribute('width', W);
+    clone.setAttribute('height', H);
+    clone.querySelectorAll('.sparks').forEach(n => n.remove());
+    const cr = clone.querySelector('clipPath rect');
+    if (cr) { cr.setAttribute('x', -20); cr.setAttribute('width', 440); }
+    const defs = clone.querySelector('defs');
+    const st = document.createElementNS(NS, 'style');
+    st.textContent = css;
+    defs.insertBefore(st, defs.firstChild);
+    const rg = el('radialGradient', { id: 'x-bg', cx: '50%', cy: '42%', r: '75%' }, defs);
+    [['0', '#fdfcf9'], ['0.62', '#f3f0ea'], ['1', '#e4dfd5']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, rg));
+    const bgRect = el('rect', { x: -5, y: -5, width: 410, height: 310, fill: 'url(#x-bg)' });
+    clone.insertBefore(bgRect, defs.nextSibling);
+    const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' }));
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    const L = lines(form);
+    const pad = 56, lh = 42;
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H + pad * 2 + 64 + L.length * lh;
+    const x = c.getContext('2d');
+    x.fillStyle = '#ffffff';
+    x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(img, 0, 0, W, H);
+    URL.revokeObjectURL(url);
+    const rtl = LANG === 'ar';
+    x.direction = rtl ? 'rtl' : 'ltr';
+    x.textAlign = rtl ? 'right' : 'left';
+    const X = rtl ? W - pad : pad;
+    x.fillStyle = '#1d1f1e';
+    x.font = '600 36px Alexandria, sans-serif';
+    x.fillText('Empire Jewelry', X, H + pad + 22);
+    x.font = '400 27px Alexandria, sans-serif';
+    x.fillStyle = '#3d413f';
+    L.forEach(([k, v], i) => x.fillText(k + ': ' + v, X, H + pad + 84 + i * lh));
+    return new Promise(r => c.toBlob(r, 'image/png'));
+  }
+  window.__exportPng = exportPng;
+  forms.forEach(form => {
+    const btn = form.querySelector('[data-save]');
+    const status = form.querySelector('[data-save-status]');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      if (status) status.textContent = TXT.making;
+      try {
+        const blob = await exportPng(form);
+        const file = new File([blob], 'empire-jewelry-design.png', { type: 'image/png' });
+        const phone = window.matchMedia('(pointer: coarse)').matches;
+        if (phone && navigator.canShare && navigator.canShare({ files: [file] })) {
+          // am Handy: Teilen-Menü (WhatsApp wählen) mit Bild und Text
+          if (status) status.textContent = '';
+          await navigator.share({ files: [file], text: message(form) });
+        } else {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = file.name;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+          if (status) status.textContent = TXT.saved;
+        }
+      } catch (e) {
+        if (status) status.textContent = e && e.name === 'AbortError' ? '' : TXT.saveFail;
+      }
+      btn.disabled = false;
+    });
+  });
 
   let pending = null;
   function schedule(key) {
@@ -693,14 +917,23 @@
       updateOutputs();
     });
   }
+  let lastKind = font().kind === 'arabic';
   function onChange(e) {
     const c = e.target;
     const k = c.dataset && c.dataset.key;
     if (!k || (c.type === 'radio' && !c.checked) || state[k] === c.value) return;
     state[k] = c.value;
+    if (k === 'textAlt' || k === 'text2Alt') altEdited[k] = !!c.value.trim();
+    if (k === 'text') altEdited.textAlt = false;
+    if (k === 'text2') altEdited.text2Alt = false;
+    if (k === 'style') {
+      const nowAr = font().kind === 'arabic';
+      if (nowAr !== lastKind) { altEdited.textAlt = altEdited.text2Alt = false; lastKind = nowAr; }
+    }
+    if (k !== 'textAlt' && k !== 'text2Alt') refreshAlt();
     if (k === 'piece') updateSizes();
-    if (k === 'piece' || k === 'text2') updateFields();
-    if (k === 'text') updateSamples();
+    updateFields();
+    updateSamples();
     syncControls(c);
     schedule(k);
   }
@@ -852,7 +1085,8 @@
     Object.assign(state, like);
     const cap = b.closest('li').querySelector('.cap');
     if (goal === 'design') state.notes = TXT.similar + ' ' + cap.textContent.trim();
-    updateSizes(); updateFields(); syncControls(null); updateSamples();
+    altEdited.textAlt = altEdited.text2Alt = false;
+    refreshAlt(); updateSizes(); updateFields(); syncControls(null); updateSamples();
     renderAll(); updateOutputs();
     const target = document.getElementById(goal);
     goTo(target);
@@ -868,7 +1102,16 @@
     return Promise.race([Promise.all(loads).catch(() => {}), new Promise(r => setTimeout(r, 3000))]);
   }
 
-  updateSizes(); updateFields(); syncControls(null); updateSamples(); updateOutputs();
+  const shared = readDesign();
+  if (shared) {
+    KEYS[shared.f].forEach(k => { if (typeof shared[k] === 'string') state[k] = shared[k].slice(0, 40); });
+    if (shared.textAlt) altEdited.textAlt = true;
+    if (shared.text2Alt) altEdited.text2Alt = true;
+    lastKind = font().kind === 'arabic';
+  }
+  refreshAlt(); updateSizes();
+  if (shared && shared.size) state.size = shared.size;
+  updateFields(); syncControls(null); updateSamples(); updateOutputs();
 
   const io = new IntersectionObserver(entries => entries.forEach(en => {
     const s = en.target;
@@ -882,6 +1125,10 @@
   fontsReady().then(() => {
     renderAll();
     previews.forEach(s => io.observe(s));
+    if (shared) {
+      const target = document.getElementById(shared.f === 'studio' ? 'name' : 'design');
+      if (target) setTimeout(() => goTo(target), 300);
+    }
     // später nachgeladene Schriften: neu zeichnen, damit Breiten stimmen
     if (document.fonts) document.fonts.addEventListener('loadingdone', () => renderAll());
     if (ANIM) {

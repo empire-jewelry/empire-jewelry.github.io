@@ -19,7 +19,7 @@
   <!-- Schriften für die Namenskette -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@700&family=Pacifico&family=Playfair+Display:wght@700&family=Montserrat:wght@700&family=Fredoka:wght@600&family=UnifrakturMaguntia&family=Amiri:wght@700&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -86,18 +86,6 @@
           <figcaption class="small">Arabic name necklace, from our Instagram</figcaption>
         </figure>
       </div>
-      <h3 class="ideas-title">Ideas for your piece</h3>
-      <ul class="ideas">
-        <li><span class="idea-t">Your name</span><span class="idea-d">in Arabic or English, in the lettering you like</span></li>
-        <li><span class="idea-t">Two names</span><span class="idea-d">for couples, joined by a heart</span></li>
-        <li><span class="idea-t">Your children’s names</span><span class="idea-d">on one necklace for mum</span></li>
-        <li><span class="idea-t">Initials and a date</span><span class="idea-d">engagement, wedding or birth</span></li>
-        <li><span class="idea-t">Your village</span><span class="idea-d">marked on the map of Lebanon</span></li>
-        <li><span class="idea-t">A loved one’s handwriting</span><span class="idea-d">copied from a card or a letter</span></li>
-        <li><span class="idea-t">A child’s drawing</span><span class="idea-d">turned into a pendant</span></li>
-        <li><span class="idea-t">Birthstones</span><span class="idea-d">one for each person in the family</span></li>
-      </ul>
-      <p class="ideas-more"><a class="btn btn-line" data-wa-idea href="https://wa.me/96170894976" target="_blank" rel="noopener">Send us your idea on WhatsApp</a></p>
     </section>
 
     <!-- Namenskette: Schrift, Kette, Anhänger, Stein -->
@@ -151,7 +139,18 @@
               <label class="font-tile"><input type="radio" name="n-style" value="nastaliq" data-key="style"><span class="font-sample" data-font="nastaliq">Layla</span><span class="font-name">Nastaliq</span></label>
               <label class="font-tile"><input type="radio" name="n-style" value="katibeh" data-key="style"><span class="font-sample" data-font="katibeh">Layla</span><span class="font-name">Decorative</span></label>
             </div>
-            <p class="small">Type the name in Arabic to see the Arabic lettering. Block letters are held together by a thin bar under the name.</p>
+            <p class="small">With Arabic lettering we show the name in Arabic letters, and you can correct the spelling. Block letters are held together by a thin bar under the name.</p>
+          </fieldset>
+
+          <fieldset data-field="textAlt" data-label="Name in Arabic letters" data-alt="1" hidden>
+            <legend class="field-label">Name in Arabic letters</legend>
+            <input class="name-input" type="text" maxlength="14" autocomplete="off" spellcheck="false" dir="auto" data-key="textAlt" aria-describedby="n-alt-hint">
+            <p class="small" id="n-alt-hint">We suggested a spelling. Please check it.</p>
+          </fieldset>
+
+          <fieldset data-field="text2Alt" data-label="Second name in Arabic letters" data-alt="2" hidden>
+            <legend class="field-label">Second name in Arabic letters</legend>
+            <input class="name-input" type="text" maxlength="12" autocomplete="off" spellcheck="false" dir="auto" data-key="text2Alt">
           </fieldset>
 
           <fieldset class="chips" data-field="accent" data-label="Charm">
@@ -220,7 +219,9 @@
             <h3>Your name necklace</h3>
             <dl data-summary></dl>
             <a class="btn btn-main" data-wa href="https://wa.me/96170894976" target="_blank" rel="noopener">Send on WhatsApp</a>
-            <p class="small">WhatsApp opens with your design as a message. Price on request: we reply with the price and how long it takes.</p>
+            <button class="btn btn-line" type="button" data-save>Save as picture</button>
+            <p class="small save-status" data-save-status role="status"></p>
+            <p class="small">Your message includes a link that opens this exact design. You can also save it as a picture and attach it in WhatsApp. Price on request: we reply with the price and how long it takes.</p>
           </div>
         </form>
       </div>
@@ -285,6 +286,12 @@
             </select>
           </fieldset>
 
+          <fieldset data-field="textAlt" data-label="Name in Arabic letters" data-alt="1" data-show="initial ring bracelet" hidden>
+            <legend class="field-label">Name in Arabic letters</legend>
+            <input class="name-input" type="text" maxlength="14" autocomplete="off" spellcheck="false" dir="auto" data-key="textAlt" aria-describedby="b-alt-hint">
+            <p class="small" id="b-alt-hint">We suggested a spelling. Please check it.</p>
+          </fieldset>
+
           <fieldset class="chips chips-motif" data-field="motif" data-label="Shape" data-show="pendant earrings">
             <legend class="field-label">Shape</legend>
             <label class="chip"><input type="radio" name="b-motif" value="butterfly" data-key="motif" checked><span class="motif-ico" data-motif="butterfly" aria-hidden="true"></span><span class="chip-t">Butterfly</span></label>
@@ -330,7 +337,9 @@
             <h3>Your design</h3>
             <dl data-summary></dl>
             <a class="btn btn-main" data-wa href="https://wa.me/96170894976" target="_blank" rel="noopener">Send on WhatsApp</a>
-            <p class="small">WhatsApp opens with your design as a message, and you can add a photo of your idea there. The sketch is only a guide: we confirm the final design with you before we make it.</p>
+            <button class="btn btn-line" type="button" data-save>Save as picture</button>
+            <p class="small save-status" data-save-status role="status"></p>
+            <p class="small">Your message includes a link that opens this exact design. You can also save it as a picture and attach it in WhatsApp. The sketch is only a guide: we confirm the final design with you before we make it.</p>
           </div>
         </form>
       </div>
@@ -464,7 +473,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=7" defer></script>
+  <script src="js/main.js?v=8" defer></script>
   <script src="js/ring.js?v=6" defer></script>
 </body>
 </html>
