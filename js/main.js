@@ -33,7 +33,9 @@
       saveFail: 'The picture could not be made. Send the message instead: it lists every detail of your design.',
       pastePhone: 'Picture copied. In WhatsApp, long-press the message box, tap Paste and send the picture.',
       pasteDesk: 'Picture copied. In WhatsApp, press Ctrl+V to add it, then send.',
-      pasteFail: 'The picture could not be copied. Tap “Save as picture” and attach it in WhatsApp.'
+      pasteFail: 'The picture could not be copied. Tap “Save as picture” and attach it in WhatsApp.',
+      zoomOpen: 'Enlarge', zoomClose: 'Close', zoomIn: 'Zoom in', zoomOut: 'Zoom out',
+      zoomHint: 'Tap the picture to zoom in, drag to move.'
     },
     ar: {
       helloName: 'مرحباً Empire Jewelry، صممت هذه القلادة بالاسم على موقعكم:',
@@ -55,7 +57,9 @@
       saveFail: 'تعذّر تجهيز الصورة. أرسل الرسالة، فهي تحتوي على كل تفاصيل تصميمك.',
       pastePhone: 'تم نسخ الصورة. في واتساب اضغط مطولاً على خانة الكتابة، ثم «لصق»، وأرسل الصورة.',
       pasteDesk: 'تم نسخ الصورة. في واتساب اضغط Ctrl+V لإضافتها، ثم أرسل.',
-      pasteFail: 'تعذّر نسخ الصورة. اضغط «احفظ كصورة» وأرفقها في واتساب.'
+      pasteFail: 'تعذّر نسخ الصورة. اضغط «احفظ كصورة» وأرفقها في واتساب.',
+      zoomOpen: 'تكبير', zoomClose: 'إغلاق', zoomIn: 'تكبير', zoomOut: 'تصغير',
+      zoomHint: 'اضغط على الصورة للتكبير، واسحب لتحريكها.'
     }
   }[LANG];
 
@@ -271,6 +275,7 @@
   const sizeLabel = document.getElementById('b-size-label');
   const previews = Array.from(document.querySelectorAll('svg.preview'));
   const heroSvg = document.querySelector('svg.preview[data-pid="h"]');
+  let zoomBox = null, zoomSvg = null;  // Vergrößerung (Vollbild), siehe unten
 
   // ---------- Hilfen ----------
   function el(tag, attrs, parent) {
@@ -866,10 +871,11 @@
     ctx.grad = grad;
     ctx.clipRect = clipRect;
     svg._ctx = ctx;
-    const form = svg.closest('section').querySelector('[data-form]');
+    const sec = svg.closest('section');
+    const form = sec && sec.querySelector('[data-form]');
     if (form) svg.setAttribute('aria-label', TXT.sketch + ' ' + lines(form).map(l => l[1]).join(', '));
   }
-  const renderAll = () => previews.forEach(render);
+  const renderAll = () => { previews.forEach(render); if (zoomBox && zoomBox.open) render(zoomSvg); };
 
   // ---------- Glitzer ----------
   function pickPoint(c) {
@@ -1440,6 +1446,89 @@
   refreshAlt(); updateSizes();
   if (shared && shared.size) state.size = shared.size;
   updateFields(); syncControls(null); updateSamples(); updateOutputs();
+
+  // ---------- Vergrößerung: Bild der Namenskette groß öffnen, hineinzoomen, verschieben ----------
+  const stage = document.querySelector('.studio-stage');
+  if (stage) {
+    zoomBox = document.createElement('dialog');
+    zoomBox.className = 'zoom-box';
+    zoomBox.innerHTML =
+      '<div class="zoom-scroll"><svg class="zoom-svg" data-pid="L" data-piece="necklace" viewBox="0 0 400 300" role="img"></svg></div>' +
+      '<p class="zoom-hint"></p>' +
+      '<div class="zoom-tools">' +
+      '<button type="button" class="zoom-btn" data-z="-" aria-label="' + TXT.zoomOut + '">−</button>' +
+      '<button type="button" class="zoom-btn" data-z="+" aria-label="' + TXT.zoomIn + '">+</button>' +
+      '<button type="button" class="zoom-btn zoom-x" aria-label="' + TXT.zoomClose + '">×</button></div>';
+    document.body.appendChild(zoomBox);
+    zoomSvg = zoomBox.querySelector('svg');
+    const sc = zoomBox.querySelector('.zoom-scroll');
+    zoomBox.querySelector('.zoom-hint').textContent = TXT.zoomHint;
+    let z = 1;
+    // Zoomstufe setzen; der Punkt (fx, fy) (Anteil 0..1 im Bild) bleibt an der Stelle (px, py) im Fenster
+    const setZoom = (nz, fx, fy, px, py) => {
+      nz = Math.max(1, Math.min(4, nz));
+      const r = sc.getBoundingClientRect();
+      if (px === undefined) { px = r.width / 2; py = r.height / 2; }
+      if (fx === undefined) {
+        fx = (sc.scrollLeft + px) / zoomSvg.clientWidth;
+        fy = (sc.scrollTop + py) / zoomSvg.clientHeight;
+      }
+      z = nz;
+      zoomSvg.style.width = (z * 100) + '%';
+      zoomBox.classList.toggle('is-zoomed', z > 1);
+      sc.scrollLeft = fx * zoomSvg.clientWidth - px;
+      sc.scrollTop = fy * zoomSvg.clientHeight - py;
+    };
+    const open = view => {
+      if (view) zoomSvg.dataset.view = view; else delete zoomSvg.dataset.view;
+      const src = stage.querySelector(view ? 'svg.preview-close' : 'svg.preview:not(.preview-close)');
+      zoomSvg.setAttribute('aria-label', src.getAttribute('aria-label'));
+      zoomBox.showModal();  // erst sichtbar machen, sonst misst getBBox 0 und die Ösen sitzen falsch
+      render(zoomSvg);
+      setZoom(1, 0.5, 0.5);
+    };
+    // Klick auf eine der beiden Ansichten öffnet sie groß
+    stage.querySelectorAll('svg.preview').forEach(v => {
+      v.addEventListener('click', () => open(v.dataset.view));
+    });
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'zoom-open';
+    btn.setAttribute('aria-label', TXT.zoomOpen);
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg><span>' + TXT.zoomOpen + '</span>';
+    btn.addEventListener('click', () => open(''));
+    stage.appendChild(btn);
+    zoomBox.querySelector('.zoom-x').addEventListener('click', () => zoomBox.close());
+    zoomBox.querySelectorAll('[data-z]').forEach(b => b.addEventListener('click', () => setZoom(b.dataset.z === '+' ? z * 1.6 : z / 1.6)));
+    // Klick neben das Bild schließt
+    zoomBox.addEventListener('click', e => { if (e.target === zoomBox) zoomBox.close(); });
+    // Ziehen mit der Maus verschiebt, kurzer Klick zoomt an dieser Stelle
+    let drag = null;
+    sc.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { x: e.clientX, y: e.clientY, l: sc.scrollLeft, t: sc.scrollTop, moved: false };
+    });
+    window.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
+      if (drag.moved && z > 1) { sc.scrollLeft = drag.l - dx; sc.scrollTop = drag.t - dy; }
+    });
+    window.addEventListener('pointerup', () => { setTimeout(() => { drag = null; }, 0); });
+    zoomSvg.addEventListener('click', e => {
+      if (drag && drag.moved) return;
+      const r = zoomSvg.getBoundingClientRect(), sr = sc.getBoundingClientRect();
+      const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+      setZoom(z > 1 ? 1 : 2.5, fx, fy, e.clientX - sr.left, e.clientY - sr.top);
+    });
+    // Strg + Mausrad oder Trackpad-Zoom
+    sc.addEventListener('wheel', e => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const r = zoomSvg.getBoundingClientRect(), sr = sc.getBoundingClientRect();
+      setZoom(z * (e.deltaY < 0 ? 1.15 : 1 / 1.15), (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, e.clientX - sr.left, e.clientY - sr.top);
+    }, { passive: false });
+  }
 
   const io = new IntersectionObserver(entries => entries.forEach(en => {
     const s = en.target;

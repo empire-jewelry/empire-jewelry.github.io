@@ -420,3 +420,38 @@ html[lang="ar"] .how-steps li::before { content: counter(step, arabic-indic); }
     box-shadow: 0 6px 14px -8px rgba(40, 35, 20, .6);
   }
 }
+
+/* Vergrößerung der Namenskette */
+.studio-stage svg.preview { cursor: zoom-in; }
+.zoom-open {
+  position: absolute; inset-inline-start: 10px; bottom: 10px; z-index: 2;
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .4rem .75rem .4rem .55rem; border: 0; border-radius: 999px;
+  background: rgba(255, 255, 255, .92); color: var(--ink); font: 500 .8rem var(--font-ui);
+  box-shadow: 0 4px 12px -6px rgba(40, 35, 20, .55); cursor: pointer;
+}
+.zoom-open svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.zoom-open:hover { background: #fff; }
+.zoom-box {
+  width: min(96vw, 1200px); max-width: none; max-height: 94svh; padding: 0;
+  border: 0; border-radius: 16px; background: #1d1f1e; overflow: hidden;
+}
+.zoom-box::backdrop { background: rgba(20, 20, 18, .78); }
+.zoom-scroll { overflow: auto; max-height: calc(94svh - 2.6rem); overscroll-behavior: contain; }
+.zoom-svg { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; cursor: zoom-in; }
+.zoom-box.is-zoomed .zoom-svg { cursor: grab; }
+.zoom-box.is-zoomed .zoom-svg:active { cursor: grabbing; }
+.zoom-hint { margin: 0; padding: .7rem 1rem; font-size: .8rem; color: #d8d6cf; }
+.zoom-tools { position: absolute; top: 10px; inset-inline-end: 10px; display: flex; gap: 6px; }
+.zoom-btn {
+  width: 40px; height: 40px; border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, .92); color: var(--ink); font: 400 1.4rem/1 var(--font-ui); cursor: pointer;
+}
+.zoom-btn:hover { background: #fff; }
+@media (max-width: 699px) {
+  /* Handy: Knopf als Lupe unten am kleinen Hals-Bild */
+  .zoom-open { bottom: auto; top: calc(8px + 30vw * .75 - 40px); inset-inline-start: 14px; padding: .3rem; }
+  .zoom-open span { display: none; }
+  .zoom-box { width: 100vw; max-height: 100svh; border-radius: 0; }
+  .zoom-scroll { max-height: calc(100svh - 2.6rem); }
+}
