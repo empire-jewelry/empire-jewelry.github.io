@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600&family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@500;600&display=swap">
   <!-- Schriften für die Namenskette -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=UnifrakturMaguntia&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
   <link rel="stylesheet" href="../css/style.css?v=11">
 </head>
@@ -138,7 +138,6 @@
               <label class="font-tile"><input type="radio" name="n-style" value="serif" data-key="style"><span class="font-sample" data-font="serif">ليلى</span><span class="font-name">كلاسيكي بزوايا</span></label>
               <label class="font-tile"><input type="radio" name="n-style" value="block" data-key="style"><span class="font-sample" data-font="block">ليلى</span><span class="font-name">حروف كبيرة</span></label>
               <label class="font-tile"><input type="radio" name="n-style" value="bubble" data-key="style"><span class="font-sample" data-font="bubble">ليلى</span><span class="font-name">مستدير</span></label>
-              <label class="font-tile"><input type="radio" name="n-style" value="gothic" data-key="style"><span class="font-sample" data-font="gothic">ليلى</span><span class="font-name">قوطي</span></label>
             </div>
             <p class="small">عند اختيار خط إنجليزي نعرض الاسم بالأحرف الإنجليزية، ويمكنك تصحيح الكتابة. الحروف الكبيرة تُثبَّت بشريط رفيع تحت الاسم.</p>
           </fieldset>
@@ -152,6 +151,16 @@
           <fieldset data-field="text2Alt" data-label="الاسم الثاني بالأحرف العربية" data-alt="2" hidden>
             <legend class="field-label">الاسم الثاني بالأحرف العربية</legend>
             <input class="name-input" type="text" maxlength="12" autocomplete="off" spellcheck="false" dir="auto" data-key="text2Alt">
+          </fieldset>
+
+          <fieldset class="chips" data-field="stone" data-label="حجر الميلاد">
+            <legend class="field-label">حجر الميلاد</legend>
+            <label class="chip"><input type="radio" name="n-stone" value="none" data-key="stone" checked><span class="chip-t">بدون</span></label>
+            <label class="chip"><input type="radio" name="n-stone" value="clear" data-key="stone"><span class="dot" style="--c:#eef4ff" aria-hidden="true"></span><span class="chip-t">شفاف</span></label>
+            <label class="chip"><input type="radio" name="n-stone" value="pink" data-key="stone"><span class="dot" style="--c:#f39bbb" aria-hidden="true"></span><span class="chip-t">زهري</span></label>
+            <label class="chip"><input type="radio" name="n-stone" value="blue" data-key="stone"><span class="dot" style="--c:#3f6fd1" aria-hidden="true"></span><span class="chip-t">أزرق</span></label>
+            <label class="chip"><input type="radio" name="n-stone" value="green" data-key="stone"><span class="dot" style="--c:#2f9d63" aria-hidden="true"></span><span class="chip-t">أخضر</span></label>
+            <label class="chip"><input type="radio" name="n-stone" value="red" data-key="stone"><span class="dot" style="--c:#c4243f" aria-hidden="true"></span><span class="chip-t">أحمر</span></label>
           </fieldset>
 
           <fieldset class="chips" data-field="accent" data-label="تعاليق صغيرة">
@@ -202,16 +211,6 @@
             <legend class="field-label">العيار</legend>
             <label class="chip"><input type="radio" name="n-karat" value="18k" data-key="karat" checked><span class="chip-t">عيار ١٨</span></label>
             <label class="chip"><input type="radio" name="n-karat" value="21k" data-key="karat"><span class="chip-t">عيار ٢١</span></label>
-          </fieldset>
-
-          <fieldset class="chips" data-field="stone" data-label="حجر الميلاد">
-            <legend class="field-label">حجر الميلاد</legend>
-            <label class="chip"><input type="radio" name="n-stone" value="none" data-key="stone" checked><span class="chip-t">بدون</span></label>
-            <label class="chip"><input type="radio" name="n-stone" value="clear" data-key="stone"><span class="dot" style="--c:#eef4ff" aria-hidden="true"></span><span class="chip-t">شفاف</span></label>
-            <label class="chip"><input type="radio" name="n-stone" value="pink" data-key="stone"><span class="dot" style="--c:#f39bbb" aria-hidden="true"></span><span class="chip-t">زهري</span></label>
-            <label class="chip"><input type="radio" name="n-stone" value="blue" data-key="stone"><span class="dot" style="--c:#3f6fd1" aria-hidden="true"></span><span class="chip-t">أزرق</span></label>
-            <label class="chip"><input type="radio" name="n-stone" value="green" data-key="stone"><span class="dot" style="--c:#2f9d63" aria-hidden="true"></span><span class="chip-t">أخضر</span></label>
-            <label class="chip"><input type="radio" name="n-stone" value="red" data-key="stone"><span class="dot" style="--c:#c4243f" aria-hidden="true"></span><span class="chip-t">أحمر</span></label>
           </fieldset>
 
           <fieldset data-field="len" data-label="طول السلسلة">
@@ -296,7 +295,6 @@
                 <option value="serif">كلاسيكي بزوايا</option>
                 <option value="block">حروف كبيرة</option>
                 <option value="bubble">مستدير</option>
-                <option value="gothic">قوطي</option>
               </optgroup>
             </select>
           </fieldset>
@@ -488,7 +486,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="../js/main.js?v=26" defer></script>
+  <script src="../js/main.js?v=27" defer></script>
   <script src="../js/ring.js?v=6" defer></script>
   <script src="../js/music.js?v=3" defer></script>
 </body>

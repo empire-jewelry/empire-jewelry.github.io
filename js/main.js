@@ -83,7 +83,7 @@
   const ENAMEL = { none: null, red: '#c8313a', pink: '#f2a7bb', mint: '#9fd8c4', turquoise: '#3fb8c0', white: '#f7f5f0', black: '#232323' };
   const STONE = { none: null, clear: '#e6eefc', pink: '#f39bbb', blue: '#3f6fd1', green: '#2f9d63', red: '#c4243f' };
 
-  // Schriften wie bei Namensketten üblich: Schreibschrift, Druckschrift, Old English, arabische Kalligrafie
+  // Schriften wie bei Namensketten üblich: Schreibschrift, Druckschrift, arabische Kalligrafie
   const FONTS = {
     script: { family: '"Great Vibes", "Aref Ruqaa", cursive', weight: 400, scale: 1.3, kind: 'script' },
     allura: { family: '"Allura", "Aref Ruqaa", cursive', weight: 400, scale: 1.32, kind: 'script' },
@@ -93,7 +93,6 @@
     serif: { family: '"Playfair Display", "Amiri", serif', weight: 500, scale: 0.88, kind: 'print', spacing: -0.02 },
     block: { family: '"Montserrat", "Reem Kufi", sans-serif', weight: 500, scale: 0.72, kind: 'print', upper: true, spacing: -0.01 },
     bubble: { family: '"Fredoka", "Reem Kufi", sans-serif', weight: 500, scale: 0.86, kind: 'print', spacing: -0.05 },
-    gothic: { family: '"UnifrakturMaguntia", "Aref Ruqaa", serif', weight: 400, scale: 0.95, kind: 'print', spacing: -0.02 },
     calligraphy: { family: '"Aref Ruqaa", serif', weight: 400, scale: 1.0, kind: 'arabic' },
     naskh: { family: '"Amiri", serif', weight: 400, scale: 0.95, kind: 'arabic' },
     modern: { family: '"Reem Kufi", "Alexandria", sans-serif', weight: 500, scale: 0.88, kind: 'arabic' },
@@ -1465,7 +1464,11 @@
 
   const shared = readDesign();
   if (shared) {
-    KEYS[shared.f].forEach(k => { if (typeof shared[k] === 'string') state[k] = shared[k].slice(0, 40); });
+    KEYS[shared.f].forEach(k => {
+      if (typeof shared[k] !== 'string') return;
+      if (k === 'style' && !FONTS[shared[k]]) return;   // Schrift gibt es nicht mehr (z. B. Old English in alten Links)
+      state[k] = shared[k].slice(0, 40);
+    });
     if (shared.textAlt) altEdited.textAlt = true;
     if (shared.text2Alt) altEdited.text2Alt = true;
     lastKind = font().kind === 'arabic';
