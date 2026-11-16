@@ -23,7 +23,7 @@
       letter: 'Letter',
       chain: 'Chain length', ring: 'Ring size', bracelet: 'Bracelet length', notSure: 'Not sure',
       cm: n => n + ' cm', ringSize: n => 'EU ' + n,
-      karat: ', 18k', similar: 'Similar to the photo:',
+      similar: 'Similar to the photo:',
       fallbackName: 'Layla', amp: '&', sketch: 'Sketch:', menu: 'Menu', close: 'Close',
       altAr1: 'Name in Arabic letters', altAr2: 'Second name in Arabic letters',
       altEn1: 'Name in English letters', altEn2: 'Second name in English letters',
@@ -47,7 +47,7 @@
       letter: 'الحرف',
       chain: 'طول السلسلة', ring: 'مقاس الخاتم', bracelet: 'طول الإسوارة', notSure: 'لا أعرف',
       cm: n => n + ' سم', ringSize: n => 'مقاس ' + n,
-      karat: ' عيار ١٨', similar: 'مثل الصورة:',
+      similar: 'مثل الصورة:',
       fallbackName: 'ليلى', amp: 'و', sketch: 'رسم:', menu: 'القائمة', close: 'إغلاق',
       altAr1: 'الاسم بالأحرف العربية', altAr2: 'الاسم الثاني بالأحرف العربية',
       altEn1: 'الاسم بالأحرف الإنجليزية', altEn2: 'الاسم الثاني بالأحرف الإنجليزية',
@@ -1011,7 +1011,6 @@
         if (c) v = c.tagName === 'SELECT' ? (c.options[c.selectedIndex] ? c.options[c.selectedIndex].textContent : '') : c.value;
       }
       v = (v || '').trim();
-      if (key === 'gold' && v) v += TXT.karat;
       if (key === 'text' && form === builder && state.piece === 'initial') { label = TXT.letter; v = v ? firstLetter(v) : ''; }
       if (key === 'size' && sizeLabel) label = sizeLabel.textContent;
       if (v) out.push([label, v]);
