@@ -247,7 +247,7 @@
 
   // ---------- Zustand (Startwerte aus dem HTML) ----------
   const state = {
-    piece: 'pendant', gold: 'yellow', text: TXT.fallbackName, text2: '', textAlt: '', text2Alt: '', join: 'heart', style: 'script',
+    piece: 'pendant', gold: 'yellow', karat: '18k', text: TXT.fallbackName, text2: '', textAlt: '', text2Alt: '', join: 'heart', style: 'script',
     accent: 'none', underline: 'none', thick: 'std', chain: 'cable', motif: 'butterfly', enamel: 'none',
     stone: 'none', size: '', len: '', notes: ''
   };
@@ -1019,8 +1019,8 @@
   }
   // ---------- Entwurf als Link: öffnet genau diese Gestaltung wieder ----------
   const KEYS = {
-    studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len'],
-    builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size']
+    studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len', 'karat'],
+    builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size', 'karat']
   };
   function designUrl(kind) {
     const raw = (kind === 'studio' ? 's' : 'b') + '|' + KEYS[kind].map(k => String(state[k] || '').replace(/\|/g, ' ')).join('|');
