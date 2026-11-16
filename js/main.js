@@ -922,9 +922,8 @@
     builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size']
   };
   function designUrl(kind) {
-    const o = { f: kind };
-    KEYS[kind].forEach(k => { if (state[k]) o[k] = state[k]; });
-    const bytes = new TextEncoder().encode(JSON.stringify(o));
+    const raw = (kind === 'studio' ? 's' : 'b') + '|' + KEYS[kind].map(k => String(state[k] || '').replace(/\|/g, ' ')).join('|');
+    const bytes = new TextEncoder().encode(raw);
     let bin = '';
     bytes.forEach(b => { bin += String.fromCharCode(b); });
     const d = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -935,15 +934,24 @@
     if (!d) return null;
     try {
       const bin = atob(d.replace(/-/g, '+').replace(/_/g, '/'));
-      const o = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
-      return o && KEYS[o.f] ? o : null;
+      const txt = new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+      if (txt.charAt(0) === '{') {            // ältere, lange Links
+        const o = JSON.parse(txt);
+        return o && KEYS[o.f] ? o : null;
+      }
+      const parts = txt.split('|');
+      const f = parts[0] === 's' ? 'studio' : parts[0] === 'b' ? 'builder' : null;
+      if (!f) return null;
+      const o = { f };
+      KEYS[f].forEach((k, i) => { if (parts[i + 1]) o[k] = parts[i + 1]; });
+      return o;
     } catch (e) { return null; }
   }
   function message(form) {
     const L = lines(form);
     const hello = form.dataset.form === 'studio' ? TXT.helloName : TXT.hello;
     return hello + '\n\n' + L.map(([k, v]) => '• ' + k + ': ' + v).join('\n') + '\n\n' + TXT.ask +
-      '';
+      '\n\n' + TXT.linkLabel + designUrl(form.dataset.form);
   }
   function updateOutputs() {
     forms.forEach(form => {
