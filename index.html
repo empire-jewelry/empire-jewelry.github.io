@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600&family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@500;600&display=swap">
   <!-- Schriften für die Namenskette -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@700&family=Pacifico&family=Playfair+Display:wght@700&family=Montserrat:wght@700&family=Fredoka:wght@600&family=UnifrakturMaguntia&family=Amiri:wght@700&family=Gulzar&family=Katibeh&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=UnifrakturMaguntia&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
   <link rel="stylesheet" href="css/style.css?v=7">
 </head>
@@ -153,15 +153,17 @@
             <input class="name-input" type="text" maxlength="12" autocomplete="off" spellcheck="false" dir="auto" data-key="text2Alt">
           </fieldset>
 
-          <fieldset class="chips" data-field="accent" data-label="Charm">
-            <legend class="field-label">Charm</legend>
-            <label class="chip"><input type="radio" name="n-accent" value="none" data-key="accent" checked><span class="chip-t">None</span></label>
-            <label class="chip"><input type="radio" name="n-accent" value="heart" data-key="accent"><span class="charm-ico" data-charm="heart" aria-hidden="true"></span><span class="chip-t">Heart</span></label>
-            <label class="chip"><input type="radio" name="n-accent" value="crown" data-key="accent"><span class="charm-ico" data-charm="crown" aria-hidden="true"></span><span class="chip-t">Crown</span></label>
-            <label class="chip"><input type="radio" name="n-accent" value="star" data-key="accent"><span class="charm-ico" data-charm="star" aria-hidden="true"></span><span class="chip-t">Star</span></label>
-            <label class="chip"><input type="radio" name="n-accent" value="butterfly" data-key="accent"><span class="charm-ico" data-charm="butterfly" aria-hidden="true"></span><span class="chip-t">Butterfly</span></label>
-            <label class="chip"><input type="radio" name="n-accent" value="cedar" data-key="accent"><span class="charm-ico" data-charm="cedar" aria-hidden="true"></span><span class="chip-t">Cedar</span></label>
-            <label class="chip"><input type="radio" name="n-accent" value="sparkle" data-key="accent"><span class="charm-ico" data-charm="sparkle" aria-hidden="true"></span><span class="chip-t">Sparkle</span></label>
+          <fieldset class="chips" data-field="accent" data-label="Charms">
+            <legend class="field-label">Charms <span class="opt">(they hang below the name, up to 3)</span></legend>
+            <label class="chip"><input type="checkbox" name="n-accent" value="heart" data-key="accent"><span class="charm-ico" data-charm="heart" aria-hidden="true"></span><span class="chip-t">Heart</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="star" data-key="accent"><span class="charm-ico" data-charm="star" aria-hidden="true"></span><span class="chip-t">Star</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="butterfly" data-key="accent"><span class="charm-ico" data-charm="butterfly" aria-hidden="true"></span><span class="chip-t">Butterfly</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="flower" data-key="accent"><span class="charm-ico" data-charm="flower" aria-hidden="true"></span><span class="chip-t">Flower</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="hamsa" data-key="accent"><span class="charm-ico" data-charm="hamsa" aria-hidden="true"></span><span class="chip-t">Hamsa</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="eye" data-key="accent"><span class="charm-ico" data-charm="eye" aria-hidden="true"></span><span class="chip-t">Evil eye</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="coin" data-key="accent"><span class="charm-ico" data-charm="coin" aria-hidden="true"></span><span class="chip-t">Engraved coin</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="cedar" data-key="accent"><span class="charm-ico" data-charm="cedar" aria-hidden="true"></span><span class="chip-t">Cedar</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="crown" data-key="accent"><span class="charm-ico" data-charm="crown" aria-hidden="true"></span><span class="chip-t">Crown on first letter</span></label>
           </fieldset>
 
           <fieldset class="chips" data-field="underline" data-label="Underline">
@@ -473,7 +475,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=17" defer></script>
+  <script src="js/main.js?v=19" defer></script>
   <script src="js/ring.js?v=6" defer></script>
 </body>
 </html>

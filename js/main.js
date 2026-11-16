@@ -81,15 +81,15 @@
     script: { family: '"Great Vibes", "Aref Ruqaa", cursive', weight: 400, scale: 1.3, kind: 'script' },
     allura: { family: '"Allura", "Aref Ruqaa", cursive', weight: 400, scale: 1.32, kind: 'script' },
     sacramento: { family: '"Sacramento", "Aref Ruqaa", cursive', weight: 400, scale: 1.4, kind: 'script', thin: true },
-    dancing: { family: '"Dancing Script", "Aref Ruqaa", cursive', weight: 700, scale: 1.05, kind: 'script' },
+    dancing: { family: '"Dancing Script", "Aref Ruqaa", cursive', weight: 500, scale: 1.05, kind: 'script' },
     pacifico: { family: '"Pacifico", "Aref Ruqaa", cursive', weight: 400, scale: 0.86, kind: 'script' },
-    serif: { family: '"Playfair Display", "Amiri", serif', weight: 700, scale: 0.88, kind: 'print', spacing: -0.02 },
-    block: { family: '"Montserrat", "Reem Kufi", sans-serif', weight: 700, scale: 0.72, kind: 'print', upper: true, spacing: -0.01 },
-    bubble: { family: '"Fredoka", "Reem Kufi", sans-serif', weight: 600, scale: 0.86, kind: 'print', spacing: -0.05 },
+    serif: { family: '"Playfair Display", "Amiri", serif', weight: 500, scale: 0.88, kind: 'print', spacing: -0.02 },
+    block: { family: '"Montserrat", "Reem Kufi", sans-serif', weight: 500, scale: 0.72, kind: 'print', upper: true, spacing: -0.01 },
+    bubble: { family: '"Fredoka", "Reem Kufi", sans-serif', weight: 500, scale: 0.86, kind: 'print', spacing: -0.05 },
     gothic: { family: '"UnifrakturMaguntia", "Aref Ruqaa", serif', weight: 400, scale: 0.95, kind: 'print', spacing: -0.02 },
-    calligraphy: { family: '"Aref Ruqaa", serif', weight: 700, scale: 1.0, kind: 'arabic' },
-    naskh: { family: '"Amiri", serif', weight: 700, scale: 0.95, kind: 'arabic' },
-    modern: { family: '"Reem Kufi", "Alexandria", sans-serif', weight: 600, scale: 0.88, kind: 'arabic' },
+    calligraphy: { family: '"Aref Ruqaa", serif', weight: 400, scale: 1.0, kind: 'arabic' },
+    naskh: { family: '"Amiri", serif', weight: 400, scale: 0.95, kind: 'arabic' },
+    modern: { family: '"Reem Kufi", "Alexandria", sans-serif', weight: 500, scale: 0.88, kind: 'arabic' },
     nastaliq: { family: '"Gulzar", "Aref Ruqaa", serif', weight: 400, scale: 0.9, kind: 'arabic' },
     katibeh: { family: '"Katibeh", "Aref Ruqaa", serif', weight: 400, scale: 1.2, kind: 'arabic' }
   };
@@ -213,8 +213,14 @@
     butterfly: 'M-.04-.06C-.16-.4-.46-.46-.48-.28C-.5-.1-.3 0-.04 0C-.3 .02-.44 .2-.36 .34C-.26 .46-.08 .3-.04 .06ZM.04-.06C.16-.4 .46-.46 .48-.28C.5-.1 .3 0 .04 0C.3 .02 .44 .2 .36 .34C.26 .46 .08 .3 .04 .06Z',
     cedar: 'M0-.5L.16-.24H.08L.28 0H.14L.38 .28H.07V.46H-.07V.28H-.38L-.14 0H-.28L-.08-.24H-.16Z',
     sparkle: 'M0-.5C.04-.12 .12-.04 .5 0C.12 .04 .04 .12 0 .5C-.04 .12-.12 .04-.5 0C-.12-.04-.04-.12 0-.5Z',
-    infinity: 'M-.46 0C-.46-.2-.2-.22 0 0C.2 .22 .46 .2 .46 0C.46-.2 .2-.22 0 0C-.2 .22-.46 .2-.46 0Z'
+    infinity: 'M-.46 0C-.46-.2-.2-.22 0 0C.2 .22 .46 .2 .46 0C.46-.2 .2-.22 0 0C-.2 .22-.46 .2-.46 0Z',
+    hamsa: 'M0 .5C-.22 .5-.34 .34-.34 .16L-.44 .02C-.48-.06-.4-.12-.34-.06L-.27 .02L-.27-.3C-.27-.4-.11-.4-.11-.3L-.11-.02L-.08-.02L-.08-.4C-.08-.5 .08-.5 .08-.4L.08-.02L.11-.02L.11-.3C.11-.4 .27-.4 .27-.3L.27 .02L.34-.06C.4-.12 .48-.06 .44 .02L.34 .16C.34 .34 .22 .5 0 .5Z',
+    flower: 'M0.200 -0.280a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0M0.466 -0.087a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0M0.365 0.227a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0M0.035 0.227a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0M-0.066 -0.087a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0',
+    coin: 'M0-.5A.5 .5 0 1 1 0 .5A.5 .5 0 1 1 0-.5Z',
+    eye: 'M0-.5A.5 .5 0 1 1 0 .5A.5 .5 0 1 1 0-.5Z'
   };
+  // Aufhängepunkt oben am Anhänger (y im Einheitsfeld), dort sitzt der kleine Ring
+  const CHARM_HANG = { heart: -0.24, star: -0.5, butterfly: -0.1, cedar: -0.5, hamsa: -0.48, flower: -0.48, coin: -0.5, eye: -0.5 };
 
   // Kettenarten, wie sie bei Namensketten angeboten werden
   const CHAINS = {
@@ -244,9 +250,13 @@
   let touched = false;   // erst nach der ersten Änderung Bilder vorbereiten
   const controls = Array.from(document.querySelectorAll('[data-sync] [data-key]'));
   const seen = new Set();
+  const cbInit = {};
   controls.forEach(c => {
     const k = c.dataset.key;
-    if (c.type === 'radio') {
+    if (c.type === 'checkbox') {
+      cbInit[k] = cbInit[k] || [];
+      if (c.checked) cbInit[k].push(c.value);
+    } else if (c.type === 'radio') {
       if (c.checked) state[k] = c.value;
     } else if (!seen.has(k) && !(c.tagName === 'SELECT' && !c.options.length)) {
       state[k] = c.value;
@@ -254,6 +264,7 @@
     }
   });
 
+  Object.keys(cbInit).forEach(k => { state[k] = cbInit[k].join(','); });
   const forms = Array.from(document.querySelectorAll('[data-form]'));
   const builder = document.querySelector('[data-form="builder"]');
   const sizeSel = document.getElementById('b-size');
@@ -296,11 +307,11 @@
   function plateFilter(ctx) {
     const thick = state.thick === 'thick';
     const f = el('filter', { id: ctx.id + '-plate', x: '-15%', y: '-45%', width: '130%', height: '200%', 'color-interpolation-filters': 'sRGB' }, ctx.defs);
-    el('feGaussianBlur', { in: 'SourceAlpha', stdDeviation: thick ? 1.1 : 0.8, result: 'b' }, f);
-    const sp = el('feSpecularLighting', { in: 'b', surfaceScale: thick ? 3.4 : 2.5, specularConstant: 1.0, specularExponent: 24, 'lighting-color': '#fff6dc', result: 's' }, f);
+    el('feGaussianBlur', { in: 'SourceAlpha', stdDeviation: thick ? 0.9 : 0.6, result: 'b' }, f);
+    const sp = el('feSpecularLighting', { in: 'b', surfaceScale: thick ? 2.6 : 1.8, specularConstant: 1.0, specularExponent: 24, 'lighting-color': '#fff6dc', result: 's' }, f);
     el('feDistantLight', { azimuth: 225, elevation: 52 }, sp);
     el('feComposite', { in: 's', in2: 'SourceAlpha', operator: 'in', result: 's2' }, f);
-    const df = el('feDiffuseLighting', { in: 'b', surfaceScale: thick ? 3.4 : 2.5, diffuseConstant: 1.18, 'lighting-color': '#ffffff', result: 'd' }, f);
+    const df = el('feDiffuseLighting', { in: 'b', surfaceScale: thick ? 2.6 : 1.8, diffuseConstant: 1.18, 'lighting-color': '#ffffff', result: 'd' }, f);
     el('feDistantLight', { azimuth: 225, elevation: 58 }, df);
     el('feComposite', { in: 'SourceGraphic', in2: 'd', operator: 'arithmetic', k1: 1, k2: 0, k3: 0, k4: 0, result: 'lit' }, f);
     el('feComposite', { in: 'lit', in2: 's2', operator: 'arithmetic', k1: 0, k2: 1, k3: 0.8, k4: 0, result: 'shine' }, f);
@@ -377,10 +388,11 @@
   }
 
   // ---------- Namensplatte ----------
-  // Metall der Platte abtasten (im Layout, auf einer unsichtbaren Leinwand): äußerste Punkte links/rechts.
-  // Dort sitzen wie bei echten Namensketten die kleinen Ösen, in die die Kette eingehängt wird.
+  // Metall der Platte abtasten (im Layout, auf einer unsichtbaren Leinwand):
+  // äußerste Punkte links/rechts (Ösen für die Kette), unterster Punkt an einer Stelle (Ringe für Anhänger),
+  // oberster Punkt über dem ersten Buchstaben (Krone).
   const inkCanvas = document.createElement('canvas');
-  function inkEnds(draw, x0, x1, yTop, yBot) {
+  function inkScan(draw, x0, x1, yTop, yBot, yCut) {
     const SC = 3, pad = 8;
     const w = Math.max(1, Math.ceil((x1 - x0 + pad * 2) * SC)), h = Math.max(1, Math.ceil((yBot - yTop + pad * 2) * SC));
     inkCanvas.width = w; inkCanvas.height = h;
@@ -390,16 +402,57 @@
     c.direction = 'ltr'; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
     draw(c);
     const data = c.getImageData(0, 0, w, h).data;
-    let L = null, R = null;
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) if (data[(y * w + x) * 4 + 3] > 90) { if (!L || x < L[0]) L = [x, y]; break; }
-      for (let x = w - 1; x >= 0; x--) if (data[(y * w + x) * 4 + 3] > 90) { if (!R || x > R[0]) R = [x, y]; break; }
-    }
+    const ink = (x, y) => data[(y * w + x) * 4 + 3] > 90;
+    const px = ux => Math.round((ux - x0 + pad) * SC);
+    const py = uy => Math.round((uy - yTop + pad) * SC);
     const back = q => q && [q[0] / SC - pad + x0, q[1] / SC - pad + yTop];
-    return { L: back(L), R: back(R) };
+    const cutRow = Math.min(h, py(yCut));
+    let L = null, R = null;
+    for (let y = 0; y < cutRow; y++) {
+      for (let x = 0; x < w; x++) if (ink(x, y)) { if (!L || x < L[0]) L = [x, y]; break; }
+      for (let x = w - 1; x >= 0; x--) if (ink(x, y)) { if (!R || x > R[0]) R = [x, y]; break; }
+    }
+    function bottomAt(ux, half) {
+      const xa = Math.max(0, px(ux - half)), xb = Math.min(w - 1, px(ux + half));
+      let best = -1, bx = px(ux);
+      for (let x = xa; x <= xb; x++) for (let y = h - 1; y > best; y--) if (ink(x, y)) { best = y; bx = x; break; }
+      return best < 0 ? null : back([bx, best]);
+    }
+    function topAt(ua, ub) {
+      const xa = Math.max(0, px(ua)), xb = Math.min(w - 1, px(ub));
+      let best = h, bx = xa;
+      for (let x = xa; x <= xb; x++) for (let y = 0; y < best; y++) if (ink(x, y)) { best = y; bx = x; break; }
+      return best >= h ? null : back([bx, best]);
+    }
+    return { L: back(L), R: back(R), bottomAt, topAt };
   }
 
-  // Baut Name(n), Verbinder, Anhänger, Unterstrich, Krone und die Ösen als eine Goldplatte.
+  // ein Anhänger (Herz, Hamsa, Auge …) im Layout zeichnen; topY = Aufhängepunkt
+  function drawCharm(ctx, parent, name, cx, topY, size, stoneFill) {
+    const cy = topY - CHARM_HANG[name] * size;
+    const g = el('g', { transform: 'translate(' + cx + ' ' + cy + ') scale(' + size + ')' }, parent);
+    if (name === 'eye') {
+      el('circle', { r: 0.5, 'stroke-width': 0.03 }, g);
+      el('circle', { r: 0.42, fill: '#1f4fa8', stroke: 'none' }, g);
+      el('circle', { r: 0.27, fill: '#f6f4ee', stroke: 'none' }, g);
+      el('circle', { r: 0.17, fill: '#57b0e3', stroke: 'none' }, g);
+      el('circle', { r: 0.08, fill: '#14161a', stroke: 'none' }, g);
+    } else if (name === 'coin') {
+      el('circle', { r: 0.5, 'stroke-width': 0.03 }, g);
+      el('circle', { r: 0.4, fill: 'none', stroke: ctx.dark, 'stroke-opacity': 0.7, 'stroke-width': 0.05 }, g);
+      for (let i = -2; i <= 2; i++) {
+        el('line', { x1: -0.24 + Math.abs(i) * 0.05, x2: 0.24 - Math.abs(i) * 0.05, y1: i * 0.11, y2: i * 0.11, stroke: ctx.dark, 'stroke-opacity': 0.65, 'stroke-width': 0.045, 'stroke-dasharray': '0.06 0.035' }, g);
+      }
+    } else {
+      const p = el('path', { d: CHARMS[name], 'stroke-width': 0.03 }, g);
+      if (stoneFill) { p.setAttribute('fill', stoneFill); p.setAttribute('stroke-width', 0.08); }
+      if (name === 'hamsa') el('circle', { cy: 0.2, r: 0.07, fill: 'none', stroke: ctx.dark, 'stroke-opacity': 0.5, 'stroke-width': 0.03 }, g);
+      if (name === 'flower') el('circle', { r: 0.12, fill: ctx.dark, 'fill-opacity': 0.25, stroke: 'none' }, g);
+    }
+    return cy;
+  }
+
+  // Baut Name(n), Verbinder, Unterstrich, Krone, Ösen und hängende Anhänger als eine Goldplatte.
   // fit(anchors) darf eine senkrechte Verschiebung liefern (Platte hängt an der Kette).
   // Rückgabe in SVG-Koordinaten: Box und die Einhängepunkte L/R.
   function namePlate(ctx, cx, baseY, maxW, maxSize, allowSecond, fit, maxH) {
@@ -420,7 +473,7 @@
     const inner = el('g', { id: ctx.id + '-pi' }, main);
 
     const mkText = txt => {
-      const t = el('text', { x: 0, y: 0, 'font-family': F.family, 'font-weight': F.weight, 'font-size': fs, 'stroke-width': F.thin ? 1.2 : 0.35, 'stroke-linejoin': 'round' }, inner);
+      const t = el('text', { x: 0, y: 0, 'font-family': F.family, 'font-weight': F.weight, 'font-size': fs, 'stroke-width': F.thin ? 0.5 : 0, 'stroke-linejoin': 'round' }, inner);
       if (F.spacing) t.style.letterSpacing = F.spacing + 'em';
       t.textContent = F.upper && !isArabic(txt) ? txt.toUpperCase() : txt;
       return t;
@@ -430,48 +483,41 @@
     items.push({ kind: 'text', el: t1 });
     if (raw2) {
       if (state.join === 'amp') items.push({ kind: 'text', el: mkText(isArabic(raw2) || rtl ? TXT.amp : '&') });
-      else items.push({ kind: 'charm', name: state.join === 'infinity' ? 'infinity' : 'heart', size: fs * 0.42 });
+      else items.push({ kind: 'charm', name: state.join === 'infinity' ? 'infinity' : 'heart', size: fs * 0.4 });
       items.push({ kind: 'text', el: mkText(raw2) });
     }
-    const heartStone = state.accent === 'heart' && STONE[state.stone];
-    if (state.accent !== 'none' && state.accent !== 'crown') items.push({ kind: 'charm', name: state.accent, size: fs * 0.46, stone: heartStone, accent: true });
-    if (STONE[state.stone] && !heartStone) items.push({ kind: 'stone', size: fs * 0.3 });
     if (rtl) items.reverse();
 
-    // nebeneinander anordnen
-    const gap = fs * 0.12;
+    // gewählte Anhänger: hängen an Ringen unter dem Namen (wie bei Malaks Ketten); Krone sitzt auf dem ersten Buchstaben
+    const picks = String(state.accent || '').split(',').filter(v => v && v !== 'none');
+    const wantCrown = picks.includes('crown');
+    const heartStone = picks.includes('heart') && !!STONE[state.stone];
+    let dangles = picks.filter(v => CHARM_HANG[v] !== undefined);
+    if (heartStone) dangles = ['heart'].concat(dangles.filter(v => v !== 'heart'));
+    else if (STONE[state.stone]) dangles.unshift('stone');
+    dangles = dangles.slice(0, 4);
+
+    // nebeneinander anordnen; ein Herz/Unendlich zwischen zwei Namen berührt beide
+    const gap = fs * 0.1;
     let x = 0;
     const midY = -fs * 0.3;
     items.forEach(it => {
+      if (it.kind === 'charm') x -= gap + fs * 0.04;
       if (it.kind === 'text') {
         const bb = it.el.getBBox();
         it.el.setAttribute('x', x - bb.x);
         it.x = x - bb.x;
         it.w = bb.width;
       } else {
-        it.w = it.size * 1.05;
+        it.w = it.size;
         it.cx = x + it.w / 2;
-        if (it.kind === 'charm') {
-          const fill = it.stone ? stoneGrad(ctx) : null;
-          const p = el('path', { d: CHARMS[it.name], transform: 'translate(' + it.cx + ' ' + midY + ') scale(' + it.size + ')', 'stroke-width': (it.stone ? 2.4 : 0.6) / it.size }, inner);
-          if (it.name === 'infinity') { p.setAttribute('fill', 'none'); p.setAttribute('stroke-width', fs * 0.06 / it.size); }
-          if (fill) p.setAttribute('fill', fill);
-        }
+        const pth = el('path', { d: CHARMS[it.name], transform: 'translate(' + it.cx + ' ' + midY + ') scale(' + it.size + ')', 'stroke-width': 0.6 / it.size }, inner);
+        if (it.name === 'infinity') { pth.setAttribute('fill', 'none'); pth.setAttribute('stroke-width', fs * 0.05 / it.size); }
       }
-      x += it.w + gap;
+      x += it.w + (it.kind === 'charm' ? -fs * 0.04 : gap);
     });
     const textEls = items.filter(it => it.kind === 'text').map(it => it.el);
     const left = 0, right = x - gap;
-
-    // Krone über dem ersten Buchstaben
-    let crown = null;
-    if (state.accent === 'crown') {
-      let r = null;
-      try { r = t1.getExtentOfChar(0); } catch (e) { r = null; }
-      const bb1 = t1.getBBox();
-      crown = { x: r ? r.x + r.width / 2 : bb1.x + fs * 0.3, y: bb1.y - fs * 0.05, s: fs * 0.42 };
-      el('path', { d: CHARMS.crown, transform: 'translate(' + crown.x + ' ' + crown.y + ') scale(' + crown.s + ')', 'stroke-width': 0.6 / crown.s }, inner);
-    }
 
     // Unterstrich: Schwung oder gerader Steg (Druckschrift braucht einen Steg, sonst halten die Buchstaben nicht)
     let ul = state.underline;
@@ -480,53 +526,93 @@
     if (ul === 'swash') {
       const y0 = fs * 0.12, W = right - left;
       ulPath = 'M' + (left - fs * 0.04) + ' ' + (y0 - fs * 0.02) + 'C' + (left + W * 0.3) + ' ' + (y0 + fs * 0.12) + ' ' + (right - W * 0.3) + ' ' + (y0 + fs * 0.02) + ' ' + (right + fs * 0.08) + ' ' + (y0 - fs * 0.12);
-      el('path', { d: ulPath, fill: 'none', 'stroke-width': fs * 0.07, 'stroke-linecap': 'round' }, inner);
+      el('path', { d: ulPath, fill: 'none', 'stroke-width': fs * 0.05, 'stroke-linecap': 'round' }, inner);
     } else if (ul === 'bar') {
-      ulBar = [left - fs * 0.02, -fs * 0.02, right - left + fs * 0.04, fs * 0.075];
-      el('rect', { x: ulBar[0], y: ulBar[1], width: ulBar[2], height: ulBar[3], rx: fs * 0.03, 'stroke-width': 0.3 }, inner);
+      ulBar = [left - fs * 0.02, -fs * 0.02, right - left + fs * 0.04, fs * 0.06];
+      el('rect', { x: ulBar[0], y: ulBar[1], width: ulBar[2], height: ulBar[3], rx: fs * 0.025, 'stroke-width': 0.3 }, inner);
     }
 
-    // äußerste Metallpunkte suchen (Schrift, Anhänger, Stein, Unterstrich)
+    // Metall abtasten (Schrift, Verbinder, Unterstrich)
     const pre = inner.getBBox();
-    const ink = inkEnds(c => {
+    const ink = inkScan(c => {
       c.font = F.weight + ' ' + fs + 'px ' + F.family;
       try { c.letterSpacing = (F.spacing ? F.spacing * fs : 0) + 'px'; } catch (e) { /* ältere Browser */ }
-      c.lineWidth = F.thin ? 1.2 : 0.35;
+      c.lineWidth = F.thin ? 0.5 : 0.01;
       items.forEach(it => {
         if (it.kind === 'text') {
-          // linke Kante aus der SVG-Box (stimmt auch auf der arabischen Seite, wo die Schreibrichtung rechts-nach-links ist)
+          // linke Kante aus der SVG-Box (stimmt auch auf der arabischen Seite)
           const bx = it.el.getBBox().x;
-          c.fillText(it.el.textContent, bx, 0); c.strokeText(it.el.textContent, bx, 0);
-        }
-        else if (it.kind === 'charm') {
+          c.fillText(it.el.textContent, bx, 0);
+          if (F.thin) c.strokeText(it.el.textContent, bx, 0);
+        } else {
           c.save(); c.translate(it.cx, midY); c.scale(it.size, it.size);
           const p2 = new Path2D(CHARMS[it.name]);
-          if (it.name === 'infinity') { c.lineWidth = fs * 0.06 / it.size; c.stroke(p2); } else c.fill(p2);
+          if (it.name === 'infinity') { c.lineWidth = fs * 0.05 / it.size; c.stroke(p2); } else c.fill(p2);
           c.restore();
-        } else if (it.kind === 'stone') {
-          c.beginPath(); c.arc(it.cx, midY, it.size * 0.45 + 1.6, 0, Math.PI * 2); c.fill();
         }
       });
-      if (crown) { c.save(); c.translate(crown.x, crown.y); c.scale(crown.s, crown.s); c.fill(new Path2D(CHARMS.crown)); c.restore(); }
-      if (ulPath) { c.lineWidth = fs * 0.07; c.lineCap = 'round'; c.stroke(new Path2D(ulPath)); }
+      if (ulPath) { c.lineWidth = fs * 0.05; c.lineCap = 'round'; c.stroke(new Path2D(ulPath)); }
       if (ulBar) c.fillRect(ulBar[0], ulBar[1], ulBar[2], ulBar[3]);
-    }, pre.x, pre.x + pre.width, pre.y, Math.min(pre.y + pre.height, fs * 0.3));
+    }, pre.x, pre.x + pre.width, pre.y - fs * 0.05, pre.y + pre.height + fs * 0.05, fs * 0.3);
 
-    // Ösen an beiden Enden (Teil der Platte, bekommen Relief und Glanz mit)
-    const R = fs * 0.075;
+    // Krone sitzt oben auf dem ersten Buchstaben
+    if (wantCrown) {
+      let r = null;
+      try { r = t1.getExtentOfChar(0); } catch (e) { r = null; }
+      const bb1 = t1.getBBox();
+      const xa = r ? r.x : bb1.x, xb = r ? r.x + r.width : bb1.x + fs * 0.5;
+      const top = ink.topAt(xa, xb) || [(xa + xb) / 2, bb1.y];
+      const cs = fs * 0.34;
+      el('path', { d: CHARMS.crown, transform: 'translate(' + top[0] + ' ' + (top[1] - 0.25 * cs) + ') scale(' + cs + ')', 'stroke-width': 0.6 / cs }, inner);
+    }
+
+    // Ösen an beiden Enden (Teil der Platte)
+    const R = fs * 0.07;
     const aL = ink.L || [pre.x, midY], aR = ink.R || [pre.x + pre.width, midY];
     const eL = [aL[0] - R * 0.5, aL[1]], eR = [aR[0] + R * 0.5, aR[1]];
-    [eL, eR].forEach(e => el('circle', { cx: e[0], cy: e[1], r: R * 0.62, fill: 'none', 'stroke-width': R * 0.5 }, inner));
-    const hookL = [eL[0] - R * 0.62, eL[1]], hookR = [eR[0] + R * 0.62, eR[1]];
+    [eL, eR].forEach(e => el('circle', { cx: e[0], cy: e[1], r: R * 0.6, fill: 'none', 'stroke-width': R * 0.42 }, inner));
+    const hookL = [eL[0] - R * 0.6, eL[1]], hookR = [eR[0] + R * 0.6, eR[1]];
 
-    // auf Zielgröße bringen und zentrieren
+    // Größe aus Name und Ösen (die hängenden Anhänger zählen nicht mit)
     const bb = inner.getBBox();
-    // Größe: höchstens maxW breit, maxSize Schriftgröße; auf der Büste zusätzlich echte Höhe (maxH) wie bei echten Namensketten
     let k = Math.min(maxSize / S, maxW / Math.max(1, bb.width));
     if (maxH) k = Math.min(k, maxH / Math.max(1, bb.height));
+
+    // hängende Anhänger: vom Ende des Namens (Leserichtung) nach innen, jeder an einem kleinen Ring
+    const dir = rtl ? 1 : -1;
+    const endX = rtl ? aL[0] : aR[0];
+    const baseSize = n => (n === 'stone' ? fs * 0.17 : n === 'hamsa' ? fs * 0.48 : fs * 0.4);
+    // Platz unter dem Namen: bei kurzen Namen werden die Anhänger kleiner, damit sie nebeneinander passen
+    const avail = Math.abs(aR[0] - aL[0]) * 0.92;
+    const need = dangles.reduce((sum, n) => sum + baseSize(n) * 1.15, 0);
+    const shrink = need > avail ? Math.max(0.6, avail / need) : 1;
+    let ax = endX + dir * fs * 0.18;
+    let prevX = null;
+    const hung = [];
+    dangles.forEach(name => {
+      const size = baseSize(name) * shrink;
+      // nächste Stelle mit Metall darunter suchen, mit genug Abstand zum vorigen Anhänger
+      let b = null;
+      for (let t = 0; t < 40 && !b; t++) {
+        const tryX = ax + dir * t * fs * 0.03;
+        const hit = ink.bottomAt(tryX, fs * 0.04);
+        if (hit && (prevX === null || Math.abs(hit[0] - prevX) >= size * 1.05)) { b = hit; ax = tryX; }
+      }
+      if (!b) return;
+      prevX = b[0];
+      const rr = fs * 0.048;
+      const ringY = b[1] + rr * 0.6;
+      el('circle', { cx: b[0], cy: ringY, r: rr, fill: 'none', 'stroke-width': rr * 0.42 }, inner);
+      const topY = ringY + rr * 0.8;
+      if (name === 'stone') hung.push({ stone: true, x: b[0], y: topY, r: size });
+      else hung.push({ x: b[0], y: drawCharm(ctx, inner, name, b[0], topY, size, name === 'heart' && heartStone ? stoneGrad(ctx) : null) });
+      ax = b[0] + dir * (size * 1.15);
+    });
+
+    // auf Zielgröße bringen und zentrieren
     const tx = cx - (bb.x + bb.width / 2) * k;
     outer.setAttribute('transform', 'translate(' + tx.toFixed(2) + ' ' + baseY + ') scale(' + k.toFixed(4) + ')');
-    const off = state.thick === 'thick' ? 1.6 : 0.9;
+    const off = state.thick === 'thick' ? 1.1 : 0.5;
     edge.setAttribute('transform', 'translate(' + (off * 0.6 / k).toFixed(3) + ' ' + (off / k).toFixed(3) + ')');
     const conv = q => [tx + q[0] * k, baseY + q[1] * k];
     let L = conv(hookL), Rr = conv(hookR);
@@ -539,15 +625,20 @@
       L = [L[0], L[1] + dy]; Rr = [Rr[0], Rr[1] + dy];
     }
 
-    // Stein (rund) als eigenes Teil oben drauf
+    // Geburtsstein (rund, gefasst) hängt am Ring
     const keepG = ctx.g; ctx.g = pg;
-    items.forEach(it => { if (it.kind === 'stone') drawStone(ctx, tx + it.cx * k, baseY + midY * k, it.size * 0.45 * k); });
+    hung.forEach(h => {
+      if (!h.stone) return;
+      const p0 = conv([h.x, h.y]);
+      const rs = h.r * k;
+      drawStone(ctx, p0[0], p0[1] + rs + 1.4, rs);
+    });
     ctx.g = keepG;
     if (dy) ctx.glints = ctx.glints.map(g => [g[0], g[1] + dy]);
-    items.forEach(it => { if (it.kind === 'charm' && it.accent) ctx.glints.push([tx + it.cx * k, baseY + midY * k + dy]); });
+    hung.forEach(h => { if (!h.stone) { const q = conv([h.x, h.y]); ctx.glints.push([q[0], q[1] + dy]); } });
 
     const box = { x: tx + bb.x * k, y: baseY + bb.y * k + dy, width: bb.width * k, height: bb.height * k };
-    return { box, L, R: Rr, textEls, k, tx, eyeR: R * 0.62 * k };
+    return { box, L, R: Rr, textEls, k, tx, eyeR: R * 0.6 * k };
   }
 
   // ---------- Hals-Foto (Pexels, cottonbro studio) und Kettenverlauf darauf ----------
@@ -875,7 +966,8 @@
   function syncControls(source) {
     controls.forEach(c => {
       const k = c.dataset.key;
-      if (c.type === 'radio') c.checked = c.value === state[k];
+      if (c.type === 'checkbox') c.checked = String(state[k] || '').split(',').includes(c.value);
+      else if (c.type === 'radio') c.checked = c.value === state[k];
       else if (c !== source && c.value !== state[k]) c.value = state[k];
     });
   }
@@ -901,7 +993,9 @@
       const key = f.dataset.field;
       let label = f.dataset.label, v = '';
       const checked = f.querySelector('input[type=radio]:checked');
-      if (checked) {
+      if (f.querySelector('input[type=checkbox]')) {
+        v = Array.from(f.querySelectorAll('input[type=checkbox]:checked')).map(i => i.closest('label').querySelector('.chip-t').textContent.trim()).join(', ');
+      } else if (checked) {
         const t = checked.closest('label').querySelector('.chip-t, .font-name');
         v = t ? t.textContent : checked.value;
       } else {
@@ -1129,8 +1223,16 @@
   function onChange(e) {
     const c = e.target;
     const k = c.dataset && c.dataset.key;
-    if (!k || (c.type === 'radio' && !c.checked) || state[k] === c.value) return;
-    state[k] = c.value;
+    if (!k) return;
+    let val = c.value;
+    if (c.type === 'checkbox') {
+      const group = Array.from(c.closest('fieldset').querySelectorAll('input[type=checkbox][data-key="' + k + '"]'));
+      let on = group.filter(i => i.checked).map(i => i.value);
+      if (on.filter(v => v !== 'crown').length > 3) { c.checked = false; on = on.filter(v => v !== c.value); }
+      val = on.join(',');
+    }
+    if ((c.type === 'radio' && !c.checked) || state[k] === val) return;
+    state[k] = val;
     touched = true;
     if (k === 'textAlt' || k === 'text2Alt') altEdited[k] = !!c.value.trim();
     if (k === 'text') altEdited.textAlt = false;
