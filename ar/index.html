@@ -19,7 +19,7 @@
   <!-- Schriften für die Namenskette -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
-  <link rel="stylesheet" href="../css/style.css?v=11">
+  <link rel="stylesheet" href="../css/style.css?v=12">
 </head>
 <body>
   <a class="skip" href="#main">انتقل إلى المحتوى</a>
@@ -30,6 +30,7 @@
       <nav class="top-nav" id="top-nav" aria-label="القائمة">
         <a href="#custom">طلبات خاصة</a>
         <a href="#name">قلادات بالأسماء</a>
+        <a href="#lebanon">خريطة لبنان</a>
         <a href="#collection">المجموعة</a>
         <a href="#about">من نحن</a>
         <a href="#visit">تواصل</a>
@@ -79,6 +80,7 @@
           <div class="actions">
             <a class="btn btn-main" href="#name">صمّم قلادة باسمك</a>
             <a class="btn btn-line" href="#design">صمّم قطعة أخرى</a>
+            <a class="btn btn-line" href="#lebanon">صمّم خريطة لبنان</a>
           </div>
         </div>
         <figure class="custom-photo">
@@ -225,6 +227,79 @@
 
           <div class="summary">
             <h3>قلادتك بالاسم</h3>
+            <dl data-summary></dl>
+            <a class="btn btn-main" data-wa href="https://wa.me/96170894976" target="_blank" rel="noopener">أرسل عبر واتساب</a>
+            <button class="btn btn-line" type="button" data-save>احفظ كصورة</button>
+            <p class="small save-status" data-save-status role="status"></p>
+            <p class="small">يفتح واتساب وتفاصيل تصميمك مكتوبة مع رابط له، وتُنسخ صورة التصميم أيضاً: الصقها في المحادثة قبل الإرسال. السعر عند الطلب: نرد عليك بالسعر ومدة التحضير.</p>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Libanon-Karte als Anhänger: Gold, Gravur, Flagge, bunt (Umriss aus Natural Earth, gemeinfrei) -->
+    <section class="studio map-studio" id="lebanon" aria-labelledby="lebanon-title">
+      <div class="section-head">
+        <h2 id="lebanon-title">قلادة خريطة لبنان</h2>
+        <p>لبنان بالذهب، بأربعة تصاميم مثل القلائد في محلّنا. اختر التصميم وشاهده على العنق ومن قريب.</p>
+      </div>
+      <div class="studio-grid">
+        <figure class="stage studio-stage">
+          <svg class="preview" data-pid="m" data-piece="map" viewBox="0 0 400 300" role="img" aria-label="رسم قلادة خريطة لبنان على العنق"></svg>
+          <svg class="preview preview-close" data-pid="mz" data-piece="map" data-view="close" viewBox="0 0 400 300" role="img" aria-label="صورة قريبة لقلادة خريطة لبنان"></svg>
+        </figure>
+
+        <form class="studio-form" data-sync data-form="map" onsubmit="return false">
+          <fieldset class="chips" data-field="mapDesign" data-label="التصميم">
+            <legend class="field-label">التصميم</legend>
+            <label class="chip"><input type="radio" name="m-design" value="gold" data-key="mapDesign"><span class="map-ico" data-map="gold" aria-hidden="true"></span><span class="chip-t">ذهب لامع</span></label>
+            <label class="chip"><input type="radio" name="m-design" value="engrave" data-key="mapDesign"><span class="map-ico" data-map="engrave" aria-hidden="true"></span><span class="chip-t">كلمات محفورة</span></label>
+            <label class="chip"><input type="radio" name="m-design" value="flag" data-key="mapDesign" checked><span class="map-ico" data-map="flag" aria-hidden="true"></span><span class="chip-t">العلم بالمينا</span></label>
+            <label class="chip"><input type="radio" name="m-design" value="paint" data-key="mapDesign"><span class="map-ico" data-map="paint" aria-hidden="true"></span><span class="chip-t">ملوّنة بالمينا</span></label>
+          </fieldset>
+
+          <fieldset data-field="mapText" data-label="الحفر" data-design="engrave">
+            <legend class="field-label">الكلمات المحفورة</legend>
+            <input class="name-input" id="m-text" type="text" value="لبنان" maxlength="14" autocomplete="off" spellcheck="false" dir="auto" data-key="mapText" aria-describedby="m-text-hint">
+            <p class="small" id="m-text-hint">اسم أو تاريخ أو كلمات قليلة، بالعربية أو بالإنجليزية.</p>
+          </fieldset>
+
+          <fieldset class="chips" data-field="gold" data-label="الذهب">
+            <legend class="field-label">الذهب</legend>
+            <label class="chip"><input type="radio" name="m-gold" value="yellow" data-key="gold" checked><span class="dot metal-yellow" aria-hidden="true"></span><span class="chip-t">ذهب أصفر</span></label>
+            <label class="chip"><input type="radio" name="m-gold" value="rose" data-key="gold"><span class="dot metal-rose" aria-hidden="true"></span><span class="chip-t">ذهب وردي</span></label>
+            <label class="chip"><input type="radio" name="m-gold" value="white" data-key="gold"><span class="dot metal-white" aria-hidden="true"></span><span class="chip-t">ذهب أبيض</span></label>
+          </fieldset>
+
+          <fieldset class="chips" data-field="karat" data-label="العيار">
+            <legend class="field-label">العيار</legend>
+            <label class="chip"><input type="radio" name="m-karat" value="18k" data-key="karat" checked><span class="chip-t">عيار ١٨</span></label>
+            <label class="chip"><input type="radio" name="m-karat" value="21k" data-key="karat"><span class="chip-t">عيار ٢١</span></label>
+          </fieldset>
+
+          <fieldset class="chips" data-field="chain" data-label="السلسلة">
+            <legend class="field-label">السلسلة</legend>
+            <label class="chip"><input type="radio" name="m-chain" value="cable" data-key="chain" checked><span class="chip-t">كابل</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="rolo" data-key="chain"><span class="chip-t">رولو</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="box" data-key="chain"><span class="chip-t">بوكس</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="snake" data-key="chain"><span class="chip-t">سنيك</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="rope" data-key="chain"><span class="chip-t">حبل</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="figaro" data-key="chain"><span class="chip-t">فيغارو</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="cuban" data-key="chain"><span class="chip-t">كوبية</span></label>
+          </fieldset>
+
+          <fieldset data-field="len" data-label="طول السلسلة">
+            <legend class="field-label" id="m-len-label">طول السلسلة</legend>
+            <select class="select" data-key="len" aria-labelledby="m-len-label">
+              <option>40 سم</option>
+              <option>42 سم</option>
+              <option selected>45 سم</option>
+              <option>50 سم</option>
+            </select>
+          </fieldset>
+
+          <div class="summary">
+            <h3>قلادة لبنان الخاصة بك</h3>
             <dl data-summary></dl>
             <a class="btn btn-main" data-wa href="https://wa.me/96170894976" target="_blank" rel="noopener">أرسل عبر واتساب</a>
             <button class="btn btn-line" type="button" data-save>احفظ كصورة</button>
@@ -396,7 +471,7 @@
           <img src="../img/lebanon-map-480.webp" srcset="../img/lebanon-map-480.webp 480w, ../img/lebanon-map.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="أربع تعاليق ذهبية بشكل خريطة لبنان، واحدة بالعلم بالمينا وأخرى بأبنية ملونة">
           <p class="cap">تعاليق خريطة لبنان</p>
           <p class="price">السعر عند الطلب</p>
-          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">اسأل عبر واتساب</a><button class="like" type="button" data-like='{"piece":"pendant","motif":"map","enamel":"none"}'>اطلبها بتصميمك</button></div>
+          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">اسأل عبر واتساب</a><button class="like" type="button" data-like='{"goto":"lebanon"}'>اطلبها بتصميمك</button></div>
         </li>
         <li data-cat="name">
           <img src="../img/name-necklace-480.webp" srcset="../img/name-necklace-480.webp 480w, ../img/name-necklace.webp 880w" sizes="(min-width: 900px) 25vw, 50vw" width="880" height="880" loading="lazy" alt="قلادة ذهبية باسم بالخط العربي">
@@ -486,7 +561,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="../js/main.js?v=27" defer></script>
+  <script src="../js/main.js?v=28" defer></script>
   <script src="../js/ring.js?v=6" defer></script>
   <script src="../js/music.js?v=3" defer></script>
 </body>

@@ -38,7 +38,9 @@
       pasteDesk: 'Picture copied. In WhatsApp, press Ctrl+V to add it, then send.',
       pasteFail: 'The picture could not be copied. Tap “Save as picture” and attach it in WhatsApp.',
       zoomOpen: 'Enlarge', zoomClose: 'Close', zoomIn: 'Zoom in', zoomOut: 'Zoom out',
-      zoomHint: 'Tap the picture to zoom in, drag to move.'
+      zoomHint: 'Tap the picture to zoom in, drag to move.',
+      helloMap: 'Hello Empire Jewelry, I designed this Lebanon map pendant on your website:',
+      mapText: 'Lebanon'
     },
     ar: {
       helloName: 'مرحباً Empire Jewelry، صممت هذه القلادة بالاسم على موقعكم:',
@@ -62,7 +64,9 @@
       pasteDesk: 'تم نسخ الصورة. في واتساب اضغط Ctrl+V لإضافتها، ثم أرسل.',
       pasteFail: 'تعذّر نسخ الصورة. اضغط «احفظ كصورة» وأرفقها في واتساب.',
       zoomOpen: 'تكبير', zoomClose: 'إغلاق', zoomIn: 'تكبير', zoomOut: 'تصغير',
-      zoomHint: 'اضغط على الصورة للتكبير، واسحب لتحريكها.'
+      zoomHint: 'اضغط على الصورة للتكبير، واسحب لتحريكها.',
+      helloMap: 'مرحباً Empire Jewelry، صممت قلادة خريطة لبنان هذه على موقعكم:',
+      mapText: 'لبنان'
     }
   }[LANG];
 
@@ -170,6 +174,23 @@
     });
   }
 
+  // Libanon-Umriss aus Natural Earth 1:10m (gemeinfrei), vereinfacht mit Empire_Jewelry_Werkstatt\karte_libanon.py.
+  // Feld: Höhe 100, Breite 76,5, Norden oben. top = nördlichster Punkt (dort sitzt die Öse), center = Schwerpunkt.
+  const LEB = (() => {
+    const d = 'M61.5 0L64.5 3.6L65.7 4L68.2 3.6L68 5.5L67.6 5.8L66.3 5.1L65.6 5.6L65.3 8.2L62.1 10.6L62.9 11.9L65.8 11.5L67.8 11.8L68.7 13.7L72.5 16.2L72.7 17.4L72.2 20.5L74.1 23.1L75.4 23.8L74.4 26L75 28.1L76.5 29.9L73.9 33.5L70.6 36.7L70 38.9L68.4 39.3L66.8 38.8L65.7 39.4L60.5 45.4L59.5 47.8L61.6 50L64.5 50.9L64.6 52.1L64 52.9L61.1 52.6L57.6 51.2L55.3 52.5L54.2 52.6L52.8 51.3L48.4 53.4L43.2 59.9L43.1 62.2L42 62.9L41.8 64.2L47.3 66.8L47.8 67.5L47.6 68.6L45.8 70.2L42.4 71.1L41.8 71.9L42.5 73.1L41.7 75.1L36.7 78.5L34.1 82.4L30.5 83.6L28.1 86.5L26.5 86.9L25.6 88.7L23.5 86.1L22.9 86.2L21.4 89.8L21 94.4L19.4 98.1L12.5 100L11.8 99.9L10.5 97.9L9.4 97.2L6.9 97.8L5.5 97.6L4.4 98.3L0.3 98L0 97.2L1.3 95.3L2.4 94.8L3.5 93L3.2 92.6L3.8 93L5.3 89.6L5.6 87.8L4.5 86.2L6.4 84.3L7.3 81.6L7.7 78.3L8.9 76.1L8.7 75.4L12.7 71.9L15.3 64L15 63.6L15.8 62.9L16.4 60.4L17.2 59.8L19.2 54.1L19.5 49.9L18.9 48.1L19.7 47.5L21.2 48.1L24 47.6L26.1 42.5L27.5 42.2L26.8 40.9L26.8 39.4L27.9 34.8L27 32.8L26.8 29.8L27.9 28.5L28.1 24.7L28.8 23.1L30 22L30.8 22.7L33.1 18.2L35.9 16.7L36.8 15.5L35.9 13.6L36.8 13.9L40.9 12.8L44.9 9.1L45.3 5.4L44.3 2.3L47.7 3.6L53.7 3.7L54.9 3.2L56 3.9L59.1 3.7L60.1 3L60.5 0.7Z';
+    const n = d.match(/-?\d+(\.\d+)?/g).map(Number);
+    const pts = [];
+    for (let i = 0; i < n.length; i += 2) pts.push([n[i], n[i + 1]]);
+    const top = [61.5, 0], center = [39.7, 47.0];
+    // frei hängend dreht sich die Karte, bis der Schwerpunkt genau unter der Öse liegt
+    const rot = Math.atan2(center[0] - top[0], center[1] - top[1]) * 180 / Math.PI;
+    const cities = { beirut: [20.4, 48.9], tripoli: [37.7, 15.2], saida: [13.8, 69.1], tyre: [5.1, 86.9],
+      nabatieh: [19.3, 80.1], zahle: [40.7, 51.3], baalbek: [56.5, 41.5], jbeil: [28.0, 34.8] };
+    return { d, pts, top, center, rot, axis: -57.2, cities };
+  })();
+  // Zeder wie auf der Flagge (Einheitsfeld, Breite 1)
+  const CEDAR_FLAG = 'M0-.5L.09-.38L.04-.37L.19-.24L.08-.23L.31-.08L.12-.07L.43 .1L.16 .11L.5 .29L.06 .29L.06 .48L-.06 .48L-.06 .29L-.5 .29L-.16 .11L-.43 .1L-.12-.07L-.31-.08L-.08-.23L-.19-.24L-.04-.37L-.09-.38Z';
+
   // Motive im Feld 0..100. hang = Aufhängepunkt, stone = Platz für den Stein, glints = Funkelpunkte
   const P = (d, r) => ({ t: 'path', a: { d }, r });
   const MOTIFS = {
@@ -201,9 +222,10 @@
       ]
     },
     map: {
-      // aus echten Koordinaten (Küste, Grenzen) vereinfacht; Stein sitzt bei Nabatieh
-      hang: [62, 10], stone: [34, 76], glints: [[60, 20], [70, 30], [52, 45], [45, 60], [28, 80]],
-      shapes: [P('M55 10L65 10L75 8L83 15L81 26L73 41L60 60L50 75L40 82L37 90L17 90L21 82L29 67L33 58L33 49L40 45L41 38L42 31L48 20L53 15Z', 'body')]
+      // echter Umriss (LEB), mittig ins Feld geschoben; Stein sitzt bei Nabatieh
+      hang: [LEB.top[0] + 11.8, 1], stone: [LEB.cities.nabatieh[0] + 11.8, LEB.cities.nabatieh[1]],
+      glints: ['tripoli', 'beirut', 'zahle', 'saida', 'baalbek'].map(c => [LEB.cities[c][0] + 11.8, LEB.cities[c][1]]),
+      shapes: [P('M' + LEB.pts.map(p => (p[0] + 11.8).toFixed(1) + ' ' + p[1]).join('L') + 'Z', 'body')]
     },
     cedar: {
       hang: [50, 8], stone: [50, 22], glints: [[50, 32], [36, 56], [64, 56], [50, 70]],
@@ -251,7 +273,7 @@
   const state = {
     piece: 'pendant', gold: 'yellow', karat: '18k', text: TXT.fallbackName, text2: '', textAlt: '', text2Alt: '', join: 'heart', style: 'script',
     accent: 'none', underline: 'none', thick: 'std', chain: 'cable', motif: 'butterfly', enamel: 'none',
-    stone: 'none', size: '', len: '', notes: ''
+    stone: 'none', size: '', len: '', notes: '', mapDesign: 'flag', mapText: ''
   };
   let touched = false;   // erst nach der ersten Änderung Bilder vorbereiten
   const controls = Array.from(document.querySelectorAll('[data-sync] [data-key]'));
@@ -678,7 +700,7 @@
   const IMG = (LANG === 'ar' ? '../' : '') + 'img/';
   let BUST = null;
   const bustReady = fetch(IMG + 'neck.json').then(r => r.json()).then(j => { BUST = j; }).catch(() => {});
-  const onBust = piece => !!BUST && (piece === 'necklace' || piece === 'pendant' || piece === 'initial');
+  const onBust = piece => !!BUST && (piece === 'necklace' || piece === 'pendant' || piece === 'initial' || piece === 'map');
   function bustCurve(lenText) {
     const n = parseInt(lenText, 10) || 45;
     const key = [40, 42, 45, 50].reduce((a, b) => (Math.abs(b - n) < Math.abs(a - n) ? b : a), 45);
@@ -743,6 +765,124 @@
     mo.glints.forEach(p => ctx.glints.push(toSvg(p)));
     const sp = toSvg(mo.stone);
     drawStone(ctx, sp[0], sp[1], Math.max(3, 5.8 * s));
+  }
+
+  // ---------- Libanon-Karte als Anhänger (Gold, Gravur, Flagge, bunt bemalt) ----------
+  const mapFont = () => (isArabic(nameText(state.mapText) || TXT.mapText) ? FONTS.calligraphy : FONTS.script);
+  // Ausdehnung der gedrehten Karte, gemessen vom Aufhängepunkt (Karten-Einheiten)
+  const LEB_BOX = (() => {
+    const a = LEB.rot * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+    let x0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    LEB.pts.forEach(p => {
+      const dx = p[0] - LEB.top[0], dy = p[1] - LEB.top[1];
+      const x = dx * c - dy * s, y = dx * s + dy * c;
+      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+    });
+    return { x0, x1, y1, c, s };
+  })();
+  // kleines Haus mit rotem Ziegeldach und drei Bogenfenstern (wie die alten libanesischen Häuser)
+  function house(g, x, y, w, h, wall, ctx) {
+    const line = { stroke: ctx.metal, 'stroke-width': 0.55, 'stroke-linejoin': 'round' };
+    el('rect', Object.assign({ x, y, width: w, height: h, fill: wall }, line), g);
+    el('path', Object.assign({ d: 'M' + (x - 1.2) + ' ' + y + 'L' + (x + w / 2) + ' ' + (y - h * 0.55) + 'L' + (x + w + 1.2) + ' ' + y + 'Z', fill: '#e2735c' }, line), g);
+    const aw = w / 5, ah = h * 0.42, ay = y + h * 0.3;
+    for (let i = 0; i < 3; i++) {
+      const ax = x + aw * (0.6 + i * 1.4);
+      el('path', { d: 'M' + ax + ' ' + (ay + ah) + 'V' + (ay + aw / 2) + 'A' + (aw / 2) + ' ' + (aw / 2) + ' 0 0 1 ' + (ax + aw) + ' ' + (ay + aw / 2) + 'V' + (ay + ah) + 'Z', fill: '#4f86c6' }, g);
+    }
+  }
+  function mapPendant(ctx, hx, hy, s, k) {
+    const T = LEB.top, B = LEB_BOX;
+    const mt = hy + 6.4 * k;                 // Kartenspitze unter Öse und Ring
+    const toSvg = p => {
+      const dx = p[0] - T[0], dy = p[1] - T[1];
+      return [hx + (dx * B.c - dy * B.s) * s, mt + (dx * B.s + dy * B.c) * s];
+    };
+    // Öse oben, kleiner Ring durch die Spitze der Karte
+    el('ellipse', { cx: hx, cy: hy, rx: 2.5 * k, ry: 4.2 * k, fill: 'none', stroke: ctx.metal, 'stroke-width': 1.6 * k }, ctx.g);
+    plateFilter(ctx);
+    const plate = 'url(#' + ctx.id + '-plate)';
+    const tf = 'translate(' + hx.toFixed(2) + ' ' + mt.toFixed(2) + ') rotate(' + LEB.rot.toFixed(2) + ') scale(' + s.toFixed(4) + ') translate(' + (-T[0]) + ' ' + (-T[1]) + ')';
+    const clipId = ctx.id + '-leb';
+    el('path', { d: LEB.d }, el('clipPath', { id: clipId }, ctx.defs));
+    // eigenes Gold für die Karte: Spiegelung in mehreren Bändern über die Länge (poliert)
+    const mg = el('linearGradient', { id: ctx.id + '-mapmetal', gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 30, y2: 52, spreadMethod: 'reflect' }, ctx.defs);
+    const m = METALS[state.gold] || METALS.yellow;
+    m.forEach((c, i) => el('stop', { offset: i / (m.length - 1), 'stop-color': c }, mg));
+    const metal = 'url(#' + ctx.id + '-mapmetal)';
+    const design = state.mapDesign;
+    const enamel = design === 'flag' || design === 'paint';
+    // 1) Goldplatte mit Licht-Filter (Kante, Glanz, Schatten), darauf Glanz und Gravur
+    const g = el('g', { transform: tf, filter: plate }, ctx.g);
+    el('path', { d: LEB.d, fill: metal, stroke: metal, 'stroke-width': 0.8, 'stroke-linejoin': 'round' }, g);
+    const inside = el('g', { 'clip-path': 'url(#' + clipId + ')' }, g);
+    const [cx, cy] = LEB.center;
+    if (!enamel) {
+      // polierter Glanz: heller Streifen oben, etwas dunkler unten
+      const sid = ctx.id + '-sheen';
+      const lg = el('linearGradient', { id: sid, x1: 0, y1: 0, x2: 0.8, y2: 1 }, ctx.defs);
+      [[0, '#fff', 0], [0.28, '#fff', 0.5], [0.42, '#fff', 0], [0.7, '#3b2606', 0], [1, '#3b2606', 0.28]]
+        .forEach(([o, c, a]) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': a }, lg));
+      el('path', { d: LEB.d, fill: 'url(#' + sid + ')' }, inside);
+    }
+    if (design === 'engrave') {
+      // Gravur entlang der Längsachse der Karte
+      const raw = nameText(state.mapText);
+      const t = raw || TXT.mapText, F = mapFont();
+      const tg = el('g', { transform: 'rotate(' + LEB.axis + ' ' + (cx + 2) + ' ' + (cy - 3) + ')' }, inside);
+      const mk = (dx, dy, fill, op) => {
+        const e = el('text', { x: cx + 2 + dx, y: cy - 3 + dy, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': F.family, 'font-weight': F.weight, 'font-size': 10, fill, 'fill-opacity': op }, tg);
+        e.textContent = t;
+        return e;
+      };
+      const hi = mk(0.35, 0.5, '#fff', 0.5), lo = mk(0, 0, ctx.dark, raw ? 0.85 : 0.4);
+      const w10 = lo.getComputedTextLength() || chars(t).length * 5;
+      // kurze Wörter nicht zu groß, lange passen in die Länge (Ruqaa wirkt kleiner, darf größer sein)
+      const size = Math.min((isArabic(t) ? 26 : 19) * F.scale, 10 * 74 / w10);
+      [hi, lo].forEach(e => e.setAttribute('font-size', size.toFixed(2)));
+    }
+    if (enamel) {
+      // 2) Emaille ohne Licht-Filter (sonst wird sie blass), gerade ausgerichtet wie beim Tragen:
+      //    eigenes Feld ab der Spitze, x nach rechts, y nach unten (Höhe 0 … B.y1)
+      const eg = el('g', { transform: tf }, ctx.g);
+      const ein = el('g', { 'clip-path': 'url(#' + clipId + ')' }, eg);
+      const up = el('g', { transform: 'translate(' + T[0] + ' ' + T[1] + ') rotate(' + (-LEB.rot).toFixed(2) + ')' }, ein);
+      if (design === 'flag') {
+        // wie die Flagge: rot, weiß, rot (ein Viertel, die Hälfte, ein Viertel), Zeder in der Mitte
+        const q = B.y1 / 4;
+        el('rect', { x: -40, y: -10, width: 80, height: q + 10, fill: '#d0242e' }, up);
+        el('rect', { x: -40, y: q, width: 80, height: 2 * q, fill: '#faf8f3' }, up);
+        el('rect', { x: -40, y: 3 * q, width: 80, height: q + 10, fill: '#d0242e' }, up);
+        el('path', { d: CEDAR_FLAG, transform: 'translate(-2 ' + (2 * q - 11).toFixed(1) + ') scale(24)', fill: '#13924a' }, up);
+      } else {
+        // bunte Emaille mit Goldlinien dazwischen: Himmel, Sonne, Berge mit Zeder, Häuser, Meer
+        const line = { stroke: metal, 'stroke-width': 0.6, 'stroke-linejoin': 'round' };
+        el('rect', { x: -40, y: -10, width: 80, height: 140, fill: '#b9e0f2' }, up);
+        el('circle', Object.assign({ cx: 11, cy: 19, r: 5.5, fill: '#f5c842' }, line), up);
+        el('path', Object.assign({ d: 'M-25 40C-12 28-2 34 6 27C14 21 22 26 30 30V130H-25Z', fill: '#9fd8b8' }, line), up);
+        el('path', { d: CEDAR_FLAG, transform: 'translate(13 36) scale(10)', fill: '#2f8f55', stroke: metal, 'stroke-width': 0.06, 'stroke-linejoin': 'round' }, up);
+        el('path', Object.assign({ d: 'M-25 58C-12 52-2 58 8 53C16 49 22 52 30 55V130H-25Z', fill: '#f6cf9c' }, line), up);
+        house(up, -14, 50, 11, 8, '#f9cfdc', ctx);
+        house(up, -1.5, 56, 10, 7.5, '#fff0c8', ctx);
+        house(up, -13.5, 65, 10, 7, '#d6e4ff', ctx);
+        house(up, -1, 68, 8.5, 6.5, '#ffd6c2', ctx);
+        el('path', Object.assign({ d: 'M-25 84C-16 80-9 86 0 82C8 79 14 84 30 81V130H-25Z', fill: '#6fb7e3' }, line), up);
+        el('path', { d: 'M-13 93C-10 91-7 94-4 92M-9 101C-6 99-3 102 0 100M-12 108C-9 106-6 109-3 107', fill: 'none', stroke: '#fff', 'stroke-opacity': 0.9, 'stroke-width': 0.7, 'stroke-linecap': 'round' }, up);
+      }
+      // Glanz auf der Emaille (glasig), oben links heller
+      const gid = ctx.id + '-gloss';
+      const gl = el('linearGradient', { id: gid, x1: 0, y1: 0, x2: 0.7, y2: 1 }, ctx.defs);
+      [[0, '#fff', 0.05], [0.22, '#fff', 0.38], [0.36, '#fff', 0], [1, '#000', 0.08]]
+        .forEach(([o, c, a]) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': a }, gl));
+      el('path', { d: LEB.d, fill: 'url(#' + gid + ')' }, ein);
+      // 3) Goldrand um die Emaille, mit eigenem Licht und Schatten auf die Emaille
+      const rg = el('g', { transform: tf, filter: plate }, ctx.g);
+      el('path', { d: LEB.d, fill: 'none', stroke: metal, 'stroke-width': 2.4, 'stroke-linejoin': 'round' }, rg);
+    }
+    // kleiner Ring durch die Spitze
+    el('circle', { cx: hx, cy: hy + 4.6 * k, r: 2 * k, fill: 'none', stroke: ctx.metal, 'stroke-width': 1.1 * k }, ctx.g);
+    ['tripoli', 'beirut', 'zahle', 'saida', 'baalbek'].forEach(c => ctx.glints.push(toSvg(LEB.cities[c])));
+    ctx.textBox = { x: hx + B.x0 * s, y: mt + B.y1 * s * 0.15, width: (B.x1 - B.x0) * s, height: B.y1 * s * 0.7 };
   }
 
   const DRAW = {
@@ -852,6 +992,26 @@
         const hx = side === -1 ? 100 - mo.hang[0] : mo.hang[0];
         placeMotif(ctx, mo, cx - hx * s, top + 6 - mo.hang[1] * s, s, side);
       });
+    },
+    map(ctx) {
+      const B = LEB_BOX;
+      if (ctx.model) {
+        // am Hals in echter Größe (ca. 2,5 cm hoch)
+        const C = bustCurve(state.len);
+        const hx = C.front[0], hy = C.front[1] + 2;
+        linkChain(ctx, bustPath(C.left, [hx - 1.5, hy - 3], -1));
+        linkChain(ctx, bustPath(C.right, [hx + 1.5, hy - 3], 1));
+        mapPendant(ctx, hx, hy, 70 / B.y1, 1);
+        return;
+      }
+      // Nahansicht: Karte groß, Kette von oben zur Öse
+      const k = 2.2, hy = 50, top = hy + 6.4 * k;
+      const s = Math.min((290 - top) / B.y1, 330 / (B.x1 - B.x0));
+      const hx = 200 - (B.x0 + B.x1) / 2 * s;
+      ctx.linkScale = 1.9;
+      linkChain(ctx, 'M' + (hx - 125) + ' -12C' + (hx - 105) + ' 24 ' + (hx - 30) + ' ' + (hy - 14) + ' ' + (hx - 3) + ' ' + (hy - 7));
+      linkChain(ctx, 'M' + (hx + 125) + ' -12C' + (hx + 105) + ' 24 ' + (hx + 30) + ' ' + (hy - 14) + ' ' + (hx + 3) + ' ' + (hy - 7));
+      mapPendant(ctx, hx, hy, s, k);
     }
   };
   function render(svg) {
@@ -870,8 +1030,9 @@
     let vy = 0;
     if (model) {
       // Ausschnitt folgt der Kettenlänge (längere Kette = tiefer)
-      const C = bustCurve(piece === 'necklace' ? state.len : state.size);
-      vy = Math.max(0, Math.min((BUST.h || 300) - 300, C.front[1] - 212));
+      const C = bustCurve(piece === 'necklace' || piece === 'map' ? state.len : state.size);
+      // die Karte hängt tiefer als die Namensplatte, darum dort weniger Abstand nach oben
+      vy = Math.max(0, Math.min((BUST.h || 300) - 300, C.front[1] - (piece === 'map' ? 172 : 212)));
     }
     svg.setAttribute('viewBox', '0 ' + vy.toFixed(1) + ' 400 300');
     const grad = el('linearGradient', { id: id + '-metal', gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 120, y2: 60, spreadMethod: 'reflect' }, defs);
@@ -892,7 +1053,7 @@
     const shapeG = el('g', { filter: 'url(#' + id + '-sh)' }, ctx.g);
     const plainG = ctx.g;
     // Motive und Ringe bekommen den einfachen Schatten, die Namensplatte ihren eigenen Filter
-    if (piece === 'necklace' || piece === 'bracelet') ctx.g = plainG; else ctx.g = shapeG;
+    if (piece === 'necklace' || piece === 'bracelet' || piece === 'map') ctx.g = plainG; else ctx.g = shapeG;
     DRAW[piece](ctx);
     ctx.sparks = el('g', { class: 'sparks', 'pointer-events': 'none' }, svg);
     ctx.grad = grad;
@@ -988,6 +1149,7 @@
       let hide = false;
       if (f.dataset.show && f.closest('[data-form="builder"]')) hide = !f.dataset.show.split(' ').includes(state.piece);
       if (f.dataset.needs && !String(state[f.dataset.needs] || '').trim()) hide = true;
+      if (f.dataset.design) hide = !f.dataset.design.split(' ').includes(state.mapDesign);
       if (f.dataset.alt) {
         if (!mm || (f.dataset.alt === '2' && !nameText(state.text2))) hide = true;
         const lab = f.dataset.alt === '2' ? (toAr ? TXT.altAr2 : TXT.altEn2) : (toAr ? TXT.altAr1 : TXT.altEn1);
@@ -1047,15 +1209,17 @@
   // ---------- Entwurf als Link: öffnet genau diese Gestaltung wieder ----------
   const KEYS = {
     studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len', 'karat'],
-    builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size', 'karat']
+    builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size', 'karat'],
+    map: ['mapDesign', 'mapText', 'gold', 'karat', 'chain', 'len']
   };
+  const LINK = { studio: ['s', '#name'], builder: ['b', '#design'], map: ['m', '#lebanon'] };
   function designUrl(kind) {
-    const raw = (kind === 'studio' ? 's' : 'b') + '|' + KEYS[kind].map(k => String(state[k] || '').replace(/\|/g, ' ')).join('|');
+    const raw = LINK[kind][0] + '|' + KEYS[kind].map(k => String(state[k] || '').replace(/\|/g, ' ')).join('|');
     const bytes = new TextEncoder().encode(raw);
     let bin = '';
     bytes.forEach(b => { bin += String.fromCharCode(b); });
     const d = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return location.origin + location.pathname + '?d=' + d + (kind === 'studio' ? '#name' : '#design');
+    return location.origin + location.pathname + '?d=' + d + LINK[kind][1];
   }
   function readDesign() {
     const d = new URLSearchParams(location.search).get('d');
@@ -1068,7 +1232,7 @@
         return o && KEYS[o.f] ? o : null;
       }
       const parts = txt.split('|');
-      const f = parts[0] === 's' ? 'studio' : parts[0] === 'b' ? 'builder' : null;
+      const f = Object.keys(LINK).find(kind => LINK[kind][0] === parts[0]);
       if (!f) return null;
       const o = { f };
       KEYS[f].forEach((k, i) => { if (parts[i + 1]) o[k] = parts[i + 1]; });
@@ -1077,7 +1241,7 @@
   }
   function message(form) {
     const L = lines(form);
-    const hello = form.dataset.form === 'studio' ? TXT.helloName : TXT.hello;
+    const hello = { studio: TXT.helloName, map: TXT.helloMap }[form.dataset.form] || TXT.hello;
     return hello + '\n\n' + L.map(([k, v]) => '• ' + k + ': ' + v).join('\n') + '\n\n' + TXT.ask +
       '\n\n' + TXT.linkLabel + designUrl(form.dataset.form);
   }
@@ -1152,7 +1316,7 @@
     const sec = form.closest('section');
     const close = sec.querySelector('svg.preview-close');
     const views = close ? [close, sec.querySelector('svg.preview:not(.preview-close)')] : [sec.querySelector('svg.preview')];
-    const fam = font().family.split(',')[0].replace(/"/g, '').trim();
+    const fam = (form.dataset.form === 'map' ? mapFont() : font()).family.split(',')[0].replace(/"/g, '').trim();
     const css = await fontCss(fam);
     // Namenskette: Nahansicht der Kette und Hals-Foto nebeneinander, sonst eine Ansicht
     const VW = close ? 900 : 1200, VH = close ? 675 : 900, gap = close ? 6 : 0;
@@ -1329,6 +1493,29 @@
     span.appendChild(svg);
   });
 
+  // Karten-Symbole für die Design-Knöpfe (Libanon-Anhänger)
+  document.querySelectorAll('.map-ico').forEach((span, i) => {
+    const kind = span.dataset.map, cid = 'mi' + i;
+    const svg = el('svg', { viewBox: '-3 -3 83 106', 'aria-hidden': 'true' });
+    el('path', { d: LEB.d }, el('clipPath', { id: cid }, el('defs', null, svg)));
+    const gold = '#d9b25a';
+    el('path', { d: LEB.d, fill: gold }, svg);
+    const g = el('g', { 'clip-path': 'url(#' + cid + ')' }, svg);
+    if (kind === 'flag') {
+      el('rect', { x: -5, y: -5, width: 90, height: 31, fill: '#d22b33' }, g);
+      el('rect', { x: -5, y: 26, width: 90, height: 48, fill: '#fff' }, g);
+      el('rect', { x: -5, y: 74, width: 90, height: 31, fill: '#d22b33' }, g);
+      el('path', { d: CEDAR_FLAG, transform: 'translate(43 42) scale(27)', fill: '#1f9a4c' }, g);
+    } else if (kind === 'paint') {
+      [['#cde8f4', -5], ['#bfe5d0', 36], ['#f8d9b0', 54], ['#8cc8e8', 75]].forEach(([c, y]) => el('rect', { x: -5, y, width: 90, height: 110, fill: c }, g));
+      el('rect', { x: 22, y: 44, width: 14, height: 10, fill: '#fbe3ec' }, g);
+    } else if (kind === 'engrave') {
+      el('path', { d: 'M18 72L58 18M24 76L62 26', stroke: '#7d5c17', 'stroke-width': 4, 'stroke-linecap': 'round' }, g);
+    }
+    el('path', { d: LEB.d, fill: 'none', stroke: '#9c7726', 'stroke-width': kind === 'gold' || kind === 'engrave' ? 3 : 5, 'stroke-linejoin': 'round' }, svg);
+    span.appendChild(svg);
+  });
+
   // ---------- Relief-Ornamente im Startbereich ----------
   const orn = document.querySelector('.ornaments');
   const ringStage = document.querySelector('.ring-stage');
@@ -1477,9 +1664,9 @@
   if (shared && shared.size) state.size = shared.size;
   updateFields(); syncControls(null); updateSamples(); updateOutputs();
 
-  // ---------- Vergrößerung: Bild der Namenskette groß öffnen, hineinzoomen, verschieben ----------
-  const stage = document.querySelector('.studio-stage');
-  if (stage) {
+  // ---------- Vergrößerung: Bild der Namenskette bzw. Karte groß öffnen, hineinzoomen, verschieben ----------
+  const stages = Array.from(document.querySelectorAll('.studio-stage'));
+  if (stages.length) {
     zoomBox = document.createElement('dialog');
     zoomBox.className = 'zoom-box';
     zoomBox.innerHTML =
@@ -1509,25 +1696,28 @@
       sc.scrollLeft = fx * zoomSvg.clientWidth - px;
       sc.scrollTop = fy * zoomSvg.clientHeight - py;
     };
-    const open = view => {
+    const open = (stage, view) => {
       if (view) zoomSvg.dataset.view = view; else delete zoomSvg.dataset.view;
       const src = stage.querySelector(view ? 'svg.preview-close' : 'svg.preview:not(.preview-close)');
+      zoomSvg.dataset.piece = src.dataset.piece;
       zoomSvg.setAttribute('aria-label', src.getAttribute('aria-label'));
       zoomBox.showModal();  // erst sichtbar machen, sonst misst getBBox 0 und die Ösen sitzen falsch
       render(zoomSvg);
       setZoom(1, 0.5, 0.5);
     };
     // Klick auf eine der beiden Ansichten öffnet sie groß
-    stage.querySelectorAll('svg.preview').forEach(v => {
-      v.addEventListener('click', () => open(v.dataset.view));
+    stages.forEach(stage => {
+      stage.querySelectorAll('svg.preview').forEach(v => {
+        v.addEventListener('click', () => open(stage, v.dataset.view));
+      });
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'zoom-open';
+      btn.setAttribute('aria-label', TXT.zoomOpen);
+      btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg><span>' + TXT.zoomOpen + '</span>';
+      btn.addEventListener('click', () => open(stage, ''));
+      stage.appendChild(btn);
     });
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'zoom-open';
-    btn.setAttribute('aria-label', TXT.zoomOpen);
-    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg><span>' + TXT.zoomOpen + '</span>';
-    btn.addEventListener('click', () => open(''));
-    stage.appendChild(btn);
     zoomBox.querySelector('.zoom-x').addEventListener('click', () => zoomBox.close());
     zoomBox.querySelectorAll('[data-z]').forEach(b => b.addEventListener('click', () => setZoom(b.dataset.z === '+' ? z * 1.6 : z / 1.6)));
     // Klick neben das Bild schließt

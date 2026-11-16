@@ -255,6 +255,9 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .font-name { font-size: .78rem; color: var(--ink-2); pointer-events: none; }
 .charm-ico { display: inline-flex; width: 1.1rem; height: 1.1rem; }
 .charm-ico svg { width: 100%; height: 100%; }
+/* Libanon-Karte: kleine Karten in den Design-Knöpfen */
+.map-ico { display: inline-flex; width: 1.1rem; height: 1.45rem; }
+.map-ico svg { width: 100%; height: 100%; }
 
 /* ---------- Abschnitte allgemein ---------- */
 .custom, .studio, .pieces, .builder, .how, .about, .visit {

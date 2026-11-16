@@ -19,7 +19,7 @@
   <!-- Schriften für die Namenskette -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
-  <link rel="stylesheet" href="css/style.css?v=11">
+  <link rel="stylesheet" href="css/style.css?v=12">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -30,6 +30,7 @@
       <nav class="top-nav" id="top-nav" aria-label="Main">
         <a href="#custom">Custom orders</a>
         <a href="#name">Name necklaces</a>
+        <a href="#lebanon">Lebanon map</a>
         <a href="#collection">Collection</a>
         <a href="#about">About us</a>
         <a href="#visit">Contact</a>
@@ -79,6 +80,7 @@
           <div class="actions">
             <a class="btn btn-main" href="#name">Design a name necklace</a>
             <a class="btn btn-line" href="#design">Design another piece</a>
+            <a class="btn btn-line" href="#lebanon">Design a Lebanon map</a>
           </div>
         </div>
         <figure class="custom-photo">
@@ -225,6 +227,79 @@
 
           <div class="summary">
             <h3>Your name necklace</h3>
+            <dl data-summary></dl>
+            <a class="btn btn-main" data-wa href="https://wa.me/96170894976" target="_blank" rel="noopener">Send on WhatsApp</a>
+            <button class="btn btn-line" type="button" data-save>Save as picture</button>
+            <p class="small save-status" data-save-status role="status"></p>
+            <p class="small">WhatsApp opens with your design as text and a link to it. A picture is copied too: paste it into the chat before you send. Price on request: we reply with the price and how long it takes.</p>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Libanon-Karte als Anhänger: Gold, Gravur, Flagge, bunt (Umriss aus Natural Earth, gemeinfrei) -->
+    <section class="studio map-studio" id="lebanon" aria-labelledby="lebanon-title">
+      <div class="section-head">
+        <h2 id="lebanon-title">Lebanon map pendant</h2>
+        <p>Lebanon in gold, in four styles like the pendants in our shop. Choose a style and see it on the neck and up close.</p>
+      </div>
+      <div class="studio-grid">
+        <figure class="stage studio-stage">
+          <svg class="preview" data-pid="m" data-piece="map" viewBox="0 0 400 300" role="img" aria-label="Sketch of your Lebanon pendant on the neck"></svg>
+          <svg class="preview preview-close" data-pid="mz" data-piece="map" data-view="close" viewBox="0 0 400 300" role="img" aria-label="Close-up of the Lebanon pendant"></svg>
+        </figure>
+
+        <form class="studio-form" data-sync data-form="map" onsubmit="return false">
+          <fieldset class="chips" data-field="mapDesign" data-label="Style">
+            <legend class="field-label">Style</legend>
+            <label class="chip"><input type="radio" name="m-design" value="gold" data-key="mapDesign"><span class="map-ico" data-map="gold" aria-hidden="true"></span><span class="chip-t">Polished gold</span></label>
+            <label class="chip"><input type="radio" name="m-design" value="engrave" data-key="mapDesign"><span class="map-ico" data-map="engrave" aria-hidden="true"></span><span class="chip-t">Engraved words</span></label>
+            <label class="chip"><input type="radio" name="m-design" value="flag" data-key="mapDesign" checked><span class="map-ico" data-map="flag" aria-hidden="true"></span><span class="chip-t">Flag in enamel</span></label>
+            <label class="chip"><input type="radio" name="m-design" value="paint" data-key="mapDesign"><span class="map-ico" data-map="paint" aria-hidden="true"></span><span class="chip-t">Painted in colours</span></label>
+          </fieldset>
+
+          <fieldset data-field="mapText" data-label="Engraving" data-design="engrave">
+            <legend class="field-label">Words to engrave</legend>
+            <input class="name-input" id="m-text" type="text" value="Lebanon" maxlength="14" autocomplete="off" spellcheck="false" dir="auto" data-key="mapText" aria-describedby="m-text-hint">
+            <p class="small" id="m-text-hint">A name, a date or a few words, in Arabic or English.</p>
+          </fieldset>
+
+          <fieldset class="chips" data-field="gold" data-label="Gold">
+            <legend class="field-label">Gold</legend>
+            <label class="chip"><input type="radio" name="m-gold" value="yellow" data-key="gold" checked><span class="dot metal-yellow" aria-hidden="true"></span><span class="chip-t">Yellow gold</span></label>
+            <label class="chip"><input type="radio" name="m-gold" value="rose" data-key="gold"><span class="dot metal-rose" aria-hidden="true"></span><span class="chip-t">Rose gold</span></label>
+            <label class="chip"><input type="radio" name="m-gold" value="white" data-key="gold"><span class="dot metal-white" aria-hidden="true"></span><span class="chip-t">White gold</span></label>
+          </fieldset>
+
+          <fieldset class="chips" data-field="karat" data-label="Karat">
+            <legend class="field-label">Karat</legend>
+            <label class="chip"><input type="radio" name="m-karat" value="18k" data-key="karat" checked><span class="chip-t">18k</span></label>
+            <label class="chip"><input type="radio" name="m-karat" value="21k" data-key="karat"><span class="chip-t">21k</span></label>
+          </fieldset>
+
+          <fieldset class="chips" data-field="chain" data-label="Chain">
+            <legend class="field-label">Chain</legend>
+            <label class="chip"><input type="radio" name="m-chain" value="cable" data-key="chain" checked><span class="chip-t">Cable</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="rolo" data-key="chain"><span class="chip-t">Rolo</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="box" data-key="chain"><span class="chip-t">Box</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="snake" data-key="chain"><span class="chip-t">Snake</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="rope" data-key="chain"><span class="chip-t">Rope</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="figaro" data-key="chain"><span class="chip-t">Figaro</span></label>
+            <label class="chip"><input type="radio" name="m-chain" value="cuban" data-key="chain"><span class="chip-t">Cuban</span></label>
+          </fieldset>
+
+          <fieldset data-field="len" data-label="Chain length">
+            <legend class="field-label" id="m-len-label">Chain length</legend>
+            <select class="select" data-key="len" aria-labelledby="m-len-label">
+              <option>40 cm</option>
+              <option>42 cm</option>
+              <option selected>45 cm</option>
+              <option>50 cm</option>
+            </select>
+          </fieldset>
+
+          <div class="summary">
+            <h3>Your Lebanon pendant</h3>
             <dl data-summary></dl>
             <a class="btn btn-main" data-wa href="https://wa.me/96170894976" target="_blank" rel="noopener">Send on WhatsApp</a>
             <button class="btn btn-line" type="button" data-save>Save as picture</button>
@@ -396,7 +471,7 @@
           <img src="img/lebanon-map-480.webp" srcset="img/lebanon-map-480.webp 480w, img/lebanon-map.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Four gold pendants shaped like Lebanon, one with the flag in enamel and one with colourful buildings">
           <p class="cap">Lebanon map pendants</p>
           <p class="price">Price on request</p>
-          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"piece":"pendant","motif":"map","enamel":"none"}'>Make it custom</button></div>
+          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"goto":"lebanon"}'>Make it custom</button></div>
         </li>
         <li data-cat="name">
           <img src="img/name-necklace-480.webp" srcset="img/name-necklace-480.webp 480w, img/name-necklace.webp 880w" sizes="(min-width: 900px) 25vw, 50vw" width="880" height="880" loading="lazy" alt="Gold necklace with an Arabic name in calligraphy">
@@ -486,7 +561,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=27" defer></script>
+  <script src="js/main.js?v=28" defer></script>
   <script src="js/ring.js?v=6" defer></script>
   <script src="js/music.js?v=3" defer></script>
 </body>
