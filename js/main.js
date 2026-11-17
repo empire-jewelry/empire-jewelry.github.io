@@ -290,7 +290,8 @@
       ring(-.29, .13, .1) + ring(.29, .13, .1) + ring(-.15, .41, .09) + ring(.15, .41, .09),
     car: 'M-.48 .14V0C-.48-.08-.42-.12-.34-.13L-.24-.14C-.18-.3-.08-.36 .04-.36C.18-.36 .24-.28 .28-.14L.38-.13C.46-.12 .48-.06 .48 0V.14Z' +
       ring(-.25, .16, .13) + ring(.26, .16, .13),
-    allah: 'M0-.5C.12-.3 .36-.1 .36 .14C.36 .36 .2 .48 0 .48C-.2 .48-.36 .36-.36 .14C-.36-.1-.12-.3 0-.5Z'
+    allah: 'M0-.5C.12-.3 .36-.1 .36 .14C.36 .36 .2 .48 0 .48C-.2 .48-.36 .36-.36 .14C-.36-.1-.12-.3 0-.5Z',
+    stone: 'M-.32-.4H.32L.5-.1 0 .48-.5-.1Z'          // Geburtsstein (Symbol in der Liste)
   };
   // Kreis bzw. Ellipse als Pfadstück (für zusammengesetzte Anhänger)
   function ring(cx, cy, rx, ry) {
@@ -299,14 +300,14 @@
   }
   // Aufhängepunkt oben am Anhänger (y im Einheitsfeld), dort sitzt der kleine Ring
   const CHARM_HANG = { heart: -0.24, star: -0.5, butterfly: -0.1, cedar: -0.5, hamsa: -0.48, flower: -0.48, coin: -0.5, eye: -0.5,
-    teddy: -0.47, car: -0.37, allah: -0.5 };
+    teddy: -0.47, car: -0.37, allah: -0.5, stone: -0.5 };
   // Emaille-Farben für den Namen und für Herz, Stern, Schmetterling, Blume (metal = ohne Farbe)
   const PAINT = { metal: null, blue: '#4ea8e2', turquoise: '#33b3bd', pink: '#f29bbb', red: '#d0263a', white: '#f6f4ef', black: '#222326' };
   const PAINTABLE = ['heart', 'star', 'butterfly', 'flower'];
   const MAX_CHARMS = 5;     // so viele Anhänger darf der Kunde wählen (die Krone zählt nicht mit)
   // Farben je Anhänger (Banner beim Antippen im Bild): Schlüssel, Farbe (null = nur Gold), Name EN / AR
   const CHARM_COLS = [
-    ['metal', null, 'Gold', 'ذهبي'], ['red', '#d0263a', 'Red', 'أحمر'], ['pink', '#f29bbb', 'Pink', 'زهري'],
+    ['metal', null, 'Gold', 'ذهبي'], ['clear', '#e6eefc', 'Clear', 'شفاف'], ['red', '#d0263a', 'Red', 'أحمر'], ['pink', '#f29bbb', 'Pink', 'زهري'],
     ['rose', '#f8c9d4', 'Light pink', 'زهري فاتح'], ['purple', '#8a5bd1', 'Purple', 'بنفسجي'], ['lilac', '#c6a9ec', 'Lilac', 'ليلكي'],
     ['blue', '#2f6fd0', 'Blue', 'أزرق'], ['lightblue', '#6fbfec', 'Light blue', 'أزرق فاتح'], ['turquoise', '#33b3bd', 'Turquoise', 'فيروزي'],
     ['mint', '#97d8bf', 'Mint', 'نعناعي'], ['green', '#2f9d63', 'Green', 'أخضر'], ['yellow', '#f2c53d', 'Yellow', 'أصفر'],
@@ -315,19 +316,24 @@
   const CHARM_HEX = {};
   CHARM_COLS.forEach(c => { CHARM_HEX[c[0]] = c[1]; });
   // Startfarben wie auf Malaks Fotos (Teddy mit hellblauem Hemd, blaues Auto, Auge und „الله“ blau), sonst Gold
-  const CHARM_DEFAULT = { teddy: 'lightblue', car: 'lightblue', eye: 'blue', allah: 'blue' };
+  const CHARM_DEFAULT = { teddy: 'lightblue', car: 'lightblue', eye: 'blue', allah: 'blue', stone: 'clear' };
   // state.charmCols = "heart=red,teddy=pink"
   function charmColsMap() {
     const m = {};
     String(state.charmCols || '').split(',').forEach(p => { const [n, c] = p.split('='); if (n && c in CHARM_HEX) m[n] = c; });
     return m;
   }
-  const charmColKey = name => charmColsMap()[name] || CHARM_DEFAULT[name] || 'metal';
+  // der Geburtsstein hat immer eine Steinfarbe (Standard klar), die anderen kein „Klar“
+  const charmColKey = name => {
+    const k = charmColsMap()[name];
+    if (name === 'stone') return k && k !== 'metal' ? k : 'clear';
+    return k && k !== 'clear' ? k : CHARM_DEFAULT[name] || 'metal';
+  };
   const charmHex = name => CHARM_HEX[charmColKey(name)];
   const colName = key => { const c = CHARM_COLS.find(x => x[0] === key); return c ? c[LANG === 'ar' ? 3 : 2] : key; };
   // Selbst platzierte Anhänger: state.spots = "heart=u1.3,teddy=cL,star=o1.0"
   // u = hängt unter dem Buchstaben (Name 1 oder 2, Zeichen-Nr.), o = klein oben auf dem Buchstaben, cL/cR = an der Kette
-  const ON_LETTER = ['heart', 'star', 'butterfly', 'flower'];
+  const ON_LETTER = ['heart', 'star', 'butterfly', 'flower', 'stone'];
   function spotsMap() {
     const m = {};
     String(state.spots || '').split(',').forEach(p => {
@@ -482,6 +488,20 @@
     el('ellipse', { cx: x, cy: y, rx: 3.2, ry: 4.6, fill: 'none', stroke: ctx.metal, 'stroke-width': 1.8 }, ctx.g);
   }
 
+  // Steinfarbe als glänzender Verlauf (Geburtsstein-Anhänger), je Farbe einmal pro Zeichnung
+  function gemFill(ctx, c) {
+    ctx.stoneG = ctx.stoneG || {};
+    if (!ctx.stoneG[c]) {
+      const id = ctx.id + '-st' + Object.keys(ctx.stoneG).length;
+      const rg = el('radialGradient', { id, cx: '38%', cy: '34%', r: '70%' }, ctx.defs);
+      el('stop', { offset: 0, 'stop-color': '#ffffff' }, rg);
+      el('stop', { offset: 0.3, 'stop-color': shade(c, 0.3) }, rg);
+      el('stop', { offset: 0.7, 'stop-color': c }, rg);
+      el('stop', { offset: 1, 'stop-color': shade(c, -0.45) }, rg);
+      ctx.stoneG[c] = 'url(#' + id + ')';
+    }
+    return ctx.stoneG[c];
+  }
   function stoneGrad(ctx) {
     const c = STONE[state.stone];
     if (!c) return null;
@@ -594,7 +614,12 @@
     const en = enParent ? el('g', { transform: tf, stroke: 'none', 'data-charm': name }, enParent) : g;
     const dot = (x, y, r, fill, ry) => el(ry ? 'ellipse' : 'circle', ry ? { cx: x, cy: y, rx: r, ry, fill, stroke: 'none' } : { cx: x, cy: y, r, fill, stroke: 'none' }, en);
     const hex = charmHex(name);          // gewählte Farbe dieses Anhängers, null = nur Gold
-    if (name === 'eye') {
+    if (name === 'stone') {
+      // Geburtsstein: rund in Gold gefasst, mit Lichtpunkt
+      el('circle', { r: 0.5, 'stroke-width': 0.03 }, g);
+      dot(0, 0, 0.39, gemFill(ctx, hex || '#e6eefc'));
+      el('circle', { cx: -0.13, cy: -0.14, r: 0.11, fill: '#fff', opacity: 0.85, stroke: 'none' }, en);
+    } else if (name === 'eye') {
       el('circle', { r: 0.5, 'stroke-width': 0.03 }, g);
       if (hex) {
         dot(0, 0, 0.42, enamelFill(ctx, hex));
@@ -704,17 +729,14 @@
     // gewählte Anhänger: hängen an Ringen unter dem Namen (wie bei Malaks Ketten); Krone sitzt auf dem ersten Buchstaben
     const picks = String(state.accent || '').split(',').filter(v => v && v !== 'none');
     const wantCrown = picks.includes('crown');
-    const heartStone = picks.includes('heart') && !!STONE[state.stone];
     let dangles = picks.filter(v => CHARM_HANG[v] !== undefined);
-    if (heartStone) dangles = ['heart'].concat(dangles.filter(v => v !== 'heart'));
-    else if (STONE[state.stone]) dangles.unshift('stone');
     dangles = dangles.slice(0, 6);
     // vom Kunden selbst platzierte Anhänger (gezogen oder angetippt) kommen an ihre Stelle, der Rest automatisch
     const SP = spotsMap();
     const custom = [];
     dangles = dangles.filter(n => {
       const c = SP[n];
-      if (!c || n === 'stone' || (n === 'heart' && heartStone)) return true;
+      if (!c) return true;
       if (c[0] === 'c' && opts.pin) return true;                 // die Anstecknadel hat keine Kette
       if (c[0] === 'o' && !ON_LETTER.includes(n)) return true;
       custom.push({ name: n, code: c });
@@ -723,7 +745,7 @@
     // „an der Kette“: Anhänger hängen neben dem Namen an der Kette (zeichnet chainCharms), der Stein bleibt am Namen
     let side = [];
     if (!opts.pin && state.charmPos === 'chain') {
-      side = dangles.filter(n => n !== 'stone' && !(n === 'heart' && heartStone)).map(n => ({ name: n, s: null }));
+      side = dangles.map(n => ({ name: n, s: null }));
       dangles = dangles.filter(n => !side.some(e => e.name === n));
     }
     custom.filter(c => c.code[0] === 'c').forEach(c => side.push({ name: c.name, s: c.code[1] === 'R' ? 1 : 0, slot: +(c.code.slice(2) || 0) }));
@@ -840,7 +862,7 @@
     // hängende Anhänger: vom Ende des Namens (Leserichtung) nach innen, jeder an einem kleinen Ring
     const dir = rtl ? 1 : -1;
     const endX = rtl ? aL[0] : aR[0];
-    const baseSize = n => (n === 'stone' ? fs * 0.17 : n === 'hamsa' ? fs * 0.48 : fs * 0.4);
+    const baseSize = n => (n === 'stone' ? fs * 0.26 : n === 'hamsa' ? fs * 0.48 : fs * 0.4);
     // Platz unter dem Namen: bei kurzen Namen werden die Anhänger kleiner, damit sie nebeneinander passen
     const avail = Math.abs(aR[0] - aL[0]) * 0.92;
     const need = dangles.reduce((sum, n) => sum + baseSize(n) * 1.15, 0);
@@ -908,7 +930,7 @@
       if (!b) {
         // kein freier Platz mehr unter dem Namen (kurzer Name, viele Anhänger): an die Kette hängen,
         // beim Pin (keine Kette) und beim Stein trotzdem unter den Namen, dann etwas enger
-        if (!opts.pin && name !== 'stone') { side.push({ name, s: null }); return; }
+        if (!opts.pin) { side.push({ name, s: null }); return; }
         b = ink.bottomAt(ax, fs * 0.25) || ink.bottomAt((aL[0] + aR[0]) / 2, Math.abs(aR[0] - aL[0]));
         if (!b) return;
       }
@@ -917,8 +939,7 @@
       const ringY = b[1] + rr * 0.6;
       el('circle', { cx: b[0], cy: ringY, r: rr, fill: 'none', 'stroke-width': rr * 0.42 }, inner);
       const topY = ringY + rr * 0.8;
-      if (name === 'stone') hung.push({ stone: true, x: b[0], y: topY, r: size });
-      else hung.push({ x: b[0], y: drawCharm(ctx, inner, name, b[0], topY, size, name === 'heart' && heartStone ? stoneGrad(ctx) : null, enG) });
+      hung.push({ x: b[0], y: drawCharm(ctx, inner, name, b[0], topY, size, null, enG) });
       ax = b[0] + dir * (size * 1.15);
     });
 
@@ -939,15 +960,6 @@
       L = [L[0], L[1] + dy]; Rr = [Rr[0], Rr[1] + dy];
     }
 
-    // Geburtsstein (rund, gefasst) hängt am Ring
-    const keepG = ctx.g; ctx.g = pg;
-    hung.forEach(h => {
-      if (!h.stone) return;
-      const p0 = conv([h.x, h.y]);
-      const rs = h.r * k;
-      drawStone(ctx, p0[0], p0[1] + rs + 1.4, rs);
-    });
-    ctx.g = keepG;
     if (dy) ctx.glints = ctx.glints.map(g => [g[0], g[1] + dy]);
     hung.forEach(h => { if (!h.stone) { const q = conv([h.x, h.y]); ctx.glints.push([q[0], q[1] + dy]); } });
 
@@ -977,7 +989,7 @@
     const metalG = el('g', { fill: ctx.metal, stroke: ctx.metal, filter: 'url(#' + ctx.id + '-plate)' }, ctx.g);
     const enG = el('g', { 'pointer-events': 'none' }, ctx.g);
     const unit = pl.fs * pl.k * (grow || 1);
-    const sizeOf = n => (n === 'hamsa' ? 0.48 : n === 'car' ? 0.48 : n === 'teddy' ? 0.46 : 0.42) * unit;
+    const sizeOf = n => (n === 'hamsa' ? 0.48 : n === 'car' ? 0.48 : n === 'teddy' ? 0.46 : n === 'stone' ? 0.3 : 0.42) * unit;
     const used = [0, 0], occ = [[], []], next = [null, null];
     const put = (name, s, d, size) => {
       const p = alongChain(guides[s], s ? pl.R : pl.L, d);
@@ -1986,8 +1998,10 @@
       wrap.appendChild(b);
     });
   }
-  const markSwatches = (wrap, name) => wrap.querySelectorAll('[data-col]').forEach(b =>
-    b.setAttribute('aria-pressed', name && b.dataset.col === charmColKey(name) ? 'true' : 'false'));
+  const markSwatches = (wrap, name) => wrap.querySelectorAll('[data-col]').forEach(b => {
+    b.setAttribute('aria-pressed', name && b.dataset.col === charmColKey(name) ? 'true' : 'false');
+    b.hidden = name === 'stone' ? b.dataset.col === 'metal' : b.dataset.col === 'clear';
+  });
   // kurzer Hinweis im Bild, solange Anhänger gewählt, aber noch keiner verschoben wurde
   let hintDone = false;
   const dragHintOn = () => !hintDone && !state.spots && String(state.accent || '').split(',').some(v => CHARM_HANG[v] !== undefined);
@@ -2241,6 +2255,14 @@
     if (shared.textAlt) altEdited.textAlt = true;
     if (shared.text2Alt) altEdited.text2Alt = true;
     lastKind = font().kind === 'arabic';
+  }
+  if (shared && shared.f === 'studio' && STONE[state.stone]) {
+    const acc = String(state.accent || '').split(',').filter(v => v && v !== 'none');
+    if (!acc.includes('stone')) acc.push('stone');
+    state.accent = acc.join(',');
+    const m = charmColsMap();
+    m.stone = state.stone;
+    state.charmCols = Object.keys(m).map(n => n + '=' + m[n]).join(',');
   }
   if (state.charmColor && state.charmColor !== 'metal' && !state.charmCols) {
     const old = ['heart'].concat(String(state.accent || '').split(',').filter(n => PAINTABLE.includes(n) && n !== 'heart'));
