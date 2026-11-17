@@ -211,6 +211,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .ring-stage.show-piece .hero-piece { opacity: 1; pointer-events: auto; }
 .ring-glints { transition: opacity .6s ease; }
 .ring-stage.show-piece .ring-img, .ring-stage.show-piece .ring-glints { opacity: 0 !important; }
+/* beim Laden: Ring noch nicht zeigen, die Kette kommt zuerst */
+.hero-start .ring-img, .hero-start .ring-glints { opacity: 0 !important; }
 .hero-piece:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; border-radius: 14px; }
 
 .ring-stones { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-block-start: -2.5rem; }

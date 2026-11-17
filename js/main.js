@@ -2608,6 +2608,7 @@
   // Bei „weniger Bewegung“ bleibt nur der Ring.
   const ringStageEl = document.querySelector('.ring-stage');
   if (ringStageEl && ANIM) {
+    window.heroStarted = true;    // Startbereich läuft: die Sicherung im <head> blendet den Ring nicht ein
     const AR = LANG === 'ar';
     const BASE = { text2: '', textAlt: '', text2Alt: '', join: 'heart', underline: 'none', thick: 'std', chain: 'cable',
       len: '45 cm', wrist: '', stone: 'none', karat: '18k', chainHeart: 'none', spots: '', charmColor: 'metal' };
@@ -2702,8 +2703,19 @@
     };
     svg.addEventListener('click', openIt);
     svg.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openIt(); } });
-    fontsReady().then(() => restart(0));
-  }
+    // gleich mit der Kette beginnen: nur auf die Schrift des ersten Stücks warten (höchstens 1,2 s),
+    // der Ring ist beim Laden ausgeblendet (Klasse hero-start, gesetzt im <head>)
+    const F0 = FONTS[SHOW[0].style] || FONTS.script;
+    const firstFont = document.fonts && document.fonts.load
+      ? document.fonts.load(F0.weight + ' 40px ' + F0.family.split(',')[0], SHOW[0].text).catch(() => {}) : Promise.resolve();
+    Promise.race([firstFont, sleep(1200)]).then(() => {
+      svg.style.opacity = 0;
+      ringStageEl.classList.add('show-piece');
+      document.documentElement.classList.remove('hero-start');
+      gen++;
+      run(gen);
+    });
+  } else document.documentElement.classList.remove('hero-start');   // ohne Animation: Ring zeigen
 
   const io = new IntersectionObserver(entries => entries.forEach(en => {
     const s = en.target;
