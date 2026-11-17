@@ -2602,7 +2602,7 @@
   }
 
   // ---------- Startbereich: Ring und wechselnder Schmuck an derselben Stelle ----------
-  // Ring → Halskette (Anhänger kommen nacheinander dazu, Name wechselt) → Armband → Anstecknadel → Ring …
+  // Halskette (Anhänger kommen nacheinander dazu, Name wechselt) → Armband → Anstecknadel → Ring zum Schluss → …
   // Gezeichnet mit denselben Funktionen wie der Gestalter, aber mit eigenen Beispielwerten
   // (die Eingaben des Kunden bleiben unberührt). Antippen öffnet den Gestalter mit genau diesem Stück.
   // Bei „weniger Bewegung“ bleibt nur der Ring.
@@ -2655,8 +2655,6 @@
     };
     async function run(my) {
       while (my === gen) {
-        ringStageEl.classList.remove('show-piece');
-        if (!await pause(5500, my)) return;
         for (const p of SHOW) {
           // erst ausblenden (Ring bzw. voriges Stück), dann das neue Stück zeichnen und einblenden
           svg.style.opacity = 0;
@@ -2676,10 +2674,11 @@
           }
           if (!await pause(2300, my)) return;
         }
-        svg.style.opacity = 0;                         // Schmuck aus, dann kommt der Ring wieder
+        svg.style.opacity = 0;                         // Schmuck aus, zum Schluss der Ring
         if (!await pause(450, my)) return;
         ringStageEl.classList.remove('show-piece');
         svg.style.opacity = '';
+        if (!await pause(5500, my)) return;
       }
     }
     const restart = delay => {
