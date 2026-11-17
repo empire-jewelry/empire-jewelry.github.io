@@ -297,6 +297,7 @@
   // Emaille-Farben für den Namen und für Herz, Stern, Schmetterling, Blume (metal = ohne Farbe)
   const PAINT = { metal: null, blue: '#4ea8e2', turquoise: '#33b3bd', pink: '#f29bbb', red: '#d0263a', white: '#f6f4ef', black: '#222326' };
   const PAINTABLE = ['heart', 'star', 'butterfly', 'flower'];
+  const MAX_CHARMS = 5;     // so viele Anhänger darf der Kunde wählen (die Krone zählt nicht mit)
   // Selbst platzierte Anhänger: state.spots = "heart=u1.3,teddy=cL,star=o1.0"
   // u = hängt unter dem Buchstaben (Name 1 oder 2, Zeichen-Nr.), o = klein oben auf dem Buchstaben, cL/cR = an der Kette
   const ON_LETTER = ['heart', 'star', 'butterfly', 'flower'];
@@ -561,6 +562,8 @@
     const cy = topY - CHARM_HANG[name] * size;
     const tf = 'translate(' + cx + ' ' + cy + ') scale(' + size + ')';
     const g = el('g', { transform: tf, 'data-charm': name }, parent);
+    // unsichtbare Greiffläche: auch die Lücke zwischen Flügeln oder Blütenblättern lässt sich anfassen
+    if (ctx.studio) el('circle', { r: 0.56, fill: '#000', 'fill-opacity': 0, stroke: 'none', 'pointer-events': 'all' }, g);
     const en = enParent ? el('g', { transform: tf, stroke: 'none', 'data-charm': name }, enParent) : g;
     const dot = (x, y, r, fill, ry) => el(ry ? 'ellipse' : 'circle', ry ? { cx: x, cy: y, rx: r, ry, fill, stroke: 'none' } : { cx: x, cy: y, r, fill, stroke: 'none' }, en);
     if (name === 'eye') {
@@ -631,7 +634,8 @@
     plateFilter(ctx);
     const pg = el('g', null, ctx.g);
     const fg = el('g', { filter: 'url(#' + ctx.id + '-plate)' }, pg);
-    const enG = el('g', null, pg);            // Emaille liegt über dem Metall, ohne Licht-Filter
+    // Emaille liegt über dem Metall, ohne Licht-Filter; fängt keine Klicks ab (die Anhänger darunter sollen greifbar bleiben)
+    const enG = el('g', { 'pointer-events': 'none' }, pg);
     if (!raw1) { fg.setAttribute('opacity', 0.4); enG.setAttribute('opacity', 0.4); }
     const outer = el('g', null, fg);
     const edge = el('use', { href: '#' + ctx.id + '-pi', fill: ctx.dark, stroke: ctx.dark }, outer);
@@ -663,7 +667,7 @@
     let dangles = picks.filter(v => CHARM_HANG[v] !== undefined);
     if (heartStone) dangles = ['heart'].concat(dangles.filter(v => v !== 'heart'));
     else if (STONE[state.stone]) dangles.unshift('stone');
-    dangles = dangles.slice(0, 4);
+    dangles = dangles.slice(0, 6);
     // vom Kunden selbst platzierte Anhänger (gezogen oder angetippt) kommen an ihre Stelle, der Rest automatisch
     const SP = spotsMap();
     const custom = [];
@@ -922,7 +926,7 @@
     if (!pl.side || !pl.side.length || ctx.chains.length < 2) return;
     const guides = ctx.chains.slice(-2);
     const metalG = el('g', { fill: ctx.metal, stroke: ctx.metal, filter: 'url(#' + ctx.id + '-plate)' }, ctx.g);
-    const enG = el('g', null, ctx.g);
+    const enG = el('g', { 'pointer-events': 'none' }, ctx.g);
     const unit = pl.fs * pl.k * (grow || 1);
     const sizeOf = n => (n === 'hamsa' ? 0.48 : n === 'car' ? 0.48 : n === 'teddy' ? 0.46 : 0.42) * unit;
     const used = [0, 0], occ = [[], []], next = [null, null];
@@ -940,7 +944,7 @@
     const y0 = ctx.vy || 0;
     const inView = (s, d) => {
       const q = alongChain(guides[s], s ? pl.R : pl.L, d), y = q.y + unit * 0.3;
-      return q.x > 10 && q.x < 390 && y > y0 + 12 && y < y0 + 292 && d < guides[s].getTotalLength() - 4;
+      return q.x > 10 + unit * 0.26 && q.x < 390 - unit * 0.26 && y > y0 + 8 + unit * 0.3 && y < y0 + 292 && d < guides[s].getTotalLength() - 4;
     };
     pl.side.filter(e => e.slot != null).forEach(e => {
       let i = e.slot;
@@ -970,7 +974,7 @@
         const d = slotDist(gap, unit, i);
         if (d > L - 4) break;
         const p = alongChain(g, s ? pl.R : pl.L, d), y = p.y + unit * 0.3;
-        if (p.x < 10 || p.x > 390 || y < y0 + 12 || y > y0 + 292) break;
+        if (p.x < 10 + unit * 0.26 || p.x > 390 - unit * 0.26 || y < y0 + 8 + unit * 0.3 || y > y0 + 292) break;
         ctx.targets.push({ kind: 'c', ref: (s ? 'R' : 'L') + i, x: p.x, y });
       }
     });
@@ -990,7 +994,7 @@
     const unit = pl.fs * pl.k * (grow || 1);
     const size = unit * 0.62, rr = unit * 0.045;
     const metalG = el('g', { fill: ctx.metal, stroke: ctx.metal, filter: 'url(#' + ctx.id + '-plate)' }, ctx.g);
-    const enG = el('g', null, ctx.g);
+    const enG = el('g', { 'pointer-events': 'none' }, ctx.g);
     const col = PAINT[state.charmColor];
     [0, 1].forEach(s => {
       if (want !== 'both' && want !== (s ? 'right' : 'left')) return;
@@ -1292,15 +1296,18 @@
         return;
       }
       // Anhänger an der Kette brauchen Platz daneben: Name dann etwas kleiner und höher
-      const sideCharms = (state.charmPos === 'chain' && /teddy|car|heart|star|butterfly|flower|hamsa|eye|coin|cedar|allah/.test(state.accent || '')) ||
-        Object.keys(spotsMap()).some(n => spotsMap()[n][0] === 'c' && String(state.accent || '').split(',').includes(n));
+      // sobald Anhänger gewählt sind, bleibt das Bild gleich, egal ob sie unter dem Namen oder an der Kette hängen
+      // (sonst verschieben sich die Kettenpunkte beim Platzieren)
+      const hasCharms = String(state.accent || '').split(',').some(v => CHARM_HANG[v] !== undefined);
       const heartLink = !!state.chainHeart && state.chainHeart !== 'none';
-      const onChain = sideCharms || heartLink;
-      const pl = namePlate(ctx, 200, onChain ? 176 : 196, sideCharms && heartLink ? 150 : onChain ? 190 : 272, 76, true);
+      const onChain = hasCharms || heartLink;
+      const pl = namePlate(ctx, 200, onChain ? 176 : 196, hasCharms && heartLink ? 150 : onChain ? 190 : 272, 76, true);
       // mit Anhängern oder Herz an der Kette läuft sie neben dem Namen flacher (sonst stehen sie zu schräg)
-      const out = onChain ? 128 : 74, rise = onChain ? 4 : 16, top = onChain ? 60 : 110;
-      hook(ctx, pl.L, -1, st => 'M' + (onChain ? 18 : 44) + ' -12C' + (onChain ? 22 : 58) + ' ' + top + ' ' + (st[0] - out) + ' ' + (st[1] - rise) + ' ' + st[0] + ' ' + st[1]);
-      hook(ctx, pl.R, 1, st => 'M' + (onChain ? 382 : 356) + ' -12C' + (onChain ? 378 : 342) + ' ' + top + ' ' + (st[0] + out) + ' ' + (st[1] - rise) + ' ' + st[0] + ' ' + st[1]);
+      // mit Anhängern: Kette steigt als gleichmäßiger Bogen schräg nach oben, so gibt es viele Plätze daran
+      const out = onChain ? 62 : 74, rise = onChain ? 26 : 16, top = onChain ? 70 : 110;
+      const x0 = onChain ? 58 : 44, x1 = onChain ? 68 : 58;
+      hook(ctx, pl.L, -1, st => 'M' + x0 + ' -12C' + x1 + ' ' + top + ' ' + (st[0] - out) + ' ' + (st[1] - rise) + ' ' + st[0] + ' ' + st[1]);
+      hook(ctx, pl.R, 1, st => 'M' + (400 - x0) + ' -12C' + (400 - x1) + ' ' + top + ' ' + (st[0] + out) + ' ' + (st[1] - rise) + ' ' + st[0] + ' ' + st[1]);
       chainTargets(ctx, pl, pl.fs * pl.k * 0.3);
       const used = chainCharms(ctx, pl, pl.fs * pl.k * 0.3);
       chainHeart(ctx, pl, pl.fs * pl.k * 0.3, 1, used);
@@ -1918,7 +1925,7 @@
     if (c.type === 'checkbox') {
       const group = Array.from(c.closest('fieldset').querySelectorAll('input[type=checkbox][data-key="' + k + '"]'));
       let on = group.filter(i => i.checked).map(i => i.value);
-      if (on.filter(v => v !== 'crown').length > 3) { c.checked = false; on = on.filter(v => v !== c.value); }
+      if (on.filter(v => v !== 'crown').length > MAX_CHARMS) { c.checked = false; on = on.filter(v => v !== c.value); }
       val = on.join(',');
     }
     if ((c.type === 'radio' && !c.checked) || state[k] === val) return;
