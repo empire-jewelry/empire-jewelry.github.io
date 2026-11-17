@@ -905,7 +905,13 @@
         const hit = ink.bottomAt(tryX, fs * 0.04);
         if (hit && (prevX === null || Math.abs(hit[0] - prevX) >= size * 1.05) && free(hit[0], size)) { b = hit; ax = tryX; }
       }
-      if (!b) return;
+      if (!b) {
+        // kein freier Platz mehr unter dem Namen (kurzer Name, viele Anhänger): an die Kette hängen,
+        // beim Pin (keine Kette) und beim Stein trotzdem unter den Namen, dann etwas enger
+        if (!opts.pin && name !== 'stone') { side.push({ name, s: null }); return; }
+        b = ink.bottomAt(ax, fs * 0.25) || ink.bottomAt((aL[0] + aR[0]) / 2, Math.abs(aR[0] - aL[0]));
+        if (!b) return;
+      }
       prevX = b[0];
       const rr = fs * 0.048;
       const ringY = b[1] + rr * 0.6;
@@ -2450,15 +2456,24 @@
       showTargets(picked, null, false);
     };
 
-    const noZoomSoon = () => { placeSvg._noZoom = true; setTimeout(() => { placeSvg._noZoom = false; }, 400); };
+    // Vergrößern gesperrt, solange ein Anhänger angefasst ist, und kurz nach dem Loslassen.
+    // (Der Klick kommt erst nach dem Loslassen – egal, wie lange gezogen wurde.)
+    let zoomTimer = 0;
+    const holdZoom = () => { clearTimeout(zoomTimer); placeSvg._noZoom = true; };
+    const releaseZoomSoon = () => {
+      clearTimeout(zoomTimer);
+      placeSvg._noZoom = true;
+      zoomTimer = setTimeout(() => { placeSvg._noZoom = false; }, 350);
+    };
     placeSvg.addEventListener('pointerdown', e => {
       const g = e.target.closest && e.target.closest('[data-charm]');
-      noZoomSoon();
       if (g && placeSvg.contains(g)) {
         e.preventDefault();
+        holdZoom();
         act = { name: g.getAttribute('data-charm'), x0: e.clientX, y0: e.clientY, moved: false, id: e.pointerId };
         try { placeSvg.setPointerCapture(e.pointerId); } catch (err) { /* egal */ }
-      } else if (!picked) placeSvg._noZoom = false;   // normaler Klick ins Bild: vergrößern
+      } else if (picked) holdZoom();
+      else { clearTimeout(zoomTimer); placeSvg._noZoom = false; }   // normaler Klick ins Bild: vergrößern
     });
     placeSvg.addEventListener('pointermove', e => {
       if (!act || e.pointerId !== act.id || act.name === 'crown') return;
@@ -2470,6 +2485,7 @@
       ghost(act.name, p);
     });
     placeSvg.addEventListener('pointerup', e => {
+      if (act || picked) releaseZoomSoon();
       if (act && e.pointerId === act.id) {
         const a = act;
         act = null;
@@ -2488,7 +2504,7 @@
         if (t) place(picked, t); else closePop();
       }
     });
-    placeSvg.addEventListener('pointercancel', () => { act = null; clearOverlay(); });
+    placeSvg.addEventListener('pointercancel', () => { act = null; clearOverlay(); releaseZoomSoon(); });
     // Handy: Ziehen eines Anhängers soll nicht die Seite scrollen
     placeSvg.addEventListener('touchstart', e => {
       if (e.target.closest && e.target.closest('[data-charm]')) e.preventDefault();
