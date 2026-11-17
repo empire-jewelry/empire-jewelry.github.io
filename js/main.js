@@ -49,6 +49,7 @@
       dragHint: 'Tap a charm for colours, drag to move it',
       popHint: 'Tap a dot to move it, or drag it.',
       ccTitle: 'Choose a colour for each charm',
+      heroOpen: 'Design this piece yourself',
       colsLabel: 'Charm colours',
       mapText: 'Lebanon', mapName: 'LEBANON',
       mapCities: { tripoli: 'TRIPOLI', beirut: 'BEIRUT', saida: 'SAIDA', tyre: 'TYRE' }
@@ -86,6 +87,7 @@
       dragHint: 'اضغط على التعليقة للألوان، واسحبها لتحريكها',
       popHint: 'اضغط على نقطة لتحريكها، أو اسحبها.',
       ccTitle: 'اختر لوناً لكل تعليقة',
+      heroOpen: 'صمّم هذه القطعة بنفسك',
       colsLabel: 'ألوان التعاليق',
       mapText: 'لبنان', mapName: 'لبنان',
       mapCities: { tripoli: 'طرابلس', beirut: 'بيروت', saida: 'صيدا', tyre: 'صور' }
@@ -1522,7 +1524,7 @@
     if (model) {
       el('image', { href: IMG + 'neck.webp', x: 0, y: 0, width: 400, height: BUST.h || 300, preserveAspectRatio: 'xMidYMid slice' }, svg);
     } else if (studio && piece !== 'necklace' && svg.dataset.view !== 'close') velvet(svg, id, defs);
-    else background(svg, id, defs);
+    else if (!svg.dataset.bare) background(svg, id, defs);     // „bare“: frei auf dem Hintergrund der Seite (Startbereich)
     svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     // auf der Büste näher heran (Kette und Anhänger in echter Größe, trotzdem gut lesbar)
     let vy = 0;
@@ -2597,6 +2599,111 @@
     });
     colourUI.push(renderPanel);
     renderPanel();
+  }
+
+  // ---------- Startbereich: Ring und wechselnder Schmuck an derselben Stelle ----------
+  // Ring → Halskette (Anhänger kommen nacheinander dazu, Name wechselt) → Armband → Anstecknadel → Ring …
+  // Gezeichnet mit denselben Funktionen wie der Gestalter, aber mit eigenen Beispielwerten
+  // (die Eingaben des Kunden bleiben unberührt). Antippen öffnet den Gestalter mit genau diesem Stück.
+  // Bei „weniger Bewegung“ bleibt nur der Ring.
+  const ringStageEl = document.querySelector('.ring-stage');
+  if (ringStageEl && ANIM) {
+    const AR = LANG === 'ar';
+    const BASE = { text2: '', textAlt: '', text2Alt: '', join: 'heart', underline: 'none', thick: 'std', chain: 'cable',
+      len: '45 cm', wrist: '', stone: 'none', karat: '18k', chainHeart: 'none', spots: '', charmColor: 'metal' };
+    const SHOW = [
+      { item: 'necklace', text: AR ? 'ليلى' : 'Layla', style: AR ? 'calligraphy' : 'script', gold: 'yellow', nameColor: 'metal',
+        charmPos: 'below', charmCols: 'heart=red', steps: [[], ['heart'], ['heart', 'star'], ['heart', 'star', 'stone']] },
+      { item: 'necklace', text: AR ? 'مايا' : 'Maya', style: AR ? 'modern' : 'pacifico', gold: 'rose', nameColor: 'pink',
+        charmPos: 'chain', charmCols: 'butterfly=lilac,flower=pink', steps: [[], ['butterfly'], ['butterfly', 'flower']] },
+      { item: 'bracelet', text: AR ? 'آدم' : 'Adam', style: AR ? 'modern' : 'pacifico', gold: 'yellow', nameColor: 'blue',
+        charmPos: 'chain', charmCols: '', steps: [[], ['teddy'], ['teddy', 'car']] },
+      { item: 'pin', text: 'حسن', style: 'calligraphy', gold: 'white', nameColor: 'metal',
+        charmPos: 'below', charmCols: '', steps: [[], ['hamsa'], ['hamsa', 'eye'], ['hamsa', 'eye', 'coin']] }
+    ];
+    const svg = el('svg', { class: 'hero-piece', viewBox: '0 0 400 300', role: 'link', tabindex: '0', 'aria-label': TXT.heroOpen }, ringStageEl);
+    svg.dataset.pid = 'hp';
+    svg.dataset.piece = 'necklace';
+    svg.dataset.view = 'close';
+    svg.dataset.bare = '1';
+    ringStageEl.setAttribute('role', 'group');
+    let current = null, gen = 0, visible = true;
+    const design = (p, accent) => Object.assign({}, BASE, {
+      item: p.item, text: p.text, style: p.style, gold: p.gold, nameColor: p.nameColor, charmPos: p.charmPos,
+      charmCols: p.charmCols, accent: accent.length ? accent.join(',') : 'none'
+    });
+    // mit den Beispielwerten zeichnen, danach die Werte des Kunden zurück
+    // Armband und Anstecknadel sind kleiner als die Kette: im Startbereich näher heranzoomen
+    const ZOOM = { bracelet: '16 42 368 276', pin: '72 50 256 192' };
+    const draw = d => {
+      const keep = {};
+      Object.keys(d).forEach(k => { keep[k] = state[k]; state[k] = d[k]; });
+      try { render(svg); } finally { Object.assign(state, keep); }
+      if (ZOOM[d.item]) svg.setAttribute('viewBox', ZOOM[d.item]);
+    };
+    // neu dazugekommene Anhänger „ploppen“ auf (Skalierung zusätzlich zur Lage, darum additive="sum")
+    const popIn = names => names.forEach(n => svg.querySelectorAll('[data-charm="' + n + '"]').forEach(g => {
+      const a = el('animateTransform', { attributeName: 'transform', type: 'scale', values: '0.05;1.18;1', keyTimes: '0;0.7;1', dur: '0.55s', additive: 'sum', fill: 'freeze', begin: 'indefinite' }, g);
+      try { a.beginElement(); } catch (e) { /* ohne SMIL einfach da */ }
+    }));
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    // wartet; solange der Startbereich nicht zu sehen oder der Tab im Hintergrund ist, geht es nicht weiter
+    const pause = async (ms, my) => {
+      await sleep(ms);
+      while (my === gen && (!visible || document.hidden)) await sleep(500);
+      return my === gen;
+    };
+    async function run(my) {
+      while (my === gen) {
+        ringStageEl.classList.remove('show-piece');
+        if (!await pause(5500, my)) return;
+        for (const p of SHOW) {
+          // erst ausblenden (Ring bzw. voriges Stück), dann das neue Stück zeichnen und einblenden
+          svg.style.opacity = 0;
+          const fromRing = !ringStageEl.classList.contains('show-piece');
+          ringStageEl.classList.add('show-piece');
+          if (!await pause(fromRing ? 650 : 450, my)) return;
+          current = design(p, p.steps[0]);
+          draw(current);
+          svg.style.opacity = '';
+          for (let i = 1; i < p.steps.length; i++) {
+            if (!await pause(i === 1 ? 1500 : 1250, my)) return;
+            const added = p.steps[i].filter(n => !p.steps[i - 1].includes(n));
+            current = design(p, p.steps[i]);
+            draw(current);
+            popIn(added);
+            if (!LITE) burst(svg, 2, 0.15);
+          }
+          if (!await pause(2300, my)) return;
+        }
+        svg.style.opacity = 0;                         // Schmuck aus, dann kommt der Ring wieder
+        if (!await pause(450, my)) return;
+        ringStageEl.classList.remove('show-piece');
+        svg.style.opacity = '';
+      }
+    }
+    const restart = delay => {
+      gen++;
+      const my = gen;
+      ringStageEl.classList.remove('show-piece');
+      setTimeout(() => { if (my === gen) run(my); }, delay || 0);
+    };
+    // Steinfarbe am Ring gewählt: Ring zeigen, Wechsel eine Weile anhalten
+    document.querySelectorAll('[data-stones] input').forEach(i => i.addEventListener('change', () => restart(15000)));
+    new IntersectionObserver(es => es.forEach(e => { visible = e.isIntersecting; })).observe(ringStageEl);
+    // antippen: Gestalter mit genau diesem Stück öffnen
+    const openIt = () => {
+      if (!current || !ringStageEl.classList.contains('show-piece')) return;
+      Object.assign(state, current);
+      Object.keys(current).forEach(k => touchedKeys.add(k));
+      altEdited.textAlt = altEdited.text2Alt = false;
+      refreshAlt(); updateSizes(); updateFields(); syncControls(null); updateSamples();
+      renderAll(); updateOutputs();
+      goTo(document.getElementById('name'));
+    };
+    svg.addEventListener('click', openIt);
+    svg.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openIt(); } });
+    fontsReady().then(() => restart(0));
   }
 
   const io = new IntersectionObserver(entries => entries.forEach(en => {

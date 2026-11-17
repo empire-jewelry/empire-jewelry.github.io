@@ -201,6 +201,17 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .ring-img { opacity: 0; transition: opacity .6s ease; }
 .ring-img.is-on { opacity: 1; }
 .ring-glints { pointer-events: none; }
+/* Startbereich: wechselnder Schmuck an der Stelle des Rings (frei auf dem Hintergrund, Ränder laufen weich aus) */
+.hero-piece {
+  position: absolute; left: -6%; top: 50%; width: 112%; height: auto; aspect-ratio: 4 / 3; transform: translateY(-50%);
+  opacity: 0; pointer-events: none; cursor: pointer; transition: opacity .45s ease;
+  -webkit-mask-image: radial-gradient(ellipse 60% 58% at 50% 54%, #000 62%, transparent 100%);
+          mask-image: radial-gradient(ellipse 60% 58% at 50% 54%, #000 62%, transparent 100%);
+}
+.ring-stage.show-piece .hero-piece { opacity: 1; pointer-events: auto; }
+.ring-glints { transition: opacity .6s ease; }
+.ring-stage.show-piece .ring-img, .ring-stage.show-piece .ring-glints { opacity: 0 !important; }
+.hero-piece:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; border-radius: 14px; }
 
 .ring-stones { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-block-start: -2.5rem; }
 .ring-stones > .field-label { width: 100%; text-align: center; font-weight: 400; color: var(--ink-2); }
