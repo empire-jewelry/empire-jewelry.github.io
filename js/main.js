@@ -43,6 +43,9 @@
       helloBracelet: 'Hello Empire Jewelry, I designed this name bracelet on your website:',
       helloPin: 'Hello Empire Jewelry, I designed this name pin on your website:',
       sum: { necklace: 'Your name necklace', bracelet: 'Your name bracelet', pin: 'Your name pin' },
+      spotUnder: (l, n) => 'below “' + l + '” in ' + n, spotOn: (l, n) => 'on top of “' + l + '” in ' + n,
+      spotChainL: 'on the chain, left', spotChainR: 'on the chain, right',
+      spotPick: n => 'Now tap the spot for the ' + n.toLowerCase() + ' (a dot on the picture).',
       mapText: 'Lebanon', mapName: 'LEBANON',
       mapCities: { tripoli: 'TRIPOLI', beirut: 'BEIRUT', saida: 'SAIDA', tyre: 'TYRE' }
     },
@@ -73,6 +76,9 @@
       helloBracelet: 'مرحباً Empire Jewelry، صممت هذه الإسوارة بالاسم على موقعكم:',
       helloPin: 'مرحباً Empire Jewelry، صممت هذا الدبوس بالاسم على موقعكم:',
       sum: { necklace: 'قلادتك بالاسم', bracelet: 'إسوارتك بالاسم', pin: 'دبوسك بالاسم' },
+      spotUnder: (l, n) => 'تحت «' + l + '» في ' + n, spotOn: (l, n) => 'فوق «' + l + '» في ' + n,
+      spotChainL: 'على السلسلة، يسار', spotChainR: 'على السلسلة، يمين',
+      spotPick: n => 'اضغط الآن على مكان «' + n + '» (إحدى النقاط على الصورة).',
       mapText: 'لبنان', mapName: 'لبنان',
       mapCities: { tripoli: 'طرابلس', beirut: 'بيروت', saida: 'صيدا', tyre: 'صور' }
     }
@@ -289,6 +295,17 @@
   // Emaille-Farben für den Namen und für Herz, Stern, Schmetterling, Blume (metal = ohne Farbe)
   const PAINT = { metal: null, blue: '#4ea8e2', turquoise: '#33b3bd', pink: '#f29bbb', red: '#d0263a', white: '#f6f4ef', black: '#222326' };
   const PAINTABLE = ['heart', 'star', 'butterfly', 'flower'];
+  // Selbst platzierte Anhänger: state.spots = "heart=u1.3,teddy=cL,star=o1.0"
+  // u = hängt unter dem Buchstaben (Name 1 oder 2, Zeichen-Nr.), o = klein oben auf dem Buchstaben, cL/cR = an der Kette
+  const ON_LETTER = ['heart', 'star', 'butterfly', 'flower'];
+  function spotsMap() {
+    const m = {};
+    String(state.spots || '').split(',').forEach(p => {
+      const [n, c] = p.split('=');
+      if (n && c && /^(?:[uo][12]\.\d+|c[LR])$/.test(c)) m[n] = c;
+    });
+    return m;
+  }
 
   // Kettenarten, wie sie bei Namensketten angeboten werden
   const CHAINS = {
@@ -314,7 +331,7 @@
     piece: 'pendant', gold: 'yellow', karat: '18k', text: TXT.fallbackName, text2: '', textAlt: '', text2Alt: '', join: 'heart', style: 'script',
     accent: 'none', underline: 'none', thick: 'std', chain: 'cable', motif: 'butterfly', enamel: 'none',
     stone: 'none', size: '', len: '', notes: '', mapDesign: 'flag', mapText: '', mapHeart: 'none',
-    item: 'necklace', nameColor: 'metal', charmColor: 'metal', charmPos: 'below', wrist: '', chainHeart: 'none'
+    item: 'necklace', nameColor: 'metal', charmColor: 'metal', charmPos: 'below', wrist: '', chainHeart: 'none', spots: ''
   };
   let touched = false;   // erst nach der ersten Änderung Bilder vorbereiten
   const controls = Array.from(document.querySelectorAll('[data-sync] [data-key]'));
@@ -541,8 +558,8 @@
   function drawCharm(ctx, parent, name, cx, topY, size, stoneFill, enParent) {
     const cy = topY - CHARM_HANG[name] * size;
     const tf = 'translate(' + cx + ' ' + cy + ') scale(' + size + ')';
-    const g = el('g', { transform: tf }, parent);
-    const en = enParent ? el('g', { transform: tf, stroke: 'none' }, enParent) : g;
+    const g = el('g', { transform: tf, 'data-charm': name }, parent);
+    const en = enParent ? el('g', { transform: tf, stroke: 'none', 'data-charm': name }, enParent) : g;
     const dot = (x, y, r, fill, ry) => el(ry ? 'ellipse' : 'circle', ry ? { cx: x, cy: y, rx: r, ry, fill, stroke: 'none' } : { cx: x, cy: y, r, fill, stroke: 'none' }, en);
     if (name === 'eye') {
       el('circle', { r: 0.5, 'stroke-width': 0.03 }, g);
@@ -627,11 +644,13 @@
     };
     const items = [];
     const t1 = mkText(n1);
+    let t2El = null;
     items.push({ kind: 'text', el: t1 });
     if (raw2) {
       if (state.join === 'amp') items.push({ kind: 'text', el: mkText(isArabic(raw2) || rtl ? TXT.amp : '&') });
       else items.push({ kind: 'charm', name: state.join === 'infinity' ? 'infinity' : 'heart', size: fs * 0.4 });
-      items.push({ kind: 'text', el: mkText(raw2) });
+      t2El = mkText(raw2);
+      items.push({ kind: 'text', el: t2El });
     }
     if (rtl) items.reverse();
 
@@ -643,12 +662,24 @@
     if (heartStone) dangles = ['heart'].concat(dangles.filter(v => v !== 'heart'));
     else if (STONE[state.stone]) dangles.unshift('stone');
     dangles = dangles.slice(0, 4);
+    // vom Kunden selbst platzierte Anhänger (gezogen oder angetippt) kommen an ihre Stelle, der Rest automatisch
+    const SP = spotsMap();
+    const custom = [];
+    dangles = dangles.filter(n => {
+      const c = SP[n];
+      if (!c || n === 'stone' || (n === 'heart' && heartStone)) return true;
+      if (c[0] === 'c' && opts.pin) return true;                 // die Anstecknadel hat keine Kette
+      if (c[0] === 'o' && !ON_LETTER.includes(n)) return true;
+      custom.push({ name: n, code: c });
+      return false;
+    });
     // „an der Kette“: Anhänger hängen neben dem Namen an der Kette (zeichnet chainCharms), der Stein bleibt am Namen
     let side = [];
     if (!opts.pin && state.charmPos === 'chain') {
-      side = dangles.filter(n => n !== 'stone' && !(n === 'heart' && heartStone));
-      dangles = dangles.filter(n => !side.includes(n));
+      side = dangles.filter(n => n !== 'stone' && !(n === 'heart' && heartStone)).map(n => ({ name: n, s: null }));
+      dangles = dangles.filter(n => !side.some(e => e.name === n));
     }
+    custom.filter(c => c.code[0] === 'c').forEach(c => side.push({ name: c.name, s: c.code === 'cR' ? 1 : 0 }));
 
     // nebeneinander anordnen; ein Herz/Unendlich zwischen zwei Namen berührt beide
     const gap = fs * 0.1;
@@ -768,6 +799,41 @@
     let ax = endX + dir * fs * 0.18;
     let prevX = null;
     const hung = [];
+
+    // Stellen, an die der Kunde Anhänger ziehen kann: unter und oben auf jedem Buchstaben
+    const lt = [];
+    [[1, t1], [2, t2El]].forEach(([num, tEl]) => {
+      if (!tEl) return;
+      const txt = tEl.textContent;
+      for (let i = 0; i < txt.length; i++) {
+        if (/\s/.test(txt[i])) continue;
+        let r = null;
+        try { r = tEl.getExtentOfChar(i); } catch (e) { r = null; }
+        if (!r || !r.width) continue;
+        const bot = ink.bottomAt(r.x + r.width / 2, Math.max(fs * 0.04, r.width * 0.3));
+        if (bot) lt.push({ kind: 'u', ref: num + '.' + i, x: bot[0], y: bot[1] });
+        const top = ink.topAt(r.x + r.width * 0.2, r.x + r.width * 0.8);
+        if (top) lt.push({ kind: 'o', ref: num + '.' + i, x: top[0], y: top[1] });
+      }
+    });
+    // selbst platzierte: unter dem Buchstaben an einem Ring, oder klein oben auf den Buchstaben gelötet
+    const taken = [];
+    custom.forEach(c => {
+      if (c.code[0] === 'c') return;
+      const t = lt.find(q => q.kind === c.code[0] && q.ref === c.code.slice(1));
+      if (!t) { dangles.push(c.name); return; }        // Buchstabe gibt es nicht mehr: automatisch
+      if (c.code[0] === 'u') {
+        const size = baseSize(c.name), rr = fs * 0.048, ringY = t.y + rr * 0.6;
+        el('circle', { cx: t.x, cy: ringY, r: rr, fill: 'none', 'stroke-width': rr * 0.42 }, inner);
+        hung.push({ x: t.x, y: drawCharm(ctx, inner, c.name, t.x, ringY + rr * 0.8, size, null, enG) });
+        taken.push([t.x, size]);
+      } else {
+        const size = fs * 0.3, cy = t.y - size * 0.22;
+        drawCharm(ctx, inner, c.name, t.x, cy + CHARM_HANG[c.name] * size, size, null, enG);
+        hung.push({ x: t.x, y: cy });
+      }
+    });
+    const free = (x0, size) => taken.every(([tx0, ts]) => Math.abs(tx0 - x0) >= (size + ts) * 0.55);
     // Anstecknadel: Anhänger wie auf Malaks Foto über die ganze Breite des Namens verteilt
     const spread = opts.pin && dangles.length > 1;
     const span = [aL[0] + fs * 0.12, aR[0] - fs * 0.12];
@@ -781,14 +847,14 @@
         for (let t = 0; t < 40 && !b; t++) {
           for (const sgn of [1, -1]) {
             const hit = ink.bottomAt(want + sgn * t * fs * 0.03, fs * 0.04);
-            if (hit && (prevX === null || Math.abs(hit[0] - prevX) >= size * 1.05)) { b = hit; break; }
+            if (hit && (prevX === null || Math.abs(hit[0] - prevX) >= size * 1.05) && free(hit[0], size)) { b = hit; break; }
           }
         }
       }
       for (let t = 0; t < 40 && !b; t++) {
         const tryX = ax + dir * t * fs * 0.03;
         const hit = ink.bottomAt(tryX, fs * 0.04);
-        if (hit && (prevX === null || Math.abs(hit[0] - prevX) >= size * 1.05)) { b = hit; ax = tryX; }
+        if (hit && (prevX === null || Math.abs(hit[0] - prevX) >= size * 1.05) && free(hit[0], size)) { b = hit; ax = tryX; }
       }
       if (!b) return;
       prevX = b[0];
@@ -830,6 +896,15 @@
     if (dy) ctx.glints = ctx.glints.map(g => [g[0], g[1] + dy]);
     hung.forEach(h => { if (!h.stone) { const q = conv([h.x, h.y]); ctx.glints.push([q[0], q[1] + dy]); } });
 
+    // Zielstellen in SVG-Koordinaten (Ankerpunkt = wo der Anhänger dann ungefähr sitzt), nur im Bereich Namenskette
+    if (ctx.studio) {
+      const u = fs * k;
+      ctx.charmUnit = u;
+      ctx.targets = lt.map(t => {
+        const q = conv([t.x, t.y]);
+        return { kind: t.kind, ref: t.ref, x: q[0], y: q[1] + dy + (t.kind === 'u' ? u * 0.28 : -u * 0.06) };
+      });
+    }
     const box = { x: tx + bb.x * k, y: baseY + bb.y * k + dy, width: bb.width * k, height: bb.height * k };
     return { box, L, R: Rr, textEls, k, tx, eyeR: R * 0.6 * k, fs, side };
   }
@@ -844,8 +919,10 @@
     const unit = pl.fs * pl.k * (grow || 1);
     const sizeOf = n => (n === 'hamsa' ? 0.48 : n === 'car' ? 0.48 : n === 'teddy' ? 0.46 : 0.42) * unit;
     const used = [0, 0];
-    pl.side.forEach((name, i) => {
-      const s = i % 2;                       // 0 = links, 1 = rechts
+    let auto = 0;
+    pl.side.forEach(e => {
+      const name = e.name;
+      const s = e.s !== null ? e.s : auto++ % 2;      // 0 = links, 1 = rechts (selbst platziert: feste Seite)
       const size = sizeOf(name);
       used[s] += used[s] ? size * 1.35 : gap + size * 0.45;
       const p = alongChain(guides[s], s ? pl.R : pl.L, used[s]);
@@ -855,6 +932,15 @@
       ctx.glints.push([p.x, p.y + size * 0.7]);
     });
     return used;
+  }
+  // Zielstellen an der Kette (links/rechts neben dem Namen) für das freie Platzieren
+  function chainTargets(ctx, pl, gap, grow) {
+    if (!ctx.studio || !ctx.targets || ctx.chains.length < 2) return;
+    const guides = ctx.chains.slice(-2), unit = pl.fs * pl.k * (grow || 1);
+    [0, 1].forEach(s => {
+      const p = alongChain(guides[s], s ? pl.R : pl.L, gap + unit * 0.2);
+      ctx.targets.push({ kind: 'c', ref: s ? 'R' : 'L', x: p.x, y: p.y + unit * 0.3 });
+    });
   }
   // Punkt auf der Kette im Abstand d vom Namen (die Pfade laufen je nach Ansicht zum Namen hin oder von ihm weg)
   function alongChain(g, end, d) {
@@ -1166,13 +1252,15 @@
           ((curveY(C.left, a.L[0]) - a.L[1]) + (curveY(C.right, a.R[0]) - a.R[1])) / 2 + 1.4, 36);
         hook(ctx, pl.L, -1, st => bustPath(C.left, st, -1));
         hook(ctx, pl.R, 1, st => bustPath(C.right, st, 1));
+        chainTargets(ctx, pl, pl.fs * pl.k * 0.3);
         const used = chainCharms(ctx, pl, pl.fs * pl.k * 0.3);
         chainHeart(ctx, pl, pl.fs * pl.k * 0.3, 1, used);
         ctx.textBox = pl.box;
         return;
       }
       // Anhänger an der Kette brauchen Platz daneben: Name dann etwas kleiner und höher
-      const sideCharms = state.charmPos === 'chain' && /teddy|car|heart|star|butterfly|flower|hamsa|eye|coin|cedar|allah/.test(state.accent || '');
+      const sideCharms = (state.charmPos === 'chain' && /teddy|car|heart|star|butterfly|flower|hamsa|eye|coin|cedar|allah/.test(state.accent || '')) ||
+        Object.keys(spotsMap()).some(n => spotsMap()[n][0] === 'c' && String(state.accent || '').split(',').includes(n));
       const heartLink = !!state.chainHeart && state.chainHeart !== 'none';
       const onChain = sideCharms || heartLink;
       const pl = namePlate(ctx, 200, onChain ? 176 : 196, sideCharms && heartLink ? 150 : onChain ? 190 : 272, 76, true);
@@ -1180,6 +1268,7 @@
       const out = onChain ? 128 : 74, rise = onChain ? 4 : 16, top = onChain ? 60 : 110;
       hook(ctx, pl.L, -1, st => 'M' + (onChain ? 18 : 44) + ' -12C' + (onChain ? 22 : 58) + ' ' + top + ' ' + (st[0] - out) + ' ' + (st[1] - rise) + ' ' + st[0] + ' ' + st[1]);
       hook(ctx, pl.R, 1, st => 'M' + (onChain ? 382 : 356) + ' -12C' + (onChain ? 378 : 342) + ' ' + top + ' ' + (st[0] + out) + ' ' + (st[1] - rise) + ' ' + st[0] + ' ' + st[1]);
+      chainTargets(ctx, pl, pl.fs * pl.k * 0.3);
       const used = chainCharms(ctx, pl, pl.fs * pl.k * 0.3);
       chainHeart(ctx, pl, pl.fs * pl.k * 0.3, 1, used);
       ctx.textBox = pl.box;
@@ -1191,6 +1280,7 @@
       hook(ctx, pl.L, -1, st => 'M-14 ' + (st[1] + 50) + 'C36 ' + (st[1] + 44) + ' ' + (st[0] - 64) + ' ' + (st[1] + 4) + ' ' + st[0] + ' ' + st[1]);
       hook(ctx, pl.R, 1, st => 'M414 ' + (st[1] + 50) + 'C364 ' + (st[1] + 44) + ' ' + (st[0] + 64) + ' ' + (st[1] + 4) + ' ' + st[0] + ' ' + st[1]);
       // Anhänger am Armband sind im Verhältnis größer (wie Teddy und Auto bei „Adam“)
+      chainTargets(ctx, pl, pl.fs * pl.k * 0.5, 1.45);
       const used = chainCharms(ctx, pl, pl.fs * pl.k * 0.5, 1.45);
       chainHeart(ctx, pl, pl.fs * pl.k * 0.5, 1.2, used);
       ctx.textBox = pl.box;
@@ -1458,6 +1548,7 @@
       if (f.dataset.needs && !String(state[f.dataset.needs] || '').trim()) hide = true;
       if (f.dataset.design) hide = !f.dataset.design.split(' ').includes(state.mapDesign);
       if (f.dataset.item && !f.dataset.item.split(' ').includes(state.item)) hide = true;
+      if (f.dataset.field === 'spots') hide = !String(state.accent || '').split(',').some(v => CHARM_HANG[v] !== undefined);
       if (f.dataset.alt) {
         if (!mm || (f.dataset.alt === '2' && !nameText(state.text2))) hide = true;
         const lab = f.dataset.alt === '2' ? (toAr ? TXT.altAr2 : TXT.altEn2) : (toAr ? TXT.altAr1 : TXT.altEn1);
@@ -1491,12 +1582,33 @@
     });
   }
 
+  // Beschriftung eines Anhängers wie im Formular (z. B. „Heart“) und wo er sitzt (für Nachricht und Hinweis)
+  function charmLabel(name) {
+    const i = document.querySelector('[data-form="studio"] input[name="n-accent"][value="' + name + '"]');
+    return i ? i.closest('label').querySelector('.chip-t').textContent.trim() : name;
+  }
+  function spotText(code) {
+    if (code === 'cL') return TXT.spotChainL;
+    if (code === 'cR') return TXT.spotChainR;
+    const num = +code[1], i = +code.slice(3);
+    let name = shownName(num) || (num === 1 ? fallbackName() : '');
+    if (font().upper && !isArabic(name)) name = name.toUpperCase();
+    return (code[0] === 'u' ? TXT.spotUnder : TXT.spotOn)(name[i] || '?', name);
+  }
+  function describeSpots() {
+    const m = spotsMap();
+    return String(state.accent || '').split(',')
+      .filter(n => m[n] && !(m[n][0] === 'o' && !ON_LETTER.includes(n)) && !(m[n][0] === 'c' && state.item === 'pin'))
+      .map(n => charmLabel(n) + ': ' + spotText(m[n])).join('; ');
+  }
+
   function lines(form) {
     const out = [];
     form.querySelectorAll('[data-field]').forEach(f => {
       if (f.hidden) return;
       const key = f.dataset.field;
       let label = f.dataset.label, v = '';
+      if (key === 'spots') { const d = describeSpots(); if (d) out.push([label, d]); return; }
       const checked = f.querySelector('input[type=radio]:checked');
       if (f.querySelector('input[type=checkbox]')) {
         v = Array.from(f.querySelectorAll('input[type=checkbox]:checked')).map(i => i.closest('label').querySelector('.chip-t').textContent.trim()).join(', ');
@@ -1517,7 +1629,7 @@
   // ---------- Entwurf als Link: öffnet genau diese Gestaltung wieder ----------
   const KEYS = {
     studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len', 'karat',
-      'item', 'nameColor', 'charmColor', 'charmPos', 'wrist', 'chainHeart'],
+      'item', 'nameColor', 'charmColor', 'charmPos', 'wrist', 'chainHeart', 'spots'],
     builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size', 'karat'],
     map: ['mapDesign', 'mapText', 'gold', 'karat', 'chain', 'len', 'mapHeart']
   };
@@ -1968,6 +2080,7 @@
     const goal = like.goto || 'design';
     delete like.goto;
     Object.assign(state, like);
+    if (!('spots' in like)) state.spots = '';
     Object.keys(like).forEach(k => touchedKeys.add(k));
     const cap = b.closest('li').querySelector('.cap');
     if (goal === 'design') state.notes = TXT.similar + ' ' + cap.textContent.trim();
@@ -1993,7 +2106,7 @@
     KEYS[shared.f].forEach(k => {
       if (typeof shared[k] !== 'string') return;
       if (k === 'style' && !FONTS[shared[k]]) return;   // Schrift gibt es nicht mehr (z. B. Old English in alten Links)
-      state[k] = shared[k].slice(0, 40);
+      state[k] = shared[k].slice(0, k === 'spots' ? 160 : 40);
       touchedKeys.add(k);
     });
     if (shared.textAlt) altEdited.textAlt = true;
@@ -2048,7 +2161,8 @@
     // Klick auf eine der beiden Ansichten öffnet sie groß
     stages.forEach(stage => {
       stage.querySelectorAll('svg.preview').forEach(v => {
-        v.addEventListener('click', () => open(stage, v.dataset.view));
+        // nicht vergrößern, wenn gerade ein Anhänger gezogen oder platziert wurde
+        v.addEventListener('click', () => { if (v._noZoom) { v._noZoom = false; return; } open(stage, v.dataset.view); });
       });
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -2088,6 +2202,119 @@
       const r = zoomSvg.getBoundingClientRect(), sr = sc.getBoundingClientRect();
       setZoom(z * (e.deltaY < 0 ? 1.15 : 1 / 1.15), (e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, e.clientX - sr.left, e.clientY - sr.top);
     }, { passive: false });
+  }
+
+  // ---------- Anhänger selbst platzieren: in der Nahansicht ziehen (Maus/Finger) oder antippen und Stelle antippen ----------
+  // Beim Loslassen rastet der Anhänger an der nächsten möglichen Stelle ein (unter/auf einem Buchstaben, an der Kette).
+  const placeSvg = document.querySelector('#name svg.preview-close');
+  const spotsStatus = document.querySelector('[data-spots-status]');
+  if (placeSvg) {
+    let act = null;       // laufendes Ziehen: { name, x0, y0, moved, id }
+    let picked = null;    // angetippter Anhänger, wartet auf die Stelle
+    let overlay = null;
+    const pt = e => {
+      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(placeSvg.getScreenCTM().inverse());
+      return [p.x, p.y];
+    };
+    const valid = name => ((placeSvg._ctx && placeSvg._ctx.targets) || []).filter(t =>
+      t.kind === 'u' || (t.kind === 'o' && ON_LETTER.includes(name)) || (t.kind === 'c' && state.item !== 'pin'));
+    const nearest = (name, p, maxD) => {
+      let best = null, bd = maxD;
+      valid(name).forEach(t => { const d = Math.hypot(t.x - p[0], t.y - p[1]); if (d < bd) { bd = d; best = t; } });
+      return best;
+    };
+    const clearOverlay = () => {
+      if (overlay) overlay.remove();
+      overlay = null;
+      placeSvg.querySelectorAll('[data-charm]').forEach(g => g.removeAttribute('opacity'));
+    };
+    // mögliche Stellen als Punkte zeigen, die nächste hervorheben; der Anhänger selbst wird blass
+    const showTargets = (name, hi) => {
+      if (overlay) overlay.remove();
+      overlay = el('g', { 'pointer-events': 'none' }, placeSvg);
+      valid(name).forEach(t => el('circle', {
+        cx: t.x, cy: t.y, r: t === hi ? 5.5 : 3.4,
+        fill: t === hi ? '#457256' : 'rgba(69,114,86,.22)', stroke: '#457256', 'stroke-width': 1.1
+      }, overlay));
+      placeSvg.querySelectorAll('[data-charm="' + name + '"]').forEach(g => g.setAttribute('opacity', 0.3));
+    };
+    const ghost = (name, p) => {
+      const c = placeSvg._ctx, size = (c.charmUnit || 40) * 0.42;
+      const gm = el('g', { fill: c.metal, stroke: c.metal, opacity: 0.92 }, overlay);
+      drawCharm(c, gm, name, p[0], p[1] + CHARM_HANG[name] * size, size, null, overlay);
+    };
+    const place = (name, t) => {
+      const m = spotsMap();
+      m[name] = t.kind + t.ref;
+      state.spots = Object.keys(m).map(n => n + '=' + m[n]).join(',');
+      touched = true;
+      touchedKeys.add('spots');
+      if (spotsStatus) spotsStatus.textContent = charmLabel(name) + ': ' + spotText(m[name]);
+      schedule('spots');
+    };
+    const noZoomSoon = () => { placeSvg._noZoom = true; setTimeout(() => { placeSvg._noZoom = false; }, 400); };
+    placeSvg.addEventListener('pointerdown', e => {
+      const g = e.target.closest && e.target.closest('[data-charm]');
+      // ist schon ein Anhänger ausgewählt, ist der nächste Tipp die Stelle (auch wenn dort ein Anhänger hängt)
+      if (g && placeSvg.contains(g) && !picked) {
+        e.preventDefault();
+        noZoomSoon();
+        act = { name: g.getAttribute('data-charm'), x0: e.clientX, y0: e.clientY, moved: false, id: e.pointerId };
+        try { placeSvg.setPointerCapture(e.pointerId); } catch (err) { /* egal */ }
+      } else if (picked) noZoomSoon();
+    });
+    placeSvg.addEventListener('pointermove', e => {
+      if (!act || e.pointerId !== act.id) return;
+      if (!act.moved && Math.hypot(e.clientX - act.x0, e.clientY - act.y0) < 6) return;
+      act.moved = true;
+      picked = null;
+      const p = pt(e);
+      showTargets(act.name, nearest(act.name, p, 36));
+      ghost(act.name, p);
+    });
+    placeSvg.addEventListener('pointerup', e => {
+      if (act && e.pointerId === act.id) {
+        const a = act;
+        act = null;
+        noZoomSoon();
+        if (a.moved) {
+          const t = nearest(a.name, pt(e), 36);
+          clearOverlay();
+          if (t) place(a.name, t);
+        } else {
+          // nur angetippt: jetzt die Stelle antippen
+          picked = a.name;
+          showTargets(a.name, null);
+          if (spotsStatus) spotsStatus.textContent = TXT.spotPick(charmLabel(a.name));
+        }
+        return;
+      }
+      if (picked) {
+        const name = picked, t = nearest(name, pt(e), 42);
+        picked = null;
+        noZoomSoon();
+        clearOverlay();
+        if (t) { place(name, t); return; }
+        // keine Stelle in der Nähe: auf einen anderen Anhänger getippt = den auswählen, sonst abbrechen
+        const g = e.target.closest && e.target.closest('[data-charm]');
+        if (g && placeSvg.contains(g)) {
+          picked = g.getAttribute('data-charm');
+          showTargets(picked, null);
+          if (spotsStatus) spotsStatus.textContent = TXT.spotPick(charmLabel(picked));
+        } else if (spotsStatus) spotsStatus.textContent = '';
+      }
+    });
+    placeSvg.addEventListener('pointercancel', () => { act = null; clearOverlay(); });
+    // Handy: Ziehen eines Anhängers soll nicht die Seite scrollen
+    placeSvg.addEventListener('touchstart', e => {
+      if (e.target.closest && e.target.closest('[data-charm]')) e.preventDefault();
+    }, { passive: false });
+    const reset = document.querySelector('[data-spots-reset]');
+    if (reset) reset.addEventListener('click', () => {
+      state.spots = '';
+      if (spotsStatus) spotsStatus.textContent = '';
+      schedule('spots');
+    });
   }
 
   const io = new IntersectionObserver(entries => entries.forEach(en => {
