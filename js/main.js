@@ -44,7 +44,7 @@
       helloPin: 'Hello Empire Jewelry, I designed this name pin on your website:',
       sum: { necklace: 'Your name necklace', bracelet: 'Your name bracelet', pin: 'Your name pin' },
       spotUnder: (l, n) => 'below “' + l + '” in ' + n, spotOn: (l, n) => 'on top of “' + l + '” in ' + n,
-      spotChainL: 'on the chain, left', spotChainR: 'on the chain, right',
+      spotChainL: 'on the chain, left', spotChainR: 'on the chain, right', spotSlot: n => ' (spot ' + n + ' from the name)',
       spotPick: n => 'Now tap the spot for the ' + n.toLowerCase() + ' (a dot on the picture).',
       dragHint: 'Drag the charms anywhere',
       mapText: 'Lebanon', mapName: 'LEBANON',
@@ -78,7 +78,7 @@
       helloPin: 'مرحباً Empire Jewelry، صممت هذا الدبوس بالاسم على موقعكم:',
       sum: { necklace: 'قلادتك بالاسم', bracelet: 'إسوارتك بالاسم', pin: 'دبوسك بالاسم' },
       spotUnder: (l, n) => 'تحت «' + l + '» في ' + n, spotOn: (l, n) => 'فوق «' + l + '» في ' + n,
-      spotChainL: 'على السلسلة، يسار', spotChainR: 'على السلسلة، يمين',
+      spotChainL: 'على السلسلة، يسار', spotChainR: 'على السلسلة، يمين', spotSlot: n => ' (المكان ' + n + ' من الاسم)',
       spotPick: n => 'اضغط الآن على مكان «' + n + '» (إحدى النقاط على الصورة).',
       dragHint: 'اسحب التعاليق إلى أي مكان',
       mapText: 'لبنان', mapName: 'لبنان',
@@ -304,7 +304,7 @@
     const m = {};
     String(state.spots || '').split(',').forEach(p => {
       const [n, c] = p.split('=');
-      if (n && c && /^(?:[uo][12]\.\d+|c[LR])$/.test(c)) m[n] = c;
+      if (n && c && /^(?:[uo][12]\.\d+|c[LR]\d?)$/.test(c)) m[n] = c;
     });
     return m;
   }
@@ -681,7 +681,7 @@
       side = dangles.filter(n => n !== 'stone' && !(n === 'heart' && heartStone)).map(n => ({ name: n, s: null }));
       dangles = dangles.filter(n => !side.some(e => e.name === n));
     }
-    custom.filter(c => c.code[0] === 'c').forEach(c => side.push({ name: c.name, s: c.code === 'cR' ? 1 : 0 }));
+    custom.filter(c => c.code[0] === 'c').forEach(c => side.push({ name: c.name, s: c.code[1] === 'R' ? 1 : 0, slot: +(c.code.slice(2) || 0) }));
 
     // nebeneinander anordnen; ein Herz/Unendlich zwischen zwei Namen berührt beide
     const gap = fs * 0.1;
@@ -911,8 +911,13 @@
     return { box, L, R: Rr, textEls, k, tx, eyeR: R * 0.6 * k, fs, side };
   }
 
-  // Anhänger an der Kette neben dem Namen (wie bei Malaks Kinderketten): abwechselnd links und rechts,
-  // jeder an einem kleinen Ring. Braucht die zwei Kettenpfade, die hook() gerade gezeichnet hat.
+  // Kettenplätze zum Selbst-Platzieren: Abstand vom Namen entlang der Kette, Platz 0 direkt neben dem Namen
+  const CHAIN_STEP = 0.5;
+  const slotDist = (gap, unit, i) => gap + unit * (0.2 + i * CHAIN_STEP);
+
+  // Anhänger an der Kette neben dem Namen (wie bei Malaks Kinderketten): selbst platzierte an ihrem Platz,
+  // die übrigen abwechselnd links und rechts in die nächste freie Lücke. Jeder hängt an einem kleinen Ring.
+  // Braucht die zwei Kettenpfade, die hook() gerade gezeichnet hat.
   function chainCharms(ctx, pl, gap, grow) {
     if (!pl.side || !pl.side.length || ctx.chains.length < 2) return;
     const guides = ctx.chains.slice(-2);
@@ -920,28 +925,54 @@
     const enG = el('g', null, ctx.g);
     const unit = pl.fs * pl.k * (grow || 1);
     const sizeOf = n => (n === 'hamsa' ? 0.48 : n === 'car' ? 0.48 : n === 'teddy' ? 0.46 : 0.42) * unit;
-    const used = [0, 0];
-    let auto = 0;
-    pl.side.forEach(e => {
-      const name = e.name;
-      const s = e.s !== null ? e.s : auto++ % 2;      // 0 = links, 1 = rechts (selbst platziert: feste Seite)
-      const size = sizeOf(name);
-      used[s] += used[s] ? size * 1.35 : gap + size * 0.45;
-      const p = alongChain(guides[s], s ? pl.R : pl.L, used[s]);
+    const used = [0, 0], occ = [[], []], next = [null, null];
+    const put = (name, s, d, size) => {
+      const p = alongChain(guides[s], s ? pl.R : pl.L, d);
       const rr = unit * 0.05;
       el('circle', { cx: p.x, cy: p.y + rr * 0.8, r: rr, fill: 'none', 'stroke-width': rr * 0.45 }, metalG);
       drawCharm(ctx, metalG, name, p.x, p.y + rr * 1.7, size, null, enG);
       ctx.glints.push([p.x, p.y + size * 0.7]);
+      occ[s].push([d, size]);
+      used[s] = Math.max(used[s], d);
+    };
+    // selbst gewählter Platz; liegt er bei diesem Stück außerhalb des Bildes (z. B. Armband statt Halskette),
+    // rückt der Anhänger auf den nächsten sichtbaren Platz
+    const y0 = ctx.vy || 0;
+    const inView = (s, d) => {
+      const q = alongChain(guides[s], s ? pl.R : pl.L, d), y = q.y + unit * 0.3;
+      return q.x > 10 && q.x < 390 && y > y0 + 12 && y < y0 + 292 && d < guides[s].getTotalLength() - 4;
+    };
+    pl.side.filter(e => e.slot != null).forEach(e => {
+      let i = e.slot;
+      while (i > 0 && !inView(e.s, slotDist(gap, unit, i))) i--;
+      put(e.name, e.s, slotDist(gap, unit, i), sizeOf(e.name));
+    });
+    let auto = 0;
+    pl.side.filter(e => e.slot == null).forEach(e => {
+      const s = e.s !== null ? e.s : auto++ % 2;      // 0 = links, 1 = rechts
+      const size = sizeOf(e.name);
+      let d = next[s] === null ? gap + size * 0.45 : next[s];
+      while (occ[s].some(([od, os]) => Math.abs(od - d) < (os + size) * 0.62)) d += size * 0.4;
+      put(e.name, s, d, size);
+      next[s] = d + size * 1.35;
     });
     return used;
   }
-  // Zielstellen an der Kette (links/rechts neben dem Namen) für das freie Platzieren
+  // Zielstellen an der Kette für das freie Platzieren: mehrere Plätze je Seite, vom Namen aus nach oben,
+  // solange die Kette im Bild ist
   function chainTargets(ctx, pl, gap, grow) {
     if (!ctx.studio || !ctx.targets || ctx.chains.length < 2) return;
     const guides = ctx.chains.slice(-2), unit = pl.fs * pl.k * (grow || 1);
+    const y0 = ctx.vy || 0;
     [0, 1].forEach(s => {
-      const p = alongChain(guides[s], s ? pl.R : pl.L, gap + unit * 0.2);
-      ctx.targets.push({ kind: 'c', ref: s ? 'R' : 'L', x: p.x, y: p.y + unit * 0.3 });
+      const g = guides[s], L = g.getTotalLength();
+      for (let i = 0; i < 9; i++) {
+        const d = slotDist(gap, unit, i);
+        if (d > L - 4) break;
+        const p = alongChain(g, s ? pl.R : pl.L, d), y = p.y + unit * 0.3;
+        if (p.x < 10 || p.x > 390 || y < y0 + 12 || y > y0 + 292) break;
+        ctx.targets.push({ kind: 'c', ref: (s ? 'R' : 'L') + i, x: p.x, y });
+      }
     });
   }
   // Punkt auf der Kette im Abstand d vom Namen (die Pfade laufen je nach Ansicht zum Namen hin oder von ihm weg)
@@ -1444,7 +1475,7 @@
     const waiting = ANIM && svg === heroSvg && !svg._seen;
     const clipRect = el('rect', { x: -20, y: vy - 20, width: waiting ? 0 : 440, height: 340 }, clip);
 
-    const ctx = { id, defs, metal: 'url(#' + id + '-metal)', dark: m[0], glints: [], chains: [], textBox: null, model, linkScale: model ? 0.9 : 1, studio };
+    const ctx = { id, defs, metal: 'url(#' + id + '-metal)', dark: m[0], glints: [], chains: [], textBox: null, model, linkScale: model ? 0.9 : 1, studio, vy };
     ctx.under = el('g', null, svg);
     const wrapG = el('g', { 'clip-path': 'url(#' + id + '-clip)' }, svg);
     ctx.chainG = el('g', { filter: 'url(#' + id + '-sh)' }, wrapG);
@@ -1589,8 +1620,10 @@
     return i ? i.closest('label').querySelector('.chip-t').textContent.trim() : name;
   }
   function spotText(code) {
-    if (code === 'cL') return TXT.spotChainL;
-    if (code === 'cR') return TXT.spotChainR;
+    if (code[0] === 'c') {
+      const slot = +(code.slice(2) || 0);
+      return (code[1] === 'R' ? TXT.spotChainR : TXT.spotChainL) + (slot ? TXT.spotSlot(slot + 1) : '');
+    }
     const num = +code[1], i = +code.slice(3);
     let name = shownName(num) || (num === 1 ? fallbackName() : '');
     if (font().upper && !isArabic(name)) name = name.toUpperCase();
