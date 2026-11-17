@@ -46,7 +46,9 @@
       spotUnder: (l, n) => 'below “' + l + '” in ' + n, spotOn: (l, n) => 'on top of “' + l + '” in ' + n,
       spotChainL: 'on the chain, left', spotChainR: 'on the chain, right', spotSlot: n => ' (spot ' + n + ' from the name)',
       spotPick: n => 'Now tap the spot for the ' + n.toLowerCase() + ' (a dot on the picture).',
-      dragHint: 'Drag the charms anywhere',
+      dragHint: 'Tap a charm for colours, drag to move it',
+      popHint: 'Tap a dot to move it, or drag it.',
+      colsLabel: 'Charm colours',
       mapText: 'Lebanon', mapName: 'LEBANON',
       mapCities: { tripoli: 'TRIPOLI', beirut: 'BEIRUT', saida: 'SAIDA', tyre: 'TYRE' }
     },
@@ -80,7 +82,9 @@
       spotUnder: (l, n) => 'تحت «' + l + '» في ' + n, spotOn: (l, n) => 'فوق «' + l + '» في ' + n,
       spotChainL: 'على السلسلة، يسار', spotChainR: 'على السلسلة، يمين', spotSlot: n => ' (المكان ' + n + ' من الاسم)',
       spotPick: n => 'اضغط الآن على مكان «' + n + '» (إحدى النقاط على الصورة).',
-      dragHint: 'اسحب التعاليق إلى أي مكان',
+      dragHint: 'اضغط على التعليقة للألوان، واسحبها لتحريكها',
+      popHint: 'اضغط على نقطة لتحريكها، أو اسحبها.',
+      colsLabel: 'ألوان التعاليق',
       mapText: 'لبنان', mapName: 'لبنان',
       mapCities: { tripoli: 'طرابلس', beirut: 'بيروت', saida: 'صيدا', tyre: 'صور' }
     }
@@ -298,6 +302,27 @@
   const PAINT = { metal: null, blue: '#4ea8e2', turquoise: '#33b3bd', pink: '#f29bbb', red: '#d0263a', white: '#f6f4ef', black: '#222326' };
   const PAINTABLE = ['heart', 'star', 'butterfly', 'flower'];
   const MAX_CHARMS = 5;     // so viele Anhänger darf der Kunde wählen (die Krone zählt nicht mit)
+  // Farben je Anhänger (Banner beim Antippen im Bild): Schlüssel, Farbe (null = nur Gold), Name EN / AR
+  const CHARM_COLS = [
+    ['metal', null, 'Gold', 'ذهبي'], ['red', '#d0263a', 'Red', 'أحمر'], ['pink', '#f29bbb', 'Pink', 'زهري'],
+    ['rose', '#f8c9d4', 'Light pink', 'زهري فاتح'], ['purple', '#8a5bd1', 'Purple', 'بنفسجي'], ['lilac', '#c6a9ec', 'Lilac', 'ليلكي'],
+    ['blue', '#2f6fd0', 'Blue', 'أزرق'], ['lightblue', '#6fbfec', 'Light blue', 'أزرق فاتح'], ['turquoise', '#33b3bd', 'Turquoise', 'فيروزي'],
+    ['mint', '#97d8bf', 'Mint', 'نعناعي'], ['green', '#2f9d63', 'Green', 'أخضر'], ['yellow', '#f2c53d', 'Yellow', 'أصفر'],
+    ['orange', '#ef8a3a', 'Orange', 'برتقالي'], ['white', '#f6f4ef', 'White', 'أبيض'], ['black', '#222326', 'Black', 'أسود']
+  ];
+  const CHARM_HEX = {};
+  CHARM_COLS.forEach(c => { CHARM_HEX[c[0]] = c[1]; });
+  // Startfarben wie auf Malaks Fotos (Teddy mit hellblauem Hemd, blaues Auto, Auge und „الله“ blau), sonst Gold
+  const CHARM_DEFAULT = { teddy: 'lightblue', car: 'lightblue', eye: 'blue', allah: 'blue' };
+  // state.charmCols = "heart=red,teddy=pink"
+  function charmColsMap() {
+    const m = {};
+    String(state.charmCols || '').split(',').forEach(p => { const [n, c] = p.split('='); if (n && c in CHARM_HEX) m[n] = c; });
+    return m;
+  }
+  const charmColKey = name => charmColsMap()[name] || CHARM_DEFAULT[name] || 'metal';
+  const charmHex = name => CHARM_HEX[charmColKey(name)];
+  const colName = key => { const c = CHARM_COLS.find(x => x[0] === key); return c ? c[LANG === 'ar' ? 3 : 2] : key; };
   // Selbst platzierte Anhänger: state.spots = "heart=u1.3,teddy=cL,star=o1.0"
   // u = hängt unter dem Buchstaben (Name 1 oder 2, Zeichen-Nr.), o = klein oben auf dem Buchstaben, cL/cR = an der Kette
   const ON_LETTER = ['heart', 'star', 'butterfly', 'flower'];
@@ -334,7 +359,7 @@
     piece: 'pendant', gold: 'yellow', karat: '18k', text: TXT.fallbackName, text2: '', textAlt: '', text2Alt: '', join: 'heart', style: 'script',
     accent: 'none', underline: 'none', thick: 'std', chain: 'cable', motif: 'butterfly', enamel: 'none',
     stone: 'none', size: '', len: '', notes: '', mapDesign: 'flag', mapText: '', mapHeart: 'none',
-    item: 'necklace', nameColor: 'metal', charmColor: 'metal', charmPos: 'below', wrist: '', chainHeart: 'none', spots: ''
+    item: 'necklace', nameColor: 'metal', charmColor: 'metal', charmPos: 'below', wrist: '', chainHeart: 'none', spots: '', charmCols: ''
   };
   let touched = false;   // erst nach der ersten Änderung Bilder vorbereiten
   const controls = Array.from(document.querySelectorAll('[data-sync] [data-key]'));
@@ -566,53 +591,67 @@
     if (ctx.studio) el('circle', { r: 0.56, fill: '#000', 'fill-opacity': 0, stroke: 'none', 'pointer-events': 'all' }, g);
     const en = enParent ? el('g', { transform: tf, stroke: 'none', 'data-charm': name }, enParent) : g;
     const dot = (x, y, r, fill, ry) => el(ry ? 'ellipse' : 'circle', ry ? { cx: x, cy: y, rx: r, ry, fill, stroke: 'none' } : { cx: x, cy: y, r, fill, stroke: 'none' }, en);
+    const hex = charmHex(name);          // gewählte Farbe dieses Anhängers, null = nur Gold
     if (name === 'eye') {
       el('circle', { r: 0.5, 'stroke-width': 0.03 }, g);
-      dot(0, 0, 0.42, enamelFill(ctx, '#1f4fa8'));
-      dot(0, 0, 0.27, '#f6f4ee');
-      dot(0, 0, 0.17, '#57b0e3');
-      dot(0, 0, 0.08, '#14161a');
+      if (hex) {
+        dot(0, 0, 0.42, enamelFill(ctx, hex));
+        dot(0, 0, 0.27, '#f6f4ee');
+        dot(0, 0, 0.17, '#57b0e3');
+        dot(0, 0, 0.08, '#14161a');
+      } else {
+        el('circle', { r: 0.28, fill: 'none', stroke: ctx.dark, 'stroke-opacity': 0.6, 'stroke-width': 0.045 }, g);
+        dot(0, 0, 0.09, '#14161a');
+      }
     } else if (name === 'teddy') {
-      // Teddy wie auf den Fotos: braun mit blauem Hemd, Gesicht hell
+      // Teddy wie auf den Fotos: braun mit farbigem Hemd, Gesicht hell; in Gold nur Augen und Nase
       el('path', { d: CHARMS.teddy, 'stroke-width': 0.03 }, g);
-      const brown = enamelFill(ctx, '#b67f69');
-      dot(-0.27, -0.36, 0.075, '#e5b3a4'); dot(0.27, -0.36, 0.075, '#e5b3a4');
-      dot(-0.29, 0.13, 0.065, brown); dot(0.29, 0.13, 0.065, brown);
-      dot(-0.15, 0.41, 0.055, brown); dot(0.15, 0.41, 0.055, brown);
-      dot(0, 0.2, 0.21, enamelFill(ctx, '#5db3e0'), 0.2);
-      dot(0, -0.2, 0.205, brown);
-      dot(0, -0.13, 0.095, '#f1d6c8', 0.068);
+      if (hex) {
+        const brown = enamelFill(ctx, '#b67f69');
+        dot(-0.27, -0.36, 0.075, '#e5b3a4'); dot(0.27, -0.36, 0.075, '#e5b3a4');
+        dot(-0.29, 0.13, 0.065, brown); dot(0.29, 0.13, 0.065, brown);
+        dot(-0.15, 0.41, 0.055, brown); dot(0.15, 0.41, 0.055, brown);
+        dot(0, 0.2, 0.21, enamelFill(ctx, hex), 0.2);
+        dot(0, -0.2, 0.205, brown);
+        dot(0, -0.13, 0.095, '#f1d6c8', 0.068);
+      }
       dot(-0.085, -0.25, 0.026, '#2a2020'); dot(0.085, -0.25, 0.026, '#2a2020');
       dot(0, -0.155, 0.032, '#2a2020', 0.022);
     } else if (name === 'car') {
-      // kleines Auto: blau, helle Fenster, dunkle Räder mit Metallnabe
+      // kleines Auto: farbige Karosserie, helle Fenster, dunkle Räder mit Metallnabe
       el('path', { d: CHARMS.car, 'stroke-width': 0.03 }, g);
-      el('path', { d: 'M-.42 .1V0C-.42-.05-.38-.08-.32-.08L-.2-.09C-.15-.24-.07-.3 .04-.3C.15-.3 .2-.24 .24-.09L.36-.08C.41-.07 .42-.04 .42 0V.1Z', fill: enamelFill(ctx, '#4ea8e2') }, en);
-      el('path', { d: 'M-.14-.1C-.1-.21-.04-.25 .03-.25C.11-.25 .15-.2 .18-.1Z', fill: '#eef6fb' }, en);
-      el('path', { d: 'M.02-.25V-.1', stroke: ctx.metal, 'stroke-width': 0.03 }, en);
+      if (hex) {
+        el('path', { d: 'M-.42 .1V0C-.42-.05-.38-.08-.32-.08L-.2-.09C-.15-.24-.07-.3 .04-.3C.15-.3 .2-.24 .24-.09L.36-.08C.41-.07 .42-.04 .42 0V.1Z', fill: enamelFill(ctx, hex) }, en);
+        el('path', { d: 'M-.14-.1C-.1-.21-.04-.25 .03-.25C.11-.25 .15-.2 .18-.1Z', fill: '#eef6fb' }, en);
+        el('path', { d: 'M.02-.25V-.1', stroke: ctx.metal, 'stroke-width': 0.03 }, en);
+      }
       dot(-0.25, 0.16, 0.095, '#2b313b'); dot(0.26, 0.16, 0.095, '#2b313b');
       dot(-0.25, 0.16, 0.04, ctx.metal); dot(0.26, 0.16, 0.04, ctx.metal);
     } else if (name === 'allah') {
-      // Tropfen mit „الله“, blau emailliert
+      // Tropfen mit „الله“: emailliert mit weißer Schrift, in Gold eingraviert
       el('path', { d: CHARMS.allah, 'stroke-width': 0.03 }, g);
-      el('path', { d: CHARMS.allah, transform: 'translate(0 .03) scale(.8)', fill: enamelFill(ctx, '#3d8fd8') }, en);
-      const t = el('text', { x: 0, y: 0.14, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': '"Aref Ruqaa", serif', 'font-weight': 700, 'font-size': 0.34, fill: '#fff', stroke: 'none' }, en);
+      if (hex) el('path', { d: CHARMS.allah, transform: 'translate(0 .03) scale(.8)', fill: enamelFill(ctx, hex) }, en);
+      const light = !hex || ['#f6f4ef', '#f8c9d4', '#f2c53d', '#97d8bf'].includes(hex);
+      const t = el('text', { x: 0, y: 0.14, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': '"Aref Ruqaa", serif', 'font-weight': 700, 'font-size': 0.34, fill: light ? ctx.dark : '#fff', 'fill-opacity': hex ? 1 : 0.7, stroke: 'none' }, en);
       t.textContent = 'الله';
     } else if (name === 'coin') {
+      // gravierte Münze; mit Farbe: Emaille-Fläche, Gravur hell darauf
       el('circle', { r: 0.5, 'stroke-width': 0.03 }, g);
-      el('circle', { r: 0.4, fill: 'none', stroke: ctx.dark, 'stroke-opacity': 0.7, 'stroke-width': 0.05 }, g);
+      if (hex) dot(0, 0, 0.43, enamelFill(ctx, hex));
+      else el('circle', { r: 0.4, fill: 'none', stroke: ctx.dark, 'stroke-opacity': 0.7, 'stroke-width': 0.05 }, g);
       for (let i = -2; i <= 2; i++) {
-        el('line', { x1: -0.24 + Math.abs(i) * 0.05, x2: 0.24 - Math.abs(i) * 0.05, y1: i * 0.11, y2: i * 0.11, stroke: ctx.dark, 'stroke-opacity': 0.65, 'stroke-width': 0.045, 'stroke-dasharray': '0.06 0.035' }, g);
+        el('line', { x1: -0.24 + Math.abs(i) * 0.05, x2: 0.24 - Math.abs(i) * 0.05, y1: i * 0.11, y2: i * 0.11, stroke: hex ? '#fff' : ctx.dark, 'stroke-opacity': hex ? 0.75 : 0.65, 'stroke-width': 0.045, 'stroke-dasharray': '0.06 0.035' }, hex ? en : g);
       }
     } else {
       const p = el('path', { d: CHARMS[name], 'stroke-width': 0.03 }, g);
       if (stoneFill) { p.setAttribute('fill', stoneFill); p.setAttribute('stroke-width', 0.08); }
-      else if (PAINTABLE.includes(name) && PAINT[state.charmColor]) {
+      else if (hex) {
         // farbige Emaille mit Goldrand
-        el('path', { d: CHARMS[name], transform: 'scale(.76)', fill: enamelFill(ctx, PAINT[state.charmColor]) }, en);
+        el('path', { d: CHARMS[name], transform: 'scale(.76)', fill: enamelFill(ctx, hex) }, en);
       }
-      if (name === 'hamsa') el('circle', { cy: 0.2, r: 0.07, fill: 'none', stroke: ctx.dark, 'stroke-opacity': 0.5, 'stroke-width': 0.03 }, g);
-      if (name === 'flower') el('circle', { r: 0.12, fill: ctx.dark, 'fill-opacity': 0.25, stroke: 'none' }, g);
+      const detail = hex && !stoneFill ? en : g;
+      if (name === 'hamsa') el('circle', { cy: 0.2, r: 0.07, fill: 'none', stroke: hex ? '#fff' : ctx.dark, 'stroke-opacity': 0.6, 'stroke-width': 0.03 }, detail);
+      if (name === 'flower') el('circle', { r: 0.12, fill: hex ? '#f2c53d' : ctx.dark, 'fill-opacity': hex ? 1 : 0.25, stroke: 'none' }, detail);
     }
     return cy;
   }
@@ -719,8 +758,8 @@
     }
     // Herz zwischen zwei Namen in der gewählten Farbe
     items.forEach(it => {
-      if (it.kind === 'charm' && it.name === 'heart' && PAINT[state.charmColor]) {
-        el('path', { d: CHARMS.heart, transform: 'translate(' + it.cx + ' ' + midY + ') scale(' + (it.size * 0.76) + ')', fill: enamelFill(ctx, PAINT[state.charmColor]) }, enG);
+      if (it.kind === 'charm' && it.name === 'heart' && charmHex('heart')) {
+        el('path', { d: CHARMS.heart, transform: 'translate(' + it.cx + ' ' + midY + ') scale(' + (it.size * 0.76) + ')', fill: enamelFill(ctx, charmHex('heart')) }, enG);
       }
     });
 
@@ -769,7 +808,9 @@
       const xa = r ? r.x : bb1.x, xb = r ? r.x + r.width : bb1.x + fs * 0.5;
       const top = ink.topAt(xa, xb) || [(xa + xb) / 2, bb1.y];
       const cs = fs * 0.34;
-      el('path', { d: CHARMS.crown, transform: 'translate(' + top[0] + ' ' + (top[1] - 0.25 * cs) + ') scale(' + cs + ')', 'stroke-width': 0.6 / cs }, inner);
+      const ctf = 'translate(' + top[0] + ' ' + (top[1] - 0.25 * cs) + ') scale(' + cs + ')';
+      el('path', { d: CHARMS.crown, transform: ctf, 'stroke-width': 0.6 / cs, 'data-charm': 'crown' }, inner);
+      if (charmHex('crown')) el('path', { d: CHARMS.crown, transform: ctf + ' translate(0 .02) scale(.74)', fill: enamelFill(ctx, charmHex('crown')) }, enG);
     }
 
     // Ösen an beiden Enden (Teil der Platte); die Anstecknadel hat keine Kette, dafür eine Nadel hinter dem Namen
@@ -995,7 +1036,7 @@
     const size = unit * 0.62, rr = unit * 0.045;
     const metalG = el('g', { fill: ctx.metal, stroke: ctx.metal, filter: 'url(#' + ctx.id + '-plate)' }, ctx.g);
     const enG = el('g', { 'pointer-events': 'none' }, ctx.g);
-    const col = PAINT[state.charmColor];
+    const col = charmHex('heart');
     [0, 1].forEach(s => {
       if (want !== 'both' && want !== (s ? 'right' : 'left')) return;
       const g = guides[s], end = s ? pl.R : pl.L;
@@ -1496,6 +1537,7 @@
     ctx.grad = grad;
     ctx.clipRect = clipRect;
     svg._ctx = ctx;
+    if (svg._after) svg._after();
     const sec = svg.closest('section');
     const form = sec && sec.querySelector('[data-form]');
     if (form) svg.setAttribute('aria-label', TXT.sketch + ' ' + lines(form).map(l => l[1]).join(', '));
@@ -1636,6 +1678,11 @@
     if (font().upper && !isArabic(name)) name = name.toUpperCase();
     return (code[0] === 'u' ? TXT.spotUnder : TXT.spotOn)(name[i] || '?', name);
   }
+  // Farbe je gewähltem Anhänger für die Nachricht, z. B. „Heart: Red; Teddy bear: Light blue“
+  function describeCols() {
+    return String(state.accent || '').split(',').filter(n => n && n !== 'none')
+      .map(n => charmLabel(n) + ': ' + colName(charmColKey(n))).join('; ');
+  }
   function describeSpots() {
     const m = spotsMap();
     return String(state.accent || '').split(',')
@@ -1650,6 +1697,7 @@
       const key = f.dataset.field;
       let label = f.dataset.label, v = '';
       if (key === 'spots') { const d = describeSpots(); if (d) out.push([label, d]); return; }
+      if (key === 'charmCols') { const d = describeCols(); if (d) out.push([label, d]); return; }
       const checked = f.querySelector('input[type=radio]:checked');
       if (f.querySelector('input[type=checkbox]')) {
         v = Array.from(f.querySelectorAll('input[type=checkbox]:checked')).map(i => i.closest('label').querySelector('.chip-t').textContent.trim()).join(', ');
@@ -1670,7 +1718,7 @@
   // ---------- Entwurf als Link: öffnet genau diese Gestaltung wieder ----------
   const KEYS = {
     studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len', 'karat',
-      'item', 'nameColor', 'charmColor', 'charmPos', 'wrist', 'chainHeart', 'spots'],
+      'item', 'nameColor', 'charmColor', 'charmPos', 'wrist', 'chainHeart', 'spots', 'charmCols'],
     builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size', 'karat'],
     map: ['mapDesign', 'mapText', 'gold', 'karat', 'chain', 'len', 'mapHeart']
   };
@@ -2152,12 +2200,17 @@
     KEYS[shared.f].forEach(k => {
       if (typeof shared[k] !== 'string') return;
       if (k === 'style' && !FONTS[shared[k]]) return;   // Schrift gibt es nicht mehr (z. B. Old English in alten Links)
-      state[k] = shared[k].slice(0, k === 'spots' ? 160 : 40);
+      state[k] = shared[k].slice(0, k === 'spots' || k === 'charmCols' ? 160 : 40);
       touchedKeys.add(k);
     });
     if (shared.textAlt) altEdited.textAlt = true;
     if (shared.text2Alt) altEdited.text2Alt = true;
     lastKind = font().kind === 'arabic';
+  }
+  if (state.charmColor && state.charmColor !== 'metal' && !state.charmCols) {
+    const old = ['heart'].concat(String(state.accent || '').split(',').filter(n => PAINTABLE.includes(n) && n !== 'heart'));
+    state.charmCols = old.map(n => n + '=' + state.charmColor).join(',');
+    state.charmColor = 'metal';
   }
   refreshAlt(); updateSizes();
   if (shared && shared.size) state.size = shared.size;
@@ -2250,19 +2303,20 @@
     }, { passive: false });
   }
 
-  // ---------- Anhänger selbst platzieren: in der Nahansicht ziehen (Maus/Finger) oder antippen und Stelle antippen ----------
+  // ---------- Anhänger im Bild: ziehen = verschieben, antippen = Farb-Banner (und Stelle antippen) ----------
   // Beim Loslassen rastet der Anhänger an der nächsten möglichen Stelle ein (unter/auf einem Buchstaben, an der Kette).
   const placeSvg = document.querySelector('#name svg.preview-close');
   const spotsStatus = document.querySelector('[data-spots-status]');
   if (placeSvg) {
     let act = null;       // laufendes Ziehen: { name, x0, y0, moved, id }
-    let picked = null;    // angetippter Anhänger, wartet auf die Stelle
+    let picked = null;    // angetippter Anhänger (Banner offen)
     let overlay = null;
+    const stageEl = placeSvg.closest('.studio-stage');
     const pt = e => {
       const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(placeSvg.getScreenCTM().inverse());
       return [p.x, p.y];
     };
-    const valid = name => ((placeSvg._ctx && placeSvg._ctx.targets) || []).filter(t =>
+    const valid = name => name === 'crown' ? [] : ((placeSvg._ctx && placeSvg._ctx.targets) || []).filter(t =>
       t.kind === 'u' || (t.kind === 'o' && ON_LETTER.includes(name)) || (t.kind === 'c' && state.item !== 'pin'));
     const nearest = (name, p, maxD) => {
       let best = null, bd = maxD;
@@ -2274,81 +2328,149 @@
       overlay = null;
       placeSvg.querySelectorAll('[data-charm]').forEach(g => g.removeAttribute('opacity'));
     };
-    // mögliche Stellen als Punkte zeigen, die nächste hervorheben; der Anhänger selbst wird blass
-    const showTargets = (name, hi) => {
+    // mögliche Stellen als Punkte zeigen, die nächste hervorheben; beim Ziehen wird der Anhänger selbst blass
+    const showTargets = (name, hi, dim) => {
       if (overlay) overlay.remove();
       overlay = el('g', { 'pointer-events': 'none' }, placeSvg);
       valid(name).forEach(t => el('circle', {
         cx: t.x, cy: t.y, r: t === hi ? 5.5 : 3.4,
         fill: t === hi ? '#457256' : 'rgba(69,114,86,.22)', stroke: '#457256', 'stroke-width': 1.1
       }, overlay));
-      placeSvg.querySelectorAll('[data-charm="' + name + '"]').forEach(g => g.setAttribute('opacity', 0.3));
+      if (dim) placeSvg.querySelectorAll('[data-charm="' + name + '"]').forEach(g => g.setAttribute('opacity', 0.3));
+      else {
+        // angetippter Anhänger: grüner Kreis, damit man sieht, welcher gerade gefärbt wird
+        const g = placeSvg.querySelector('[data-charm="' + name + '"]');
+        if (g) {
+          const r = g.getBoundingClientRect(), m = placeSvg.getScreenCTM();
+          const c = new DOMPoint(r.x + r.width / 2, r.y + r.height / 2).matrixTransform(m.inverse());
+          el('circle', { cx: c.x, cy: c.y, r: Math.max(r.width, r.height) / 2 / m.a + 3, fill: 'none', stroke: '#457256', 'stroke-width': 1.5, 'stroke-dasharray': '3 2.5' }, overlay);
+        }
+      }
     };
     const ghost = (name, p) => {
       const c = placeSvg._ctx, size = (c.charmUnit || 40) * 0.42;
-      const gm = el('g', { fill: c.metal, stroke: c.metal, opacity: 0.92 }, overlay);
+      const gm = el('g', { fill: c.metal, stroke: c.metal, opacity: 0.92, 'pointer-events': 'none' }, overlay);
       drawCharm(c, gm, name, p[0], p[1] + CHARM_HANG[name] * size, size, null, overlay);
     };
+    const hintOff = () => { hintDone = true; document.querySelectorAll('.drag-hint').forEach(h => h.classList.remove('is-on')); };
     const place = (name, t) => {
       const m = spotsMap();
       m[name] = t.kind + t.ref;
       state.spots = Object.keys(m).map(n => n + '=' + m[n]).join(',');
       touched = true;
-      hintDone = true;
+      hintOff();
       touchedKeys.add('spots');
       if (spotsStatus) spotsStatus.textContent = charmLabel(name) + ': ' + spotText(m[name]);
       schedule('spots');
     };
+
+    // Farb-Banner: erscheint beim Antippen eines Anhängers direkt daneben, viele Farben zur Auswahl
+    const pop = document.createElement('div');
+    pop.className = 'charm-pop';
+    pop.hidden = true;
+    pop.innerHTML = '<p class="charm-pop-t"></p><div class="charm-pop-sw"></div><p class="charm-pop-h"></p>' +
+      '<button type="button" class="charm-pop-x" aria-label="' + TXT.close + '">×</button>';
+    (stageEl || placeSvg.parentNode).appendChild(pop);
+    const swWrap = pop.querySelector('.charm-pop-sw');
+    CHARM_COLS.forEach(([key, hex]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sw' + (hex ? '' : ' sw-gold');
+      if (hex) b.style.setProperty('--c', hex);
+      b.dataset.col = key;
+      b.title = colName(key);
+      b.setAttribute('aria-label', colName(key));
+      swWrap.appendChild(b);
+    });
+    const markSw = () => swWrap.querySelectorAll('[data-col]').forEach(b =>
+      b.setAttribute('aria-pressed', picked && b.dataset.col === charmColKey(picked) ? 'true' : 'false'));
+    // Banner direkt unter dem Bild (deckt keinen Anhänger ab); passt es nicht mehr ins Fenster, unten ins Bild
+    const placePop = () => {
+      if (!picked || pop.hidden || !stageEl) return;
+      const sr = stageEl.getBoundingClientRect();
+      if (sr.bottom < 40 || sr.top > innerHeight - 40) { closePop(); return; }
+      const pw = pop.offsetWidth, ph = pop.offsetHeight;
+      const x = Math.max(8, Math.min(innerWidth - pw - 8, sr.left + sr.width / 2 - pw / 2));
+      let y = sr.bottom + 8;
+      if (y + ph > innerHeight - 8) y = sr.bottom - ph - 8;
+      pop.style.left = Math.round(x) + 'px';
+      pop.style.top = Math.round(y) + 'px';
+    };
+    const openPop = name => {
+      picked = name;
+      pop.querySelector('.charm-pop-t').textContent = charmLabel(name);
+      pop.querySelector('.charm-pop-h').textContent = name === 'crown' ? '' : TXT.popHint;
+      pop.hidden = false;
+      markSw();
+      placePop();
+      showTargets(name, null, false);
+      hintOff();
+    };
+    const closePop = () => {
+      pop.hidden = true;
+      picked = null;
+      clearOverlay();
+    };
+    swWrap.addEventListener('click', e => {
+      const b = e.target.closest('[data-col]');
+      if (!b || !picked) return;
+      const m = charmColsMap();
+      m[picked] = b.dataset.col;
+      state.charmCols = Object.keys(m).map(n => n + '=' + m[n]).join(',');
+      touched = true;
+      touchedKeys.add('charmCols');
+      markSw();
+      schedule('charmCols');
+    });
+    pop.querySelector('.charm-pop-x').addEventListener('click', closePop);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && picked) closePop(); });
+    window.addEventListener('resize', placePop);
+    window.addEventListener('scroll', placePop, { passive: true });
+    // nach jedem Neuzeichnen: Banner und Punkte wieder an den (evtl. verschobenen) Anhänger
+    placeSvg._after = () => {
+      if (!picked) return;
+      if (!placeSvg.querySelector('[data-charm="' + picked + '"]')) { closePop(); return; }
+      markSw();
+      placePop();
+      showTargets(picked, null, false);
+    };
+
     const noZoomSoon = () => { placeSvg._noZoom = true; setTimeout(() => { placeSvg._noZoom = false; }, 400); };
     placeSvg.addEventListener('pointerdown', e => {
       const g = e.target.closest && e.target.closest('[data-charm]');
-      // ist schon ein Anhänger ausgewählt, ist der nächste Tipp die Stelle (auch wenn dort ein Anhänger hängt)
-      if (g && placeSvg.contains(g) && !picked) {
+      noZoomSoon();
+      if (g && placeSvg.contains(g)) {
         e.preventDefault();
-        noZoomSoon();
         act = { name: g.getAttribute('data-charm'), x0: e.clientX, y0: e.clientY, moved: false, id: e.pointerId };
         try { placeSvg.setPointerCapture(e.pointerId); } catch (err) { /* egal */ }
-      } else if (picked) noZoomSoon();
+      } else if (!picked) placeSvg._noZoom = false;   // normaler Klick ins Bild: vergrößern
     });
     placeSvg.addEventListener('pointermove', e => {
-      if (!act || e.pointerId !== act.id) return;
+      if (!act || e.pointerId !== act.id || act.name === 'crown') return;
       if (!act.moved && Math.hypot(e.clientX - act.x0, e.clientY - act.y0) < 6) return;
+      if (!act.moved) { pop.hidden = true; picked = null; }
       act.moved = true;
-      picked = null;
       const p = pt(e);
-      showTargets(act.name, nearest(act.name, p, 36));
+      showTargets(act.name, nearest(act.name, p, 36), true);
       ghost(act.name, p);
     });
     placeSvg.addEventListener('pointerup', e => {
       if (act && e.pointerId === act.id) {
         const a = act;
         act = null;
-        noZoomSoon();
         if (a.moved) {
           const t = nearest(a.name, pt(e), 36);
           clearOverlay();
           if (t) place(a.name, t);
-        } else {
-          // nur angetippt: jetzt die Stelle antippen
-          picked = a.name;
-          showTargets(a.name, null);
-          if (spotsStatus) spotsStatus.textContent = TXT.spotPick(charmLabel(a.name));
+          return;
         }
+        // angetippt: Farb-Banner dieses Anhängers öffnen (auch wenn gerade ein anderes offen ist)
+        openPop(a.name);
         return;
       }
       if (picked) {
-        const name = picked, t = nearest(name, pt(e), 42);
-        picked = null;
-        noZoomSoon();
-        clearOverlay();
-        if (t) { place(name, t); return; }
-        // keine Stelle in der Nähe: auf einen anderen Anhänger getippt = den auswählen, sonst abbrechen
-        const g = e.target.closest && e.target.closest('[data-charm]');
-        if (g && placeSvg.contains(g)) {
-          picked = g.getAttribute('data-charm');
-          showTargets(picked, null);
-          if (spotsStatus) spotsStatus.textContent = TXT.spotPick(charmLabel(picked));
-        } else if (spotsStatus) spotsStatus.textContent = '';
+        const t = nearest(picked, pt(e), 42);
+        if (t) place(picked, t); else closePop();
       }
     });
     placeSvg.addEventListener('pointercancel', () => { act = null; clearOverlay(); });
@@ -2356,7 +2478,6 @@
     placeSvg.addEventListener('touchstart', e => {
       if (e.target.closest && e.target.closest('[data-charm]')) e.preventDefault();
     }, { passive: false });
-    const stageEl = placeSvg.closest('.studio-stage');
     if (stageEl) {
       const hint = document.createElement('p');
       hint.className = 'drag-hint';

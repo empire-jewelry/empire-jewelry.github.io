@@ -264,6 +264,34 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .spots-status { margin: 0; color: var(--green); font-weight: 500; }
 .spots-reset { padding: .45rem .95rem; font-size: .85rem; }
 .spots-reset[hidden] { display: none; }
+/* Farb-Banner: erscheint beim Antippen eines Anhängers direkt daneben */
+.charm-pop {
+  position: fixed; z-index: 45; width: max-content; max-width: calc(100vw - 16px);
+  padding: .55rem .7rem .6rem; border-radius: 14px; background: #fff;
+  box-shadow: 0 10px 28px -10px rgba(30, 30, 25, .45), 0 0 0 1px rgba(0, 0, 0, .06);
+}
+.charm-pop[hidden] { display: none; }
+.charm-pop-t { margin: 0 1.6rem .45rem 0; font: 600 .85rem var(--font-ui); color: var(--ink); }
+html[dir="rtl"] .charm-pop-t { margin: 0 0 .45rem 1.6rem; }
+.charm-pop-sw { display: grid; grid-template-columns: repeat(8, 26px); gap: 7px; }
+.sw {
+  width: 26px; height: 26px; padding: 0; border-radius: 50%; cursor: pointer;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), rgba(255,255,255,0) 45%), var(--c, #ccc);
+  border: 1px solid rgba(0, 0, 0, .18);
+}
+.sw-gold { background: linear-gradient(135deg, #9c7726, #fcecb6 50%, #cfa443); }
+.sw[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
+.sw:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.charm-pop-h { margin: .5rem 0 0; font-size: .74rem; color: var(--ink-2); }
+.charm-pop-h:empty { display: none; }
+.charm-pop-x {
+  position: absolute; top: 4px; inset-inline-end: 6px; width: 28px; height: 28px;
+  border: 0; background: none; font: 400 1.25rem/1 var(--font-ui); color: var(--ink-2); cursor: pointer;
+}
+@media (pointer: coarse) {
+  .charm-pop-sw { grid-template-columns: repeat(7, 30px); gap: 8px; }
+  .sw { width: 30px; height: 30px; }
+}
 /* kurzer Hinweis unten in der Ecke der Nahansicht, bis der Kunde einen Anhänger verschoben hat */
 .drag-hint {
   position: absolute; inset-inline-end: 10px; bottom: 10px; z-index: 2; margin: 0;

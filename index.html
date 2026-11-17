@@ -30,7 +30,7 @@
   <!-- Schriften für die Namenskette -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
-  <link rel="stylesheet" href="css/style.css?v=14">
+  <link rel="stylesheet" href="css/style.css?v=15">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -208,21 +208,11 @@
             <label class="chip"><input type="checkbox" name="n-accent" value="car" data-key="accent"><span class="charm-ico" data-charm="car" aria-hidden="true"></span><span class="chip-t">Car</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="allah" data-key="accent"><span class="charm-ico" data-charm="allah" aria-hidden="true"></span><span class="chip-t">Allah</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="crown" data-key="accent"><span class="charm-ico" data-charm="crown" aria-hidden="true"></span><span class="chip-t">Crown on first letter</span></label>
+            <div style="display:none" data-field="charmCols" data-label="Charm colours"></div>
             <div class="spots-row" data-field="spots" data-label="Charm places">
               <p class="small spots-status" data-spots-status role="status"></p>
               <button class="btn btn-line spots-reset" type="button" data-spots-reset hidden>Arrange automatically</button>
             </div>
-          </fieldset>
-
-          <fieldset class="chips" data-field="charmColor" data-label="Charm colour">
-            <legend class="field-label">Colour of heart, star, butterfly and flower</legend>
-            <label class="chip"><input type="radio" name="n-ccol" value="metal" data-key="charmColor" checked><span class="dot metal-yellow" aria-hidden="true"></span><span class="chip-t">Gold only</span></label>
-            <label class="chip"><input type="radio" name="n-ccol" value="blue" data-key="charmColor"><span class="dot" style="--c:#4ea8e2" aria-hidden="true"></span><span class="chip-t">Blue</span></label>
-            <label class="chip"><input type="radio" name="n-ccol" value="turquoise" data-key="charmColor"><span class="dot" style="--c:#33b3bd" aria-hidden="true"></span><span class="chip-t">Turquoise</span></label>
-            <label class="chip"><input type="radio" name="n-ccol" value="pink" data-key="charmColor"><span class="dot" style="--c:#f29bbb" aria-hidden="true"></span><span class="chip-t">Pink</span></label>
-            <label class="chip"><input type="radio" name="n-ccol" value="red" data-key="charmColor"><span class="dot" style="--c:#d0263a" aria-hidden="true"></span><span class="chip-t">Red</span></label>
-            <label class="chip"><input type="radio" name="n-ccol" value="white" data-key="charmColor"><span class="dot" style="--c:#f6f4ef" aria-hidden="true"></span><span class="chip-t">White</span></label>
-            <label class="chip"><input type="radio" name="n-ccol" value="black" data-key="charmColor"><span class="dot" style="--c:#222326" aria-hidden="true"></span><span class="chip-t">Black</span></label>
           </fieldset>
 
           <fieldset class="chips" data-field="charmPos" data-label="Charm position" data-item="necklace bracelet">
@@ -690,7 +680,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=35" defer></script>
+  <script src="js/main.js?v=36" defer></script>
   <script src="js/ring.js?v=6" defer></script>
   <script src="js/music.js?v=3" defer></script>
 </body>
