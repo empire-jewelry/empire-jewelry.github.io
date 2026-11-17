@@ -30,7 +30,7 @@
   <!-- Schriften für die Namenskette -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
-  <link rel="stylesheet" href="../css/style.css?v=13">
+  <link rel="stylesheet" href="../css/style.css?v=14">
 </head>
 <body>
   <a class="skip" href="#main">انتقل إلى المحتوى</a>
@@ -195,7 +195,7 @@
           </fieldset>
 
           <fieldset class="chips" data-field="accent" data-label="تعاليق صغيرة">
-            <legend class="field-label">تعاليق صغيرة <span class="opt">(حتى ٣)</span></legend>
+            <legend class="field-label">ضع تعاليقك أينما تريد <span class="opt">(حتى ٣)</span></legend>
             <label class="chip"><input type="checkbox" name="n-accent" value="heart" data-key="accent"><span class="charm-ico" data-charm="heart" aria-hidden="true"></span><span class="chip-t">قلب</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="star" data-key="accent"><span class="charm-ico" data-charm="star" aria-hidden="true"></span><span class="chip-t">نجمة</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="butterfly" data-key="accent"><span class="charm-ico" data-charm="butterfly" aria-hidden="true"></span><span class="chip-t">فراشة</span></label>
@@ -208,13 +208,10 @@
             <label class="chip"><input type="checkbox" name="n-accent" value="car" data-key="accent"><span class="charm-ico" data-charm="car" aria-hidden="true"></span><span class="chip-t">سيارة</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="allah" data-key="accent"><span class="charm-ico" data-charm="allah" aria-hidden="true"></span><span class="chip-t">الله</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="crown" data-key="accent"><span class="charm-ico" data-charm="crown" aria-hidden="true"></span><span class="chip-t">تاج على الحرف الأول</span></label>
-          </fieldset>
-
-          <fieldset data-field="spots" data-label="أماكن التعاليق">
-            <legend class="field-label">ضع التعاليق بنفسك <span class="opt">(اختياري)</span></legend>
-            <p class="small">اسحب التعليقة في الصورة القريبة إلى حرف: تحته أو فوقه أو على السلسلة، فتثبت في مكانها. على الهاتف: اضغط على التعليقة ثم على إحدى النقاط.</p>
-            <p class="small spots-status" data-spots-status role="status"></p>
-            <button class="btn btn-line spots-reset" type="button" data-spots-reset>ترتيب تلقائي</button>
+            <div class="spots-row" data-field="spots" data-label="أماكن التعاليق">
+              <p class="small spots-status" data-spots-status role="status"></p>
+              <button class="btn btn-line spots-reset" type="button" data-spots-reset hidden>ترتيب تلقائي</button>
+            </div>
           </fieldset>
 
           <fieldset class="chips" data-field="charmColor" data-label="لون التعاليق">
@@ -693,7 +690,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="../js/main.js?v=32" defer></script>
+  <script src="../js/main.js?v=33" defer></script>
   <script src="../js/ring.js?v=6" defer></script>
   <script src="../js/music.js?v=3" defer></script>
 </body>

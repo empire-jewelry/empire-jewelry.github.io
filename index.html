@@ -30,7 +30,7 @@
   <!-- Schriften für die Namenskette -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
-  <link rel="stylesheet" href="css/style.css?v=13">
+  <link rel="stylesheet" href="css/style.css?v=14">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -195,7 +195,7 @@
           </fieldset>
 
           <fieldset class="chips" data-field="accent" data-label="Charms">
-            <legend class="field-label">Charms <span class="opt">(up to 3)</span></legend>
+            <legend class="field-label">Place your charms wherever you want <span class="opt">(up to 3)</span></legend>
             <label class="chip"><input type="checkbox" name="n-accent" value="heart" data-key="accent"><span class="charm-ico" data-charm="heart" aria-hidden="true"></span><span class="chip-t">Heart</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="star" data-key="accent"><span class="charm-ico" data-charm="star" aria-hidden="true"></span><span class="chip-t">Star</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="butterfly" data-key="accent"><span class="charm-ico" data-charm="butterfly" aria-hidden="true"></span><span class="chip-t">Butterfly</span></label>
@@ -208,13 +208,10 @@
             <label class="chip"><input type="checkbox" name="n-accent" value="car" data-key="accent"><span class="charm-ico" data-charm="car" aria-hidden="true"></span><span class="chip-t">Car</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="allah" data-key="accent"><span class="charm-ico" data-charm="allah" aria-hidden="true"></span><span class="chip-t">Allah</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="crown" data-key="accent"><span class="charm-ico" data-charm="crown" aria-hidden="true"></span><span class="chip-t">Crown on first letter</span></label>
-          </fieldset>
-
-          <fieldset data-field="spots" data-label="Charm places">
-            <legend class="field-label">Place the charms yourself <span class="opt">(optional)</span></legend>
-            <p class="small">Drag a charm in the close-up to a letter: below it, on top of it, or onto the chain. It snaps into place. On a phone: tap the charm, then tap one of the dots.</p>
-            <p class="small spots-status" data-spots-status role="status"></p>
-            <button class="btn btn-line spots-reset" type="button" data-spots-reset>Arrange automatically</button>
+            <div class="spots-row" data-field="spots" data-label="Charm places">
+              <p class="small spots-status" data-spots-status role="status"></p>
+              <button class="btn btn-line spots-reset" type="button" data-spots-reset hidden>Arrange automatically</button>
+            </div>
           </fieldset>
 
           <fieldset class="chips" data-field="charmColor" data-label="Charm colour">
@@ -693,7 +690,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=32" defer></script>
+  <script src="js/main.js?v=33" defer></script>
   <script src="js/ring.js?v=6" defer></script>
   <script src="js/music.js?v=3" defer></script>
 </body>

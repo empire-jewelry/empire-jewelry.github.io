@@ -46,6 +46,7 @@
       spotUnder: (l, n) => 'below “' + l + '” in ' + n, spotOn: (l, n) => 'on top of “' + l + '” in ' + n,
       spotChainL: 'on the chain, left', spotChainR: 'on the chain, right',
       spotPick: n => 'Now tap the spot for the ' + n.toLowerCase() + ' (a dot on the picture).',
+      dragHint: 'Drag the charms anywhere',
       mapText: 'Lebanon', mapName: 'LEBANON',
       mapCities: { tripoli: 'TRIPOLI', beirut: 'BEIRUT', saida: 'SAIDA', tyre: 'TYRE' }
     },
@@ -79,6 +80,7 @@
       spotUnder: (l, n) => 'تحت «' + l + '» في ' + n, spotOn: (l, n) => 'فوق «' + l + '» في ' + n,
       spotChainL: 'على السلسلة، يسار', spotChainR: 'على السلسلة، يمين',
       spotPick: n => 'اضغط الآن على مكان «' + n + '» (إحدى النقاط على الصورة).',
+      dragHint: 'اسحب التعاليق إلى أي مكان',
       mapText: 'لبنان', mapName: 'لبنان',
       mapCities: { tripoli: 'طرابلس', beirut: 'بيروت', saida: 'صيدا', tyre: 'صور' }
     }
@@ -1548,7 +1550,6 @@
       if (f.dataset.needs && !String(state[f.dataset.needs] || '').trim()) hide = true;
       if (f.dataset.design) hide = !f.dataset.design.split(' ').includes(state.mapDesign);
       if (f.dataset.item && !f.dataset.item.split(' ').includes(state.item)) hide = true;
-      if (f.dataset.field === 'spots') hide = !String(state.accent || '').split(',').some(v => CHARM_HANG[v] !== undefined);
       if (f.dataset.alt) {
         if (!mm || (f.dataset.alt === '2' && !nameText(state.text2))) hide = true;
         const lab = f.dataset.alt === '2' ? (toAr ? TXT.altAr2 : TXT.altEn2) : (toAr ? TXT.altAr1 : TXT.altEn1);
@@ -1677,6 +1678,8 @@
         return [dt, dd];
       }));
       if (form.dataset.form === 'studio') {
+        form.querySelectorAll('[data-spots-reset]').forEach(b => { b.hidden = !describeSpots(); });
+        document.querySelectorAll('.drag-hint').forEach(h => h.classList.toggle('is-on', dragHintOn()));
         const h = form.querySelector('.summary h3');
         if (h) h.textContent = TXT.sum[state.item] || TXT.sum.necklace;
       }
@@ -1862,6 +1865,9 @@
   // Beim Wechsel Halskette / Armband / Anstecknadel: Startwerte wie auf Malaks Fotos,
   // aber nur für Felder, die der Kunde noch nicht selbst geändert hat
   const touchedKeys = new Set();
+  // kurzer Hinweis im Bild, solange Anhänger gewählt, aber noch keiner verschoben wurde
+  let hintDone = false;
+  const dragHintOn = () => !hintDone && !state.spots && String(state.accent || '').split(',').some(v => CHARM_HANG[v] !== undefined);
   const ITEM_START = {
     necklace: { charmPos: 'below', nameColor: 'metal', accent: 'none' },
     bracelet: { charmPos: 'chain', nameColor: 'blue', accent: 'teddy,car' },
@@ -2248,6 +2254,7 @@
       m[name] = t.kind + t.ref;
       state.spots = Object.keys(m).map(n => n + '=' + m[n]).join(',');
       touched = true;
+      hintDone = true;
       touchedKeys.add('spots');
       if (spotsStatus) spotsStatus.textContent = charmLabel(name) + ': ' + spotText(m[name]);
       schedule('spots');
@@ -2309,6 +2316,16 @@
     placeSvg.addEventListener('touchstart', e => {
       if (e.target.closest && e.target.closest('[data-charm]')) e.preventDefault();
     }, { passive: false });
+    const stageEl = placeSvg.closest('.studio-stage');
+    if (stageEl) {
+      const hint = document.createElement('p');
+      hint.className = 'drag-hint';
+      hint.setAttribute('aria-hidden', 'true');
+      hint.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg><span></span>';
+      hint.querySelector('span').textContent = TXT.dragHint;
+      stageEl.appendChild(hint);
+      hint.classList.toggle('is-on', dragHintOn());
+    }
     const reset = document.querySelector('[data-spots-reset]');
     if (reset) reset.addEventListener('click', () => {
       state.spots = '';
