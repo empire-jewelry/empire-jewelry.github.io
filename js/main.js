@@ -48,6 +48,7 @@
       spotPick: n => 'Now tap the spot for the ' + n.toLowerCase() + ' (a dot on the picture).',
       dragHint: 'Tap a charm for colours, drag to move it',
       popHint: 'Tap a dot to move it, or drag it.',
+      ccTitle: 'Choose a colour for each charm',
       colsLabel: 'Charm colours',
       mapText: 'Lebanon', mapName: 'LEBANON',
       mapCities: { tripoli: 'TRIPOLI', beirut: 'BEIRUT', saida: 'SAIDA', tyre: 'TYRE' }
@@ -84,6 +85,7 @@
       spotPick: n => 'اضغط الآن على مكان «' + n + '» (إحدى النقاط على الصورة).',
       dragHint: 'اضغط على التعليقة للألوان، واسحبها لتحريكها',
       popHint: 'اضغط على نقطة لتحريكها، أو اسحبها.',
+      ccTitle: 'اختر لوناً لكل تعليقة',
       colsLabel: 'ألوان التعاليق',
       mapText: 'لبنان', mapName: 'لبنان',
       mapCities: { tripoli: 'طرابلس', beirut: 'بيروت', saida: 'صيدا', tyre: 'صور' }
@@ -1766,6 +1768,7 @@
         return [dt, dd];
       }));
       if (form.dataset.form === 'studio') {
+        colourUI.forEach(f => f());
         form.querySelectorAll('[data-spots-reset]').forEach(b => { b.hidden = !describeSpots(); });
         document.querySelectorAll('.drag-hint').forEach(h => h.classList.toggle('is-on', dragHintOn()));
         const h = form.querySelector('.summary h3');
@@ -1953,6 +1956,32 @@
   // Beim Wechsel Halskette / Armband / Anstecknadel: Startwerte wie auf Malaks Fotos,
   // aber nur für Felder, die der Kunde noch nicht selbst geändert hat
   const touchedKeys = new Set();
+  // Farbe je Anhänger: Banner im Bild und Farbfeld im Formular teilen sich diese Teile
+  let ccActive = null;          // Anhänger, dessen Farbe gerade gewählt wird
+  const colourUI = [];          // werden nach jeder Änderung aufgefrischt
+  function setCharmCol(name, key) {
+    const m = charmColsMap();
+    m[name] = key;
+    state.charmCols = Object.keys(m).map(n => n + '=' + m[n]).join(',');
+    touched = true;
+    touchedKeys.add('charmCols');
+    colourUI.forEach(f => f());
+    schedule('charmCols');
+  }
+  function makeSwatches(wrap) {
+    CHARM_COLS.forEach(([key, hex]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sw' + (hex ? '' : ' sw-gold');
+      if (hex) b.style.setProperty('--c', hex);
+      b.dataset.col = key;
+      b.title = colName(key);
+      b.setAttribute('aria-label', colName(key));
+      wrap.appendChild(b);
+    });
+  }
+  const markSwatches = (wrap, name) => wrap.querySelectorAll('[data-col]').forEach(b =>
+    b.setAttribute('aria-pressed', name && b.dataset.col === charmColKey(name) ? 'true' : 'false'));
   // kurzer Hinweis im Bild, solange Anhänger gewählt, aber noch keiner verschoben wurde
   let hintDone = false;
   const dragHintOn = () => !hintDone && !state.spots && String(state.accent || '').split(',').some(v => CHARM_HANG[v] !== undefined);
@@ -2372,18 +2401,9 @@
       '<button type="button" class="charm-pop-x" aria-label="' + TXT.close + '">×</button>';
     (stageEl || placeSvg.parentNode).appendChild(pop);
     const swWrap = pop.querySelector('.charm-pop-sw');
-    CHARM_COLS.forEach(([key, hex]) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'sw' + (hex ? '' : ' sw-gold');
-      if (hex) b.style.setProperty('--c', hex);
-      b.dataset.col = key;
-      b.title = colName(key);
-      b.setAttribute('aria-label', colName(key));
-      swWrap.appendChild(b);
-    });
-    const markSw = () => swWrap.querySelectorAll('[data-col]').forEach(b =>
-      b.setAttribute('aria-pressed', picked && b.dataset.col === charmColKey(picked) ? 'true' : 'false'));
+    makeSwatches(swWrap);
+    const markSw = () => markSwatches(swWrap, picked);
+    colourUI.push(markSw);
     // Banner direkt unter dem Bild (deckt keinen Anhänger ab); passt es nicht mehr ins Fenster, unten ins Bild
     const placePop = () => {
       if (!picked || pop.hidden || !stageEl) return;
@@ -2405,6 +2425,8 @@
       placePop();
       showTargets(name, null, false);
       hintOff();
+      ccActive = name;              // Farbfeld im Formular zeigt denselben Anhänger
+      colourUI.forEach(f => f());
     };
     const closePop = () => {
       pop.hidden = true;
@@ -2413,14 +2435,7 @@
     };
     swWrap.addEventListener('click', e => {
       const b = e.target.closest('[data-col]');
-      if (!b || !picked) return;
-      const m = charmColsMap();
-      m[picked] = b.dataset.col;
-      state.charmCols = Object.keys(m).map(n => n + '=' + m[n]).join(',');
-      touched = true;
-      touchedKeys.add('charmCols');
-      markSw();
-      schedule('charmCols');
+      if (b && picked) setCharmCol(picked, b.dataset.col);
     });
     pop.querySelector('.charm-pop-x').addEventListener('click', closePop);
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && picked) closePop(); });
@@ -2493,6 +2508,57 @@
       if (spotsStatus) spotsStatus.textContent = '';
       schedule('spots');
     });
+  }
+
+  // ---------- Farbfeld unter den Anhängern: beim Antippen eines Anhängers erscheinen gleich seine Farben ----------
+  const accentFs = document.querySelector('[data-form="studio"] [data-field="accent"]');
+  if (accentFs) {
+    const panel = document.createElement('div');
+    panel.className = 'charm-colors';
+    panel.hidden = true;
+    panel.innerHTML = '<p class="cc-t"></p><div class="cc-tabs"></div><div class="cc-sw"></div>';
+    panel.querySelector('.cc-t').textContent = TXT.ccTitle;
+    accentFs.insertBefore(panel, accentFs.querySelector('[data-field="charmCols"]') || accentFs.querySelector('.spots-row'));
+    const tabs = panel.querySelector('.cc-tabs'), sw = panel.querySelector('.cc-sw');
+    makeSwatches(sw);
+    const icon = name => {
+      const d = CHARMS[name];
+      return d ? '<span class="charm-ico" aria-hidden="true"><svg viewBox="-0.6 -0.6 1.2 1.2"><path d="' + d + '" fill="currentColor" stroke="currentColor" stroke-width="0.06"/></svg></span>' : '';
+    };
+    const renderPanel = () => {
+      const picks = String(state.accent || '').split(',').filter(v => v && v !== 'none');
+      if (!picks.length) { panel.hidden = true; ccActive = null; return; }
+      if (!ccActive || !picks.includes(ccActive)) ccActive = picks[picks.length - 1];
+      panel.hidden = false;
+      tabs.replaceChildren(...picks.map(n => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cc-tab';
+        b.dataset.tab = n;
+        b.setAttribute('aria-pressed', n === ccActive ? 'true' : 'false');
+        const hex = charmHex(n);
+        b.innerHTML = icon(n) + '<span class="cc-l"></span><span class="cc-dot' + (hex ? '' : ' gold') + '"' + (hex ? ' style="--c:' + hex + '"' : '') + '></span>';
+        b.querySelector('.cc-l').textContent = charmLabel(n);
+        return b;
+      }));
+      markSwatches(sw, ccActive);
+    };
+    tabs.addEventListener('click', e => {
+      const b = e.target.closest('[data-tab]');
+      if (b) { ccActive = b.dataset.tab; renderPanel(); }
+    });
+    sw.addEventListener('click', e => {
+      const b = e.target.closest('[data-col]');
+      if (b && ccActive) setCharmCol(ccActive, b.dataset.col);
+    });
+    // Anhänger angetippt: gleich seine Farben zeigen (nach der Prüfung „höchstens 5“)
+    accentFs.addEventListener('change', e => {
+      const c = e.target;
+      if (c.name !== 'n-accent') return;
+      setTimeout(() => { if (c.checked) ccActive = c.value; renderPanel(); }, 0);
+    });
+    colourUI.push(renderPanel);
+    renderPanel();
   }
 
   const io = new IntersectionObserver(entries => entries.forEach(en => {

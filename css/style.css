@@ -264,6 +264,25 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .spots-status { margin: 0; color: var(--green); font-weight: 500; }
 .spots-reset { padding: .45rem .95rem; font-size: .85rem; }
 .spots-reset[hidden] { display: none; }
+/* Farbfeld unter den Anhängern im Formular */
+.charm-colors {
+  flex-basis: 100%; margin-block-start: .35rem; padding: .75rem .85rem .85rem;
+  border: 1px solid var(--line); border-radius: 16px; background: var(--paper);
+}
+.charm-colors[hidden] { display: none; }
+.cc-t { margin: 0 0 .55rem; font-size: .88rem; font-weight: 500; }
+.cc-tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin-block-end: .7rem; }
+.cc-tab {
+  display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .6rem;
+  border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink);
+  font: 500 .8rem var(--font-ui); cursor: pointer;
+}
+.cc-tab[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.cc-tab .charm-ico { width: .95rem; height: .95rem; }
+.cc-dot { width: 13px; height: 13px; border-radius: 50%; background: var(--c, #ccc); border: 1px solid rgba(0, 0, 0, .22); }
+.cc-dot.gold { background: linear-gradient(135deg, #9c7726, #fcecb6 50%, #cfa443); }
+.cc-sw { display: flex; flex-wrap: wrap; gap: 8px; }
+.cc-sw .sw { width: 30px; height: 30px; }
 /* Farb-Banner: erscheint beim Antippen eines Anhängers direkt daneben */
 .charm-pop {
   position: fixed; z-index: 45; width: max-content; max-width: calc(100vw - 16px);
