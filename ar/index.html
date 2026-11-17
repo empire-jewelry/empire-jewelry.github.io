@@ -227,6 +227,14 @@
             <label class="chip"><input type="radio" name="n-cpos" value="chain" data-key="charmPos"><span class="chip-t">على السلسلة بجانب الاسم</span></label>
           </fieldset>
 
+          <fieldset class="chips" data-field="chainHeart" data-label="قلب ضمن السلسلة" data-item="necklace bracelet">
+            <legend class="field-label">قلب ضمن السلسلة <span class="opt">(قلب مسطّح كجزء من السلسلة)</span></legend>
+            <label class="chip"><input type="radio" name="n-cheart" value="none" data-key="chainHeart" checked><span class="chip-t">لا</span></label>
+            <label class="chip"><input type="radio" name="n-cheart" value="left" data-key="chainHeart"><span class="chip-t">يسار</span></label>
+            <label class="chip"><input type="radio" name="n-cheart" value="right" data-key="chainHeart"><span class="chip-t">يمين</span></label>
+            <label class="chip"><input type="radio" name="n-cheart" value="both" data-key="chainHeart"><span class="chip-t">على الجانبين</span></label>
+          </fieldset>
+
           <fieldset class="chips" data-field="underline" data-label="خط تحت الاسم">
             <legend class="field-label">خط تحت الاسم</legend>
             <label class="chip"><input type="radio" name="n-underline" value="none" data-key="underline" checked><span class="chip-t">بدون</span></label>
@@ -582,7 +590,7 @@
           <img src="../img/two-names-heart-480.webp" srcset="../img/two-names-heart-480.webp 480w, ../img/two-names-heart.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="قلادة ذهبية باسمين بخط مزخرف وقلب صغير على السلسلة، في علبة زهرية">
           <p class="cap">اسمان وقلب على سلسلة واحدة</p>
           <p class="price">السعر عند الطلب</p>
-          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">اسأل عبر واتساب</a><button class="like" type="button" data-like='{"item":"necklace","style":"script","nameColor":"metal","goto":"name"}'>اطلبها بتصميمك</button></div>
+          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">اسأل عبر واتساب</a><button class="like" type="button" data-like='{"item":"necklace","style":"script","nameColor":"metal","chainHeart":"left","goto":"name"}'>اطلبها بتصميمك</button></div>
         </li>
         <li data-cat="pendant">
           <img src="../img/lebanon-map-480.webp" srcset="../img/lebanon-map-480.webp 480w, ../img/lebanon-map.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="أربع تعاليق ذهبية بشكل خريطة لبنان، واحدة بالعلم بالمينا وأخرى بأبنية ملونة">
@@ -678,7 +686,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="../js/main.js?v=30" defer></script>
+  <script src="../js/main.js?v=31" defer></script>
   <script src="../js/ring.js?v=6" defer></script>
   <script src="../js/music.js?v=3" defer></script>
 </body>

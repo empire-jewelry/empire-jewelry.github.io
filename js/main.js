@@ -314,7 +314,7 @@
     piece: 'pendant', gold: 'yellow', karat: '18k', text: TXT.fallbackName, text2: '', textAlt: '', text2Alt: '', join: 'heart', style: 'script',
     accent: 'none', underline: 'none', thick: 'std', chain: 'cable', motif: 'butterfly', enamel: 'none',
     stone: 'none', size: '', len: '', notes: '', mapDesign: 'flag', mapText: '', mapHeart: 'none',
-    item: 'necklace', nameColor: 'metal', charmColor: 'metal', charmPos: 'below', wrist: ''
+    item: 'necklace', nameColor: 'metal', charmColor: 'metal', charmPos: 'below', wrist: '', chainHeart: 'none'
   };
   let touched = false;   // erst nach der ersten Änderung Bilder vorbereiten
   const controls = Array.from(document.querySelectorAll('[data-sync] [data-key]'));
@@ -843,22 +843,55 @@
     const enG = el('g', null, ctx.g);
     const unit = pl.fs * pl.k * (grow || 1);
     const sizeOf = n => (n === 'hamsa' ? 0.48 : n === 'car' ? 0.48 : n === 'teddy' ? 0.46 : 0.42) * unit;
-    // Punkt auf der Kette im Abstand d vom Namen (die Pfade laufen je nach Ansicht zum Namen hin oder von ihm weg)
-    const along = (g, end, d) => {
-      const L = g.getTotalLength(), a = g.getPointAtLength(0), b = g.getPointAtLength(L);
-      const fromStart = Math.hypot(a.x - end[0], a.y - end[1]) < Math.hypot(b.x - end[0], b.y - end[1]);
-      return g.getPointAtLength(Math.max(0, Math.min(L, fromStart ? d : L - d)));
-    };
     const used = [0, 0];
     pl.side.forEach((name, i) => {
       const s = i % 2;                       // 0 = links, 1 = rechts
       const size = sizeOf(name);
       used[s] += used[s] ? size * 1.35 : gap + size * 0.45;
-      const p = along(guides[s], s ? pl.R : pl.L, used[s]);
+      const p = alongChain(guides[s], s ? pl.R : pl.L, used[s]);
       const rr = unit * 0.05;
       el('circle', { cx: p.x, cy: p.y + rr * 0.8, r: rr, fill: 'none', 'stroke-width': rr * 0.45 }, metalG);
       drawCharm(ctx, metalG, name, p.x, p.y + rr * 1.7, size, null, enG);
       ctx.glints.push([p.x, p.y + size * 0.7]);
+    });
+    return used;
+  }
+  // Punkt auf der Kette im Abstand d vom Namen (die Pfade laufen je nach Ansicht zum Namen hin oder von ihm weg)
+  function alongChain(g, end, d) {
+    const L = g.getTotalLength(), a = g.getPointAtLength(0), b = g.getPointAtLength(L);
+    const fromStart = Math.hypot(a.x - end[0], a.y - end[1]) < Math.hypot(b.x - end[0], b.y - end[1]);
+    return g.getPointAtLength(Math.max(0, Math.min(L, fromStart ? d : L - d)));
+  }
+  // Herz als Glied in der Kette (wie bei Malaks „Mayssam“): die Kette läuft hinter dem flachen Herz durch,
+  // links und rechts hält je ein kleiner Ring. Liegt weiter außen als die hängenden Anhänger.
+  function chainHeart(ctx, pl, gap, grow, used) {
+    const want = state.chainHeart;
+    if (!want || want === 'none' || ctx.chains.length < 2) return;
+    const guides = ctx.chains.slice(-2);
+    const unit = pl.fs * pl.k * (grow || 1);
+    const size = unit * 0.62, rr = unit * 0.045;
+    const metalG = el('g', { fill: ctx.metal, stroke: ctx.metal, filter: 'url(#' + ctx.id + '-plate)' }, ctx.g);
+    const enG = el('g', null, ctx.g);
+    const col = PAINT[state.charmColor];
+    [0, 1].forEach(s => {
+      if (want !== 'both' && want !== (s ? 'right' : 'left')) return;
+      const g = guides[s], end = s ? pl.R : pl.L;
+      const d = gap + (used && used[s] ? used[s] + size * 0.95 : size * 0.75);
+      const p = alongChain(g, end, d), q = alongChain(g, end, d + 1.5);
+      // entlang der Kette ausrichten, die Spitze zeigt nach unten
+      let a = Math.atan2(q.y - p.y, q.x - p.x);
+      if (Math.cos(a) < 0) a += Math.PI;
+      const tf = 'translate(' + p.x.toFixed(2) + ' ' + p.y.toFixed(2) + ') rotate(' + (a * 180 / Math.PI).toFixed(1) + ')';
+      const hg = el('g', { transform: tf }, metalG);
+      // die breiteste Stelle des Herzens (bei den Bögen) liegt auf der Kette
+      const heartTf = 'translate(0 ' + (size * 0.17).toFixed(2) + ') scale(' + size.toFixed(3) + ')';
+      el('path', { d: CHARMS.heart, transform: heartTf, 'stroke-width': 0.04 }, hg);
+      [-1, 1].forEach(sx => el('circle', { cx: sx * (size * 0.44 + rr * 0.6), cy: 0, r: rr, fill: 'none', 'stroke-width': rr * 0.45 }, hg));
+      if (col) {
+        const eg = el('g', { transform: tf }, enG);
+        el('path', { d: CHARMS.heart, transform: 'translate(0 ' + (size * 0.17).toFixed(2) + ') scale(' + (size * 0.76).toFixed(3) + ')', fill: enamelFill(ctx, col) }, eg);
+      }
+      ctx.glints.push([p.x, p.y]);
     });
   }
 
@@ -1133,16 +1166,22 @@
           ((curveY(C.left, a.L[0]) - a.L[1]) + (curveY(C.right, a.R[0]) - a.R[1])) / 2 + 1.4, 36);
         hook(ctx, pl.L, -1, st => bustPath(C.left, st, -1));
         hook(ctx, pl.R, 1, st => bustPath(C.right, st, 1));
-        chainCharms(ctx, pl, pl.fs * pl.k * 0.3);
+        const used = chainCharms(ctx, pl, pl.fs * pl.k * 0.3);
+        chainHeart(ctx, pl, pl.fs * pl.k * 0.3, 1, used);
         ctx.textBox = pl.box;
         return;
       }
       // Anhänger an der Kette brauchen Platz daneben: Name dann etwas kleiner und höher
-      const onChain = state.charmPos === 'chain' && /teddy|car|heart|star|butterfly|flower|hamsa|eye|coin|cedar|allah/.test(state.accent || '');
-      const pl = namePlate(ctx, 200, onChain ? 170 : 196, onChain ? 200 : 272, 76, true);
-      hook(ctx, pl.L, -1, st => 'M44 -12C58 110 ' + (st[0] - 74) + ' ' + (st[1] - 16) + ' ' + st[0] + ' ' + st[1]);
-      hook(ctx, pl.R, 1, st => 'M356 -12C342 110 ' + (st[0] + 74) + ' ' + (st[1] - 16) + ' ' + st[0] + ' ' + st[1]);
-      chainCharms(ctx, pl, pl.fs * pl.k * 0.3);
+      const sideCharms = state.charmPos === 'chain' && /teddy|car|heart|star|butterfly|flower|hamsa|eye|coin|cedar|allah/.test(state.accent || '');
+      const heartLink = !!state.chainHeart && state.chainHeart !== 'none';
+      const onChain = sideCharms || heartLink;
+      const pl = namePlate(ctx, 200, onChain ? 176 : 196, sideCharms && heartLink ? 150 : onChain ? 190 : 272, 76, true);
+      // mit Anhängern oder Herz an der Kette läuft sie neben dem Namen flacher (sonst stehen sie zu schräg)
+      const out = onChain ? 128 : 74, rise = onChain ? 4 : 16, top = onChain ? 60 : 110;
+      hook(ctx, pl.L, -1, st => 'M' + (onChain ? 18 : 44) + ' -12C' + (onChain ? 22 : 58) + ' ' + top + ' ' + (st[0] - out) + ' ' + (st[1] - rise) + ' ' + st[0] + ' ' + st[1]);
+      hook(ctx, pl.R, 1, st => 'M' + (onChain ? 382 : 356) + ' -12C' + (onChain ? 378 : 342) + ' ' + top + ' ' + (st[0] + out) + ' ' + (st[1] - rise) + ' ' + st[0] + ' ' + st[1]);
+      const used = chainCharms(ctx, pl, pl.fs * pl.k * 0.3);
+      chainHeart(ctx, pl, pl.fs * pl.k * 0.3, 1, used);
       ctx.textBox = pl.box;
     },
     // Namensarmband wie Malaks „Adam“: Name in der Mitte, Kette nach beiden Seiten, Anhänger an der Kette
@@ -1152,7 +1191,8 @@
       hook(ctx, pl.L, -1, st => 'M-14 ' + (st[1] + 50) + 'C36 ' + (st[1] + 44) + ' ' + (st[0] - 64) + ' ' + (st[1] + 4) + ' ' + st[0] + ' ' + st[1]);
       hook(ctx, pl.R, 1, st => 'M414 ' + (st[1] + 50) + 'C364 ' + (st[1] + 44) + ' ' + (st[0] + 64) + ' ' + (st[1] + 4) + ' ' + st[0] + ' ' + st[1]);
       // Anhänger am Armband sind im Verhältnis größer (wie Teddy und Auto bei „Adam“)
-      chainCharms(ctx, pl, pl.fs * pl.k * 0.5, 1.45);
+      const used = chainCharms(ctx, pl, pl.fs * pl.k * 0.5, 1.45);
+      chainHeart(ctx, pl, pl.fs * pl.k * 0.5, 1.2, used);
       ctx.textBox = pl.box;
     },
     // Anstecknadel mit Namen wie Malaks „حسن“: Nadel hinter dem Namen, Anhänger darunter, keine Kette
@@ -1477,7 +1517,7 @@
   // ---------- Entwurf als Link: öffnet genau diese Gestaltung wieder ----------
   const KEYS = {
     studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len', 'karat',
-      'item', 'nameColor', 'charmColor', 'charmPos', 'wrist'],
+      'item', 'nameColor', 'charmColor', 'charmPos', 'wrist', 'chainHeart'],
     builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size', 'karat'],
     map: ['mapDesign', 'mapText', 'gold', 'karat', 'chain', 'len', 'mapHeart']
   };
