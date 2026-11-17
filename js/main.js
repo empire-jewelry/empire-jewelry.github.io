@@ -40,6 +40,9 @@
       zoomOpen: 'Enlarge', zoomClose: 'Close', zoomIn: 'Zoom in', zoomOut: 'Zoom out',
       zoomHint: 'Tap the picture to zoom in, drag to move.',
       helloMap: 'Hello Empire Jewelry, I designed this Lebanon map pendant on your website:',
+      helloBracelet: 'Hello Empire Jewelry, I designed this name bracelet on your website:',
+      helloPin: 'Hello Empire Jewelry, I designed this name pin on your website:',
+      sum: { necklace: 'Your name necklace', bracelet: 'Your name bracelet', pin: 'Your name pin' },
       mapText: 'Lebanon', mapName: 'LEBANON',
       mapCities: { tripoli: 'TRIPOLI', beirut: 'BEIRUT', saida: 'SAIDA', tyre: 'TYRE' }
     },
@@ -67,6 +70,9 @@
       zoomOpen: 'تكبير', zoomClose: 'إغلاق', zoomIn: 'تكبير', zoomOut: 'تصغير',
       zoomHint: 'اضغط على الصورة للتكبير، واسحب لتحريكها.',
       helloMap: 'مرحباً Empire Jewelry، صممت قلادة خريطة لبنان هذه على موقعكم:',
+      helloBracelet: 'مرحباً Empire Jewelry، صممت هذه الإسوارة بالاسم على موقعكم:',
+      helloPin: 'مرحباً Empire Jewelry، صممت هذا الدبوس بالاسم على موقعكم:',
+      sum: { necklace: 'قلادتك بالاسم', bracelet: 'إسوارتك بالاسم', pin: 'دبوسك بالاسم' },
       mapText: 'لبنان', mapName: 'لبنان',
       mapCities: { tripoli: 'طرابلس', beirut: 'بيروت', saida: 'صيدا', tyre: 'صور' }
     }
@@ -264,10 +270,25 @@
     hamsa: 'M0 .5C-.22 .5-.34 .34-.34 .16L-.44 .02C-.48-.06-.4-.12-.34-.06L-.27 .02L-.27-.3C-.27-.4-.11-.4-.11-.3L-.11-.02L-.08-.02L-.08-.4C-.08-.5 .08-.5 .08-.4L.08-.02L.11-.02L.11-.3C.11-.4 .27-.4 .27-.3L.27 .02L.34-.06C.4-.12 .48-.06 .44 .02L.34 .16C.34 .34 .22 .5 0 .5Z',
     flower: 'M0.200 -0.280a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0M0.466 -0.087a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0M0.365 0.227a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0M0.035 0.227a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0M-0.066 -0.087a0.20 0.20 0 1 0 -0.40 0a0.20 0.20 0 1 0 0.40 0',
     coin: 'M0-.5A.5 .5 0 1 1 0 .5A.5 .5 0 1 1 0-.5Z',
-    eye: 'M0-.5A.5 .5 0 1 1 0 .5A.5 .5 0 1 1 0-.5Z'
+    eye: 'M0-.5A.5 .5 0 1 1 0 .5A.5 .5 0 1 1 0-.5Z',
+    // Kinder-Anhänger wie auf Malaks Fotos (Umriss = Metall, Farben kommen als Emaille darüber)
+    teddy: ring(-.27, -.36, .12) + ring(.27, -.36, .12) + ring(0, -.2, .25) + ring(0, .2, .27, .25) +
+      ring(-.29, .13, .1) + ring(.29, .13, .1) + ring(-.15, .41, .09) + ring(.15, .41, .09),
+    car: 'M-.48 .14V0C-.48-.08-.42-.12-.34-.13L-.24-.14C-.18-.3-.08-.36 .04-.36C.18-.36 .24-.28 .28-.14L.38-.13C.46-.12 .48-.06 .48 0V.14Z' +
+      ring(-.25, .16, .13) + ring(.26, .16, .13),
+    allah: 'M0-.5C.12-.3 .36-.1 .36 .14C.36 .36 .2 .48 0 .48C-.2 .48-.36 .36-.36 .14C-.36-.1-.12-.3 0-.5Z'
   };
+  // Kreis bzw. Ellipse als Pfadstück (für zusammengesetzte Anhänger)
+  function ring(cx, cy, rx, ry) {
+    ry = ry || rx;
+    return 'M' + (cx - rx) + ' ' + cy + 'a' + rx + ' ' + ry + ' 0 1 0 ' + 2 * rx + ' 0a' + rx + ' ' + ry + ' 0 1 0 ' + (-2 * rx) + ' 0Z';
+  }
   // Aufhängepunkt oben am Anhänger (y im Einheitsfeld), dort sitzt der kleine Ring
-  const CHARM_HANG = { heart: -0.24, star: -0.5, butterfly: -0.1, cedar: -0.5, hamsa: -0.48, flower: -0.48, coin: -0.5, eye: -0.5 };
+  const CHARM_HANG = { heart: -0.24, star: -0.5, butterfly: -0.1, cedar: -0.5, hamsa: -0.48, flower: -0.48, coin: -0.5, eye: -0.5,
+    teddy: -0.47, car: -0.37, allah: -0.5 };
+  // Emaille-Farben für den Namen und für Herz, Stern, Schmetterling, Blume (metal = ohne Farbe)
+  const PAINT = { metal: null, blue: '#4ea8e2', turquoise: '#33b3bd', pink: '#f29bbb', red: '#d0263a', white: '#f6f4ef', black: '#222326' };
+  const PAINTABLE = ['heart', 'star', 'butterfly', 'flower'];
 
   // Kettenarten, wie sie bei Namensketten angeboten werden
   const CHAINS = {
@@ -292,7 +313,8 @@
   const state = {
     piece: 'pendant', gold: 'yellow', karat: '18k', text: TXT.fallbackName, text2: '', textAlt: '', text2Alt: '', join: 'heart', style: 'script',
     accent: 'none', underline: 'none', thick: 'std', chain: 'cable', motif: 'butterfly', enamel: 'none',
-    stone: 'none', size: '', len: '', notes: '', mapDesign: 'flag', mapText: '', mapHeart: 'none'
+    stone: 'none', size: '', len: '', notes: '', mapDesign: 'flag', mapText: '', mapHeart: 'none',
+    item: 'necklace', nameColor: 'metal', charmColor: 'metal', charmPos: 'below', wrist: ''
   };
   let touched = false;   // erst nach der ersten Änderung Bilder vorbereiten
   const controls = Array.from(document.querySelectorAll('[data-sync] [data-key]'));
@@ -500,16 +522,60 @@
     return { L: back(L), R: back(R), bottomAt, topAt };
   }
 
-  // ein Anhänger (Herz, Hamsa, Auge …) im Layout zeichnen; topY = Aufhängepunkt
-  function drawCharm(ctx, parent, name, cx, topY, size, stoneFill) {
+  // glänzende Emaille: Verlauf von hell nach dunkel, je Farbe einmal pro Zeichnung
+  function enamelFill(ctx, c) {
+    ctx.enamel = ctx.enamel || {};
+    if (!ctx.enamel[c]) {
+      const id = ctx.id + '-en' + Object.keys(ctx.enamel).length;
+      const lg = el('linearGradient', { id, x1: 0, y1: 0, x2: 0.3, y2: 1 }, ctx.defs);
+      el('stop', { offset: 0, 'stop-color': shade(c, 0.38) }, lg);
+      el('stop', { offset: 0.45, 'stop-color': c }, lg);
+      el('stop', { offset: 1, 'stop-color': shade(c, -0.2) }, lg);
+      ctx.enamel[c] = 'url(#' + id + ')';
+    }
+    return ctx.enamel[c];
+  }
+
+  // ein Anhänger (Herz, Hamsa, Auge …) im Layout zeichnen; topY = Aufhängepunkt.
+  // parent bekommt das Metall (mit Licht-Filter), enParent die Emaille-Farben (ohne Filter, sonst werden sie blass)
+  function drawCharm(ctx, parent, name, cx, topY, size, stoneFill, enParent) {
     const cy = topY - CHARM_HANG[name] * size;
-    const g = el('g', { transform: 'translate(' + cx + ' ' + cy + ') scale(' + size + ')' }, parent);
+    const tf = 'translate(' + cx + ' ' + cy + ') scale(' + size + ')';
+    const g = el('g', { transform: tf }, parent);
+    const en = enParent ? el('g', { transform: tf, stroke: 'none' }, enParent) : g;
+    const dot = (x, y, r, fill, ry) => el(ry ? 'ellipse' : 'circle', ry ? { cx: x, cy: y, rx: r, ry, fill, stroke: 'none' } : { cx: x, cy: y, r, fill, stroke: 'none' }, en);
     if (name === 'eye') {
       el('circle', { r: 0.5, 'stroke-width': 0.03 }, g);
-      el('circle', { r: 0.42, fill: '#1f4fa8', stroke: 'none' }, g);
-      el('circle', { r: 0.27, fill: '#f6f4ee', stroke: 'none' }, g);
-      el('circle', { r: 0.17, fill: '#57b0e3', stroke: 'none' }, g);
-      el('circle', { r: 0.08, fill: '#14161a', stroke: 'none' }, g);
+      dot(0, 0, 0.42, enamelFill(ctx, '#1f4fa8'));
+      dot(0, 0, 0.27, '#f6f4ee');
+      dot(0, 0, 0.17, '#57b0e3');
+      dot(0, 0, 0.08, '#14161a');
+    } else if (name === 'teddy') {
+      // Teddy wie auf den Fotos: braun mit blauem Hemd, Gesicht hell
+      el('path', { d: CHARMS.teddy, 'stroke-width': 0.03 }, g);
+      const brown = enamelFill(ctx, '#b67f69');
+      dot(-0.27, -0.36, 0.075, '#e5b3a4'); dot(0.27, -0.36, 0.075, '#e5b3a4');
+      dot(-0.29, 0.13, 0.065, brown); dot(0.29, 0.13, 0.065, brown);
+      dot(-0.15, 0.41, 0.055, brown); dot(0.15, 0.41, 0.055, brown);
+      dot(0, 0.2, 0.21, enamelFill(ctx, '#5db3e0'), 0.2);
+      dot(0, -0.2, 0.205, brown);
+      dot(0, -0.13, 0.095, '#f1d6c8', 0.068);
+      dot(-0.085, -0.25, 0.026, '#2a2020'); dot(0.085, -0.25, 0.026, '#2a2020');
+      dot(0, -0.155, 0.032, '#2a2020', 0.022);
+    } else if (name === 'car') {
+      // kleines Auto: blau, helle Fenster, dunkle Räder mit Metallnabe
+      el('path', { d: CHARMS.car, 'stroke-width': 0.03 }, g);
+      el('path', { d: 'M-.42 .1V0C-.42-.05-.38-.08-.32-.08L-.2-.09C-.15-.24-.07-.3 .04-.3C.15-.3 .2-.24 .24-.09L.36-.08C.41-.07 .42-.04 .42 0V.1Z', fill: enamelFill(ctx, '#4ea8e2') }, en);
+      el('path', { d: 'M-.14-.1C-.1-.21-.04-.25 .03-.25C.11-.25 .15-.2 .18-.1Z', fill: '#eef6fb' }, en);
+      el('path', { d: 'M.02-.25V-.1', stroke: ctx.metal, 'stroke-width': 0.03 }, en);
+      dot(-0.25, 0.16, 0.095, '#2b313b'); dot(0.26, 0.16, 0.095, '#2b313b');
+      dot(-0.25, 0.16, 0.04, ctx.metal); dot(0.26, 0.16, 0.04, ctx.metal);
+    } else if (name === 'allah') {
+      // Tropfen mit „الله“, blau emailliert
+      el('path', { d: CHARMS.allah, 'stroke-width': 0.03 }, g);
+      el('path', { d: CHARMS.allah, transform: 'translate(0 .03) scale(.8)', fill: enamelFill(ctx, '#3d8fd8') }, en);
+      const t = el('text', { x: 0, y: 0.14, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': '"Aref Ruqaa", serif', 'font-weight': 700, 'font-size': 0.34, fill: '#fff', stroke: 'none' }, en);
+      t.textContent = 'الله';
     } else if (name === 'coin') {
       el('circle', { r: 0.5, 'stroke-width': 0.03 }, g);
       el('circle', { r: 0.4, fill: 'none', stroke: ctx.dark, 'stroke-opacity': 0.7, 'stroke-width': 0.05 }, g);
@@ -519,6 +585,10 @@
     } else {
       const p = el('path', { d: CHARMS[name], 'stroke-width': 0.03 }, g);
       if (stoneFill) { p.setAttribute('fill', stoneFill); p.setAttribute('stroke-width', 0.08); }
+      else if (PAINTABLE.includes(name) && PAINT[state.charmColor]) {
+        // farbige Emaille mit Goldrand
+        el('path', { d: CHARMS[name], transform: 'scale(.76)', fill: enamelFill(ctx, PAINT[state.charmColor]) }, en);
+      }
       if (name === 'hamsa') el('circle', { cy: 0.2, r: 0.07, fill: 'none', stroke: ctx.dark, 'stroke-opacity': 0.5, 'stroke-width': 0.03 }, g);
       if (name === 'flower') el('circle', { r: 0.12, fill: ctx.dark, 'fill-opacity': 0.25, stroke: 'none' }, g);
     }
@@ -528,7 +598,8 @@
   // Baut Name(n), Verbinder, Unterstrich, Krone, Ösen und hängende Anhänger als eine Goldplatte.
   // fit(anchors) darf eine senkrechte Verschiebung liefern (Platte hängt an der Kette).
   // Rückgabe in SVG-Koordinaten: Box und die Einhängepunkte L/R.
-  function namePlate(ctx, cx, baseY, maxW, maxSize, allowSecond, fit, maxH) {
+  function namePlate(ctx, cx, baseY, maxW, maxSize, allowSecond, fit, maxH, opts) {
+    opts = opts || {};
     const F = font();
     const raw1 = shownName(1);
     const raw2 = allowSecond ? shownName(2) : '';
@@ -536,17 +607,20 @@
     const rtl = isArabic(n1);
     const S = 40;                       // Layout-Schriftgröße, danach skaliert
     const fs = S * F.scale;
+    const nameCol = PAINT[state.nameColor];   // Name in Emaille (Farbe mit Goldrand) oder nur Metall
+    const rim = fs * 0.075;
     plateFilter(ctx);
     const pg = el('g', null, ctx.g);
     const fg = el('g', { filter: 'url(#' + ctx.id + '-plate)' }, pg);
-    if (!raw1) fg.setAttribute('opacity', 0.4);
+    const enG = el('g', null, pg);            // Emaille liegt über dem Metall, ohne Licht-Filter
+    if (!raw1) { fg.setAttribute('opacity', 0.4); enG.setAttribute('opacity', 0.4); }
     const outer = el('g', null, fg);
     const edge = el('use', { href: '#' + ctx.id + '-pi', fill: ctx.dark, stroke: ctx.dark }, outer);
     const main = el('g', { fill: ctx.metal, stroke: ctx.metal }, outer);
     const inner = el('g', { id: ctx.id + '-pi' }, main);
 
     const mkText = txt => {
-      const t = el('text', { x: 0, y: 0, 'font-family': F.family, 'font-weight': F.weight, 'font-size': fs, 'stroke-width': F.thin ? 0.5 : 0, 'stroke-linejoin': 'round' }, inner);
+      const t = el('text', { x: 0, y: 0, 'font-family': F.family, 'font-weight': F.weight, 'font-size': fs, 'stroke-width': nameCol ? rim : F.thin ? 0.5 : 0, 'stroke-linejoin': 'round' }, inner);
       if (F.spacing) t.style.letterSpacing = F.spacing + 'em';
       t.textContent = F.upper && !isArabic(txt) ? txt.toUpperCase() : txt;
       return t;
@@ -569,6 +643,12 @@
     if (heartStone) dangles = ['heart'].concat(dangles.filter(v => v !== 'heart'));
     else if (STONE[state.stone]) dangles.unshift('stone');
     dangles = dangles.slice(0, 4);
+    // „an der Kette“: Anhänger hängen neben dem Namen an der Kette (zeichnet chainCharms), der Stein bleibt am Namen
+    let side = [];
+    if (!opts.pin && state.charmPos === 'chain') {
+      side = dangles.filter(n => n !== 'stone' && !(n === 'heart' && heartStone));
+      dangles = dangles.filter(n => !side.includes(n));
+    }
 
     // nebeneinander anordnen; ein Herz/Unendlich zwischen zwei Namen berührt beide
     const gap = fs * 0.1;
@@ -591,6 +671,21 @@
     });
     const textEls = items.filter(it => it.kind === 'text').map(it => it.el);
     const left = 0, right = x - gap;
+    // Emaille: Kopie der Schrift ohne Rand in Farbe, so bleibt ringsum ein schmaler Goldrand sichtbar
+    if (nameCol) {
+      const fill = enamelFill(ctx, nameCol);
+      textEls.forEach(t => {
+        const c = t.cloneNode(true);
+        c.setAttribute('fill', fill); c.setAttribute('stroke', 'none'); c.setAttribute('stroke-width', 0);
+        enG.appendChild(c);
+      });
+    }
+    // Herz zwischen zwei Namen in der gewählten Farbe
+    items.forEach(it => {
+      if (it.kind === 'charm' && it.name === 'heart' && PAINT[state.charmColor]) {
+        el('path', { d: CHARMS.heart, transform: 'translate(' + it.cx + ' ' + midY + ') scale(' + (it.size * 0.76) + ')', fill: enamelFill(ctx, PAINT[state.charmColor]) }, enG);
+      }
+    });
 
     // Unterstrich: Schwung oder gerader Steg (Druckschrift braucht einen Steg, sonst halten die Buchstaben nicht)
     let ul = state.underline;
@@ -610,13 +705,14 @@
     const ink = inkScan(c => {
       c.font = F.weight + ' ' + fs + 'px ' + F.family;
       try { c.letterSpacing = (F.spacing ? F.spacing * fs : 0) + 'px'; } catch (e) { /* ältere Browser */ }
-      c.lineWidth = F.thin ? 0.5 : 0.01;
+      c.lineWidth = nameCol ? rim : F.thin ? 0.5 : 0.01;
+      c.lineJoin = 'round';
       items.forEach(it => {
         if (it.kind === 'text') {
           // linke Kante aus der SVG-Box (stimmt auch auf der arabischen Seite)
           const bx = it.el.getBBox().x;
           c.fillText(it.el.textContent, bx, 0);
-          if (F.thin) c.strokeText(it.el.textContent, bx, 0);
+          if (F.thin || nameCol) c.strokeText(it.el.textContent, bx, 0);
         } else {
           c.save(); c.translate(it.cx, midY); c.scale(it.size, it.size);
           const p2 = new Path2D(CHARMS[it.name]);
@@ -639,12 +735,22 @@
       el('path', { d: CHARMS.crown, transform: 'translate(' + top[0] + ' ' + (top[1] - 0.25 * cs) + ') scale(' + cs + ')', 'stroke-width': 0.6 / cs }, inner);
     }
 
-    // Ösen an beiden Enden (Teil der Platte)
+    // Ösen an beiden Enden (Teil der Platte); die Anstecknadel hat keine Kette, dafür eine Nadel hinter dem Namen
     const R = fs * 0.07;
     const aL = ink.L || [pre.x, midY], aR = ink.R || [pre.x + pre.width, midY];
     const eL = [aL[0] - R * 0.5, aL[1]], eR = [aR[0] + R * 0.5, aR[1]];
-    [eL, eR].forEach(e => el('circle', { cx: e[0], cy: e[1], r: R * 0.6, fill: 'none', 'stroke-width': R * 0.42 }, inner));
+    if (!opts.pin) [eL, eR].forEach(e => el('circle', { cx: e[0], cy: e[1], r: R * 0.6, fill: 'none', 'stroke-width': R * 0.42 }, inner));
     const hookL = [eL[0] - R * 0.6, eL[1]], hookR = [eR[0] + R * 0.6, eR[1]];
+    if (opts.pin) {
+      // Nadel wie auf dem Foto: läuft hinter dem Namen, links der Verschluss, rechts die Spitze
+      const by = pre.y + pre.height * 0.42, bw = fs * 0.045;
+      const x0 = pre.x - fs * 0.14, x1 = pre.x + pre.width + fs * 0.4;
+      const bar = el('g', null);
+      el('path', { d: 'M' + x0 + ' ' + by + 'H' + (x1 - fs * 0.1), fill: 'none', 'stroke-width': bw, 'stroke-linecap': 'round' }, bar);
+      el('path', { d: 'M' + (x1 - fs * 0.11) + ' ' + (by - bw * 0.5) + 'L' + x1 + ' ' + by + 'L' + (x1 - fs * 0.11) + ' ' + (by + bw * 0.5) + 'Z', 'stroke-width': 0.2 }, bar);
+      el('rect', { x: x0 - fs * 0.07, y: by - fs * 0.065, width: fs * 0.13, height: fs * 0.13, rx: fs * 0.035, 'stroke-width': 0.2 }, bar);
+      inner.insertBefore(bar, inner.firstChild);
+    }
 
     // Größe aus Name und Ösen (die hängenden Anhänger zählen nicht mit)
     const bb = inner.getBBox();
@@ -662,10 +768,23 @@
     let ax = endX + dir * fs * 0.18;
     let prevX = null;
     const hung = [];
-    dangles.forEach(name => {
+    // Anstecknadel: Anhänger wie auf Malaks Foto über die ganze Breite des Namens verteilt
+    const spread = opts.pin && dangles.length > 1;
+    const span = [aL[0] + fs * 0.12, aR[0] - fs * 0.12];
+    dangles.forEach((name, i) => {
       const size = baseSize(name) * shrink;
       // nächste Stelle mit Metall darunter suchen, mit genug Abstand zum vorigen Anhänger
       let b = null;
+      if (spread) {
+        const f = (i + 0.5) / dangles.length;
+        const want = rtl ? span[1] - f * (span[1] - span[0]) : span[0] + f * (span[1] - span[0]);
+        for (let t = 0; t < 40 && !b; t++) {
+          for (const sgn of [1, -1]) {
+            const hit = ink.bottomAt(want + sgn * t * fs * 0.03, fs * 0.04);
+            if (hit && (prevX === null || Math.abs(hit[0] - prevX) >= size * 1.05)) { b = hit; break; }
+          }
+        }
+      }
       for (let t = 0; t < 40 && !b; t++) {
         const tryX = ax + dir * t * fs * 0.03;
         const hit = ink.bottomAt(tryX, fs * 0.04);
@@ -678,13 +797,14 @@
       el('circle', { cx: b[0], cy: ringY, r: rr, fill: 'none', 'stroke-width': rr * 0.42 }, inner);
       const topY = ringY + rr * 0.8;
       if (name === 'stone') hung.push({ stone: true, x: b[0], y: topY, r: size });
-      else hung.push({ x: b[0], y: drawCharm(ctx, inner, name, b[0], topY, size, name === 'heart' && heartStone ? stoneGrad(ctx) : null) });
+      else hung.push({ x: b[0], y: drawCharm(ctx, inner, name, b[0], topY, size, name === 'heart' && heartStone ? stoneGrad(ctx) : null, enG) });
       ax = b[0] + dir * (size * 1.15);
     });
 
     // auf Zielgröße bringen und zentrieren
     const tx = cx - (bb.x + bb.width / 2) * k;
     outer.setAttribute('transform', 'translate(' + tx.toFixed(2) + ' ' + baseY + ') scale(' + k.toFixed(4) + ')');
+    enG.setAttribute('transform', outer.getAttribute('transform'));
     const off = state.thick === 'thick' ? 1.1 : 0.5;
     edge.setAttribute('transform', 'translate(' + (off * 0.6 / k).toFixed(3) + ' ' + (off / k).toFixed(3) + ')');
     const conv = q => [tx + q[0] * k, baseY + q[1] * k];
@@ -711,7 +831,35 @@
     hung.forEach(h => { if (!h.stone) { const q = conv([h.x, h.y]); ctx.glints.push([q[0], q[1] + dy]); } });
 
     const box = { x: tx + bb.x * k, y: baseY + bb.y * k + dy, width: bb.width * k, height: bb.height * k };
-    return { box, L, R: Rr, textEls, k, tx, eyeR: R * 0.6 * k };
+    return { box, L, R: Rr, textEls, k, tx, eyeR: R * 0.6 * k, fs, side };
+  }
+
+  // Anhänger an der Kette neben dem Namen (wie bei Malaks Kinderketten): abwechselnd links und rechts,
+  // jeder an einem kleinen Ring. Braucht die zwei Kettenpfade, die hook() gerade gezeichnet hat.
+  function chainCharms(ctx, pl, gap, grow) {
+    if (!pl.side || !pl.side.length || ctx.chains.length < 2) return;
+    const guides = ctx.chains.slice(-2);
+    const metalG = el('g', { fill: ctx.metal, stroke: ctx.metal, filter: 'url(#' + ctx.id + '-plate)' }, ctx.g);
+    const enG = el('g', null, ctx.g);
+    const unit = pl.fs * pl.k * (grow || 1);
+    const sizeOf = n => (n === 'hamsa' ? 0.48 : n === 'car' ? 0.48 : n === 'teddy' ? 0.46 : 0.42) * unit;
+    // Punkt auf der Kette im Abstand d vom Namen (die Pfade laufen je nach Ansicht zum Namen hin oder von ihm weg)
+    const along = (g, end, d) => {
+      const L = g.getTotalLength(), a = g.getPointAtLength(0), b = g.getPointAtLength(L);
+      const fromStart = Math.hypot(a.x - end[0], a.y - end[1]) < Math.hypot(b.x - end[0], b.y - end[1]);
+      return g.getPointAtLength(Math.max(0, Math.min(L, fromStart ? d : L - d)));
+    };
+    const used = [0, 0];
+    pl.side.forEach((name, i) => {
+      const s = i % 2;                       // 0 = links, 1 = rechts
+      const size = sizeOf(name);
+      used[s] += used[s] ? size * 1.35 : gap + size * 0.45;
+      const p = along(guides[s], s ? pl.R : pl.L, used[s]);
+      const rr = unit * 0.05;
+      el('circle', { cx: p.x, cy: p.y + rr * 0.8, r: rr, fill: 'none', 'stroke-width': rr * 0.45 }, metalG);
+      drawCharm(ctx, metalG, name, p.x, p.y + rr * 1.7, size, null, enG);
+      ctx.glints.push([p.x, p.y + size * 0.7]);
+    });
   }
 
   // ---------- Hals-Foto (Pexels, cottonbro studio) und Kettenverlauf darauf ----------
@@ -985,18 +1133,31 @@
           ((curveY(C.left, a.L[0]) - a.L[1]) + (curveY(C.right, a.R[0]) - a.R[1])) / 2 + 1.4, 36);
         hook(ctx, pl.L, -1, st => bustPath(C.left, st, -1));
         hook(ctx, pl.R, 1, st => bustPath(C.right, st, 1));
+        chainCharms(ctx, pl, pl.fs * pl.k * 0.3);
         ctx.textBox = pl.box;
         return;
       }
-      const pl = namePlate(ctx, 200, 196, 272, 76, true);
+      // Anhänger an der Kette brauchen Platz daneben: Name dann etwas kleiner und höher
+      const onChain = state.charmPos === 'chain' && /teddy|car|heart|star|butterfly|flower|hamsa|eye|coin|cedar|allah/.test(state.accent || '');
+      const pl = namePlate(ctx, 200, onChain ? 170 : 196, onChain ? 200 : 272, 76, true);
       hook(ctx, pl.L, -1, st => 'M44 -12C58 110 ' + (st[0] - 74) + ' ' + (st[1] - 16) + ' ' + st[0] + ' ' + st[1]);
       hook(ctx, pl.R, 1, st => 'M356 -12C342 110 ' + (st[0] + 74) + ' ' + (st[1] - 16) + ' ' + st[0] + ' ' + st[1]);
+      chainCharms(ctx, pl, pl.fs * pl.k * 0.3);
       ctx.textBox = pl.box;
     },
+    // Namensarmband wie Malaks „Adam“: Name in der Mitte, Kette nach beiden Seiten, Anhänger an der Kette
     bracelet(ctx) {
-      const pl = namePlate(ctx, 200, 170, 220, 60, false);
-      hook(ctx, pl.L, -1, st => 'M6 112C42 150 ' + (st[0] - 60) + ' ' + (st[1] + 8) + ' ' + st[0] + ' ' + st[1]);
-      hook(ctx, pl.R, 1, st => 'M394 112C358 150 ' + (st[0] + 60) + ' ' + (st[1] + 8) + ' ' + st[0] + ' ' + st[1]);
+      ctx.linkScale = 1.35;
+      const pl = namePlate(ctx, 200, 140, 220, 70, ctx.studio, null, 70);
+      hook(ctx, pl.L, -1, st => 'M-14 ' + (st[1] + 50) + 'C36 ' + (st[1] + 44) + ' ' + (st[0] - 64) + ' ' + (st[1] + 4) + ' ' + st[0] + ' ' + st[1]);
+      hook(ctx, pl.R, 1, st => 'M414 ' + (st[1] + 50) + 'C364 ' + (st[1] + 44) + ' ' + (st[0] + 64) + ' ' + (st[1] + 4) + ' ' + st[0] + ' ' + st[1]);
+      // Anhänger am Armband sind im Verhältnis größer (wie Teddy und Auto bei „Adam“)
+      chainCharms(ctx, pl, pl.fs * pl.k * 0.5, 1.45);
+      ctx.textBox = pl.box;
+    },
+    // Anstecknadel mit Namen wie Malaks „حسن“: Nadel hinter dem Namen, Anhänger darunter, keine Kette
+    pin(ctx) {
+      const pl = namePlate(ctx, 200, 128, 280, 120, false, null, 118, { pin: true });
       ctx.textBox = pl.box;
     },
     pendant(ctx) {
@@ -1106,9 +1267,22 @@
       mapPendant(ctx, hx, hy, s, k);
     }
   };
+  // schwarzer Samt wie in Malaks Schmuckschachteln (Ansicht für Armband und Anstecknadel)
+  function velvet(svg, id, defs) {
+    const rg = el('radialGradient', { id: id + '-vel', cx: '50%', cy: '40%', r: '80%' }, defs);
+    [[0, '#2c2c2e'], [0.55, '#18181a'], [1, '#09090a']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, rg));
+    el('rect', { x: -10, y: -10, width: 420, height: 320, fill: 'url(#' + id + '-vel)' }, svg);
+    const nf = el('filter', { id: id + '-vgrain', x: 0, y: 0, width: '100%', height: '100%' }, defs);
+    el('feTurbulence', { type: 'fractalNoise', baseFrequency: 1.1, numOctaves: 2, seed: 7, result: 'n' }, nf);
+    el('feColorMatrix', { in: 'n', type: 'matrix', values: '0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .1 0' }, nf);
+    el('rect', { x: 0, y: 0, width: 400, height: 300, filter: 'url(#' + id + '-vgrain)' }, svg);
+  }
   function render(svg) {
     const id = svg.dataset.pid;
-    const piece = svg.dataset.piece || state.piece;
+    let piece = svg.dataset.piece || state.piece;
+    // im Bereich Namenskette: Halskette, Armband oder Anstecknadel
+    const studio = piece === 'necklace';
+    if (studio && (state.item === 'bracelet' || state.item === 'pin')) piece = state.item;
     const m = METALS[state.gold] || METALS.yellow;
     // Nahansicht (data-view="close"): nur die Kette, ohne Hals
     const model = onBust(piece) && svg.dataset.view !== 'close';
@@ -1116,7 +1290,8 @@
     const defs = el('defs', null, svg);
     if (model) {
       el('image', { href: IMG + 'neck.webp', x: 0, y: 0, width: 400, height: BUST.h || 300, preserveAspectRatio: 'xMidYMid slice' }, svg);
-    } else background(svg, id, defs);
+    } else if (studio && piece !== 'necklace' && svg.dataset.view !== 'close') velvet(svg, id, defs);
+    else background(svg, id, defs);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     // auf der Büste näher heran (Kette und Anhänger in echter Größe, trotzdem gut lesbar)
     let vy = 0;
@@ -1137,7 +1312,7 @@
     const waiting = ANIM && svg === heroSvg && !svg._seen;
     const clipRect = el('rect', { x: -20, y: vy - 20, width: waiting ? 0 : 440, height: 340 }, clip);
 
-    const ctx = { id, defs, metal: 'url(#' + id + '-metal)', dark: m[0], glints: [], chains: [], textBox: null, model, linkScale: model ? 0.9 : 1 };
+    const ctx = { id, defs, metal: 'url(#' + id + '-metal)', dark: m[0], glints: [], chains: [], textBox: null, model, linkScale: model ? 0.9 : 1, studio };
     ctx.under = el('g', null, svg);
     const wrapG = el('g', { 'clip-path': 'url(#' + id + '-clip)' }, svg);
     ctx.chainG = el('g', { filter: 'url(#' + id + '-sh)' }, wrapG);
@@ -1145,7 +1320,7 @@
     const shapeG = el('g', { filter: 'url(#' + id + '-sh)' }, ctx.g);
     const plainG = ctx.g;
     // Motive und Ringe bekommen den einfachen Schatten, die Namensplatte ihren eigenen Filter
-    if (piece === 'necklace' || piece === 'bracelet' || piece === 'map') ctx.g = plainG; else ctx.g = shapeG;
+    if (['necklace', 'bracelet', 'map', 'pin'].includes(piece)) ctx.g = plainG; else ctx.g = shapeG;
     DRAW[piece](ctx);
     ctx.sparks = el('g', { class: 'sparks', 'pointer-events': 'none' }, svg);
     ctx.grad = grad;
@@ -1242,6 +1417,7 @@
       if (f.dataset.show && f.closest('[data-form="builder"]')) hide = !f.dataset.show.split(' ').includes(state.piece);
       if (f.dataset.needs && !String(state[f.dataset.needs] || '').trim()) hide = true;
       if (f.dataset.design) hide = !f.dataset.design.split(' ').includes(state.mapDesign);
+      if (f.dataset.item && !f.dataset.item.split(' ').includes(state.item)) hide = true;
       if (f.dataset.alt) {
         if (!mm || (f.dataset.alt === '2' && !nameText(state.text2))) hide = true;
         const lab = f.dataset.alt === '2' ? (toAr ? TXT.altAr2 : TXT.altEn2) : (toAr ? TXT.altAr1 : TXT.altEn1);
@@ -1300,7 +1476,8 @@
   }
   // ---------- Entwurf als Link: öffnet genau diese Gestaltung wieder ----------
   const KEYS = {
-    studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len', 'karat'],
+    studio: ['text', 'text2', 'textAlt', 'text2Alt', 'join', 'style', 'accent', 'underline', 'thick', 'chain', 'gold', 'stone', 'len', 'karat',
+      'item', 'nameColor', 'charmColor', 'charmPos', 'wrist'],
     builder: ['piece', 'gold', 'text', 'textAlt', 'style', 'motif', 'enamel', 'stone', 'size', 'karat'],
     map: ['mapDesign', 'mapText', 'gold', 'karat', 'chain', 'len', 'mapHeart']
   };
@@ -1333,7 +1510,8 @@
   }
   function message(form) {
     const L = lines(form);
-    const hello = { studio: TXT.helloName, map: TXT.helloMap }[form.dataset.form] || TXT.hello;
+    const studioHello = { bracelet: TXT.helloBracelet, pin: TXT.helloPin }[state.item] || TXT.helloName;
+    const hello = { studio: studioHello, map: TXT.helloMap }[form.dataset.form] || TXT.hello;
     return hello + '\n\n' + L.map(([k, v]) => '• ' + k + ': ' + v).join('\n') + '\n\n' + TXT.ask +
       '\n\n' + TXT.linkLabel + designUrl(form.dataset.form);
   }
@@ -1346,6 +1524,10 @@
         const dd = document.createElement('dd'); dd.textContent = v;
         return [dt, dd];
       }));
+      if (form.dataset.form === 'studio') {
+        const h = form.querySelector('.summary h3');
+        if (h) h.textContent = TXT.sum[state.item] || TXT.sum.necklace;
+      }
       const msg = message(form);
       form.querySelectorAll('[data-wa]').forEach(a => { a.href = wa(msg); });
     });
@@ -1525,6 +1707,18 @@
     });
   }
   let lastKind = font().kind === 'arabic';
+  // Beim Wechsel Halskette / Armband / Anstecknadel: Startwerte wie auf Malaks Fotos,
+  // aber nur für Felder, die der Kunde noch nicht selbst geändert hat
+  const touchedKeys = new Set();
+  const ITEM_START = {
+    necklace: { charmPos: 'below', nameColor: 'metal', accent: 'none' },
+    bracelet: { charmPos: 'chain', nameColor: 'blue', accent: 'teddy,car' },
+    pin: { nameColor: 'metal', accent: 'hamsa,eye,coin' }
+  };
+  function itemDefaults() {
+    const d = ITEM_START[state.item] || {};
+    Object.keys(d).forEach(k => { if (!touchedKeys.has(k)) state[k] = d[k]; });
+  }
   function onChange(e) {
     const c = e.target;
     const k = c.dataset && c.dataset.key;
@@ -1539,6 +1733,7 @@
     if ((c.type === 'radio' && !c.checked) || state[k] === val) return;
     state[k] = val;
     touched = true;
+    if (k === 'item') itemDefaults(); else touchedKeys.add(k);
     if (k === 'textAlt' || k === 'text2Alt') altEdited[k] = !!c.value.trim();
     if (k === 'text') altEdited.textAlt = false;
     if (k === 'text2') altEdited.text2Alt = false;
@@ -1733,6 +1928,7 @@
     const goal = like.goto || 'design';
     delete like.goto;
     Object.assign(state, like);
+    Object.keys(like).forEach(k => touchedKeys.add(k));
     const cap = b.closest('li').querySelector('.cap');
     if (goal === 'design') state.notes = TXT.similar + ' ' + cap.textContent.trim();
     altEdited.textAlt = altEdited.text2Alt = false;
@@ -1758,6 +1954,7 @@
       if (typeof shared[k] !== 'string') return;
       if (k === 'style' && !FONTS[shared[k]]) return;   // Schrift gibt es nicht mehr (z. B. Old English in alten Links)
       state[k] = shared[k].slice(0, 40);
+      touchedKeys.add(k);
     });
     if (shared.textAlt) altEdited.textAlt = true;
     if (shared.text2Alt) altEdited.text2Alt = true;

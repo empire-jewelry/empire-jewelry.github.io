@@ -104,8 +104,8 @@
     <!-- Namenskette: Schrift, Kette, Anhänger, Stein -->
     <section class="studio" id="name" aria-labelledby="name-title">
       <div class="section-head">
-        <h2 id="name-title">Name necklace</h2>
-        <p>Type a name, then choose the lettering, the chain and the details. The sketch shows how the gold plate will look.</p>
+        <h2 id="name-title">Name necklace, bracelet or pin</h2>
+        <p>Type a name and choose a necklace, a bracelet or a lapel pin. Then pick the lettering, colours and charms. The sketch shows how your piece will look.</p>
       </div>
       <div class="studio-grid">
         <figure class="stage studio-stage">
@@ -114,17 +114,24 @@
         </figure>
 
         <form class="studio-form" data-sync data-form="studio" onsubmit="return false">
+          <fieldset class="chips" data-field="item" data-label="Piece">
+            <legend class="field-label">Piece</legend>
+            <label class="chip"><input type="radio" name="n-item" value="necklace" data-key="item" checked><span class="chip-t">Necklace</span></label>
+            <label class="chip"><input type="radio" name="n-item" value="bracelet" data-key="item"><span class="chip-t">Bracelet</span></label>
+            <label class="chip"><input type="radio" name="n-item" value="pin" data-key="item"><span class="chip-t">Lapel pin</span></label>
+          </fieldset>
+
           <fieldset data-field="text" data-label="Name">
             <legend class="field-label">Name</legend>
             <input class="name-input" id="n-text" type="text" value="Layla" maxlength="14" autocomplete="off" spellcheck="false" dir="auto" data-key="text" aria-label="Name">
           </fieldset>
 
-          <fieldset data-field="text2" data-label="Second name">
+          <fieldset data-field="text2" data-item="necklace bracelet" data-label="Second name">
             <legend class="field-label">Second name <span class="opt">(optional, for couples or children)</span></legend>
             <input class="name-input" id="n-text2" type="text" value="" maxlength="12" autocomplete="off" spellcheck="false" dir="auto" data-key="text2" aria-label="Second name" placeholder="Ali">
           </fieldset>
 
-          <fieldset class="chips" data-field="join" data-label="Between the names" data-needs="text2">
+          <fieldset class="chips" data-field="join" data-item="necklace bracelet" data-label="Between the names" data-needs="text2">
             <legend class="field-label">Between the names</legend>
             <label class="chip"><input type="radio" name="n-join" value="heart" data-key="join" checked><span class="charm-ico" data-charm="heart" aria-hidden="true"></span><span class="chip-t">Heart</span></label>
             <label class="chip"><input type="radio" name="n-join" value="amp" data-key="join"><span class="chip-t">&amp;</span></label>
@@ -166,6 +173,17 @@
             <input class="name-input" type="text" maxlength="12" autocomplete="off" spellcheck="false" dir="auto" data-key="text2Alt">
           </fieldset>
 
+          <fieldset class="chips" data-field="nameColor" data-label="Name colour">
+            <legend class="field-label">Name colour <span class="opt">(enamel)</span></legend>
+            <label class="chip"><input type="radio" name="n-ncol" value="metal" data-key="nameColor" checked><span class="dot metal-yellow" aria-hidden="true"></span><span class="chip-t">Gold only</span></label>
+            <label class="chip"><input type="radio" name="n-ncol" value="blue" data-key="nameColor"><span class="dot" style="--c:#4ea8e2" aria-hidden="true"></span><span class="chip-t">Blue</span></label>
+            <label class="chip"><input type="radio" name="n-ncol" value="turquoise" data-key="nameColor"><span class="dot" style="--c:#33b3bd" aria-hidden="true"></span><span class="chip-t">Turquoise</span></label>
+            <label class="chip"><input type="radio" name="n-ncol" value="pink" data-key="nameColor"><span class="dot" style="--c:#f29bbb" aria-hidden="true"></span><span class="chip-t">Pink</span></label>
+            <label class="chip"><input type="radio" name="n-ncol" value="red" data-key="nameColor"><span class="dot" style="--c:#d0263a" aria-hidden="true"></span><span class="chip-t">Red</span></label>
+            <label class="chip"><input type="radio" name="n-ncol" value="white" data-key="nameColor"><span class="dot" style="--c:#f6f4ef" aria-hidden="true"></span><span class="chip-t">White</span></label>
+            <label class="chip"><input type="radio" name="n-ncol" value="black" data-key="nameColor"><span class="dot" style="--c:#222326" aria-hidden="true"></span><span class="chip-t">Black</span></label>
+          </fieldset>
+
           <fieldset class="chips" data-field="stone" data-label="Birthstone">
             <legend class="field-label">Birthstone</legend>
             <label class="chip"><input type="radio" name="n-stone" value="none" data-key="stone" checked><span class="chip-t">None</span></label>
@@ -177,7 +195,7 @@
           </fieldset>
 
           <fieldset class="chips" data-field="accent" data-label="Charms">
-            <legend class="field-label">Charms <span class="opt">(they hang below the name, up to 3)</span></legend>
+            <legend class="field-label">Charms <span class="opt">(up to 3)</span></legend>
             <label class="chip"><input type="checkbox" name="n-accent" value="heart" data-key="accent"><span class="charm-ico" data-charm="heart" aria-hidden="true"></span><span class="chip-t">Heart</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="star" data-key="accent"><span class="charm-ico" data-charm="star" aria-hidden="true"></span><span class="chip-t">Star</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="butterfly" data-key="accent"><span class="charm-ico" data-charm="butterfly" aria-hidden="true"></span><span class="chip-t">Butterfly</span></label>
@@ -186,7 +204,27 @@
             <label class="chip"><input type="checkbox" name="n-accent" value="eye" data-key="accent"><span class="charm-ico" data-charm="eye" aria-hidden="true"></span><span class="chip-t">Evil eye</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="coin" data-key="accent"><span class="charm-ico" data-charm="coin" aria-hidden="true"></span><span class="chip-t">Engraved coin</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="cedar" data-key="accent"><span class="charm-ico" data-charm="cedar" aria-hidden="true"></span><span class="chip-t">Cedar</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="teddy" data-key="accent"><span class="charm-ico" data-charm="teddy" aria-hidden="true"></span><span class="chip-t">Teddy bear</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="car" data-key="accent"><span class="charm-ico" data-charm="car" aria-hidden="true"></span><span class="chip-t">Car</span></label>
+            <label class="chip"><input type="checkbox" name="n-accent" value="allah" data-key="accent"><span class="charm-ico" data-charm="allah" aria-hidden="true"></span><span class="chip-t">Allah</span></label>
             <label class="chip"><input type="checkbox" name="n-accent" value="crown" data-key="accent"><span class="charm-ico" data-charm="crown" aria-hidden="true"></span><span class="chip-t">Crown on first letter</span></label>
+          </fieldset>
+
+          <fieldset class="chips" data-field="charmColor" data-label="Charm colour">
+            <legend class="field-label">Colour of heart, star, butterfly and flower</legend>
+            <label class="chip"><input type="radio" name="n-ccol" value="metal" data-key="charmColor" checked><span class="dot metal-yellow" aria-hidden="true"></span><span class="chip-t">Gold only</span></label>
+            <label class="chip"><input type="radio" name="n-ccol" value="blue" data-key="charmColor"><span class="dot" style="--c:#4ea8e2" aria-hidden="true"></span><span class="chip-t">Blue</span></label>
+            <label class="chip"><input type="radio" name="n-ccol" value="turquoise" data-key="charmColor"><span class="dot" style="--c:#33b3bd" aria-hidden="true"></span><span class="chip-t">Turquoise</span></label>
+            <label class="chip"><input type="radio" name="n-ccol" value="pink" data-key="charmColor"><span class="dot" style="--c:#f29bbb" aria-hidden="true"></span><span class="chip-t">Pink</span></label>
+            <label class="chip"><input type="radio" name="n-ccol" value="red" data-key="charmColor"><span class="dot" style="--c:#d0263a" aria-hidden="true"></span><span class="chip-t">Red</span></label>
+            <label class="chip"><input type="radio" name="n-ccol" value="white" data-key="charmColor"><span class="dot" style="--c:#f6f4ef" aria-hidden="true"></span><span class="chip-t">White</span></label>
+            <label class="chip"><input type="radio" name="n-ccol" value="black" data-key="charmColor"><span class="dot" style="--c:#222326" aria-hidden="true"></span><span class="chip-t">Black</span></label>
+          </fieldset>
+
+          <fieldset class="chips" data-field="charmPos" data-label="Charm position" data-item="necklace bracelet">
+            <legend class="field-label">Where the charms hang</legend>
+            <label class="chip"><input type="radio" name="n-cpos" value="below" data-key="charmPos" checked><span class="chip-t">Below the name</span></label>
+            <label class="chip"><input type="radio" name="n-cpos" value="chain" data-key="charmPos"><span class="chip-t">On the chain, beside the name</span></label>
           </fieldset>
 
           <fieldset class="chips" data-field="underline" data-label="Underline">
@@ -202,7 +240,7 @@
             <label class="chip"><input type="radio" name="n-thick" value="thick" data-key="thick"><span class="chip-t">Thick (double)</span></label>
           </fieldset>
 
-          <fieldset class="chips" data-field="chain" data-label="Chain">
+          <fieldset class="chips" data-field="chain" data-item="necklace bracelet" data-label="Chain">
             <legend class="field-label">Chain</legend>
             <label class="chip"><input type="radio" name="n-chain" value="cable" data-key="chain" checked><span class="chip-t">Cable</span></label>
             <label class="chip"><input type="radio" name="n-chain" value="rolo" data-key="chain"><span class="chip-t">Rolo</span></label>
@@ -226,13 +264,28 @@
             <label class="chip"><input type="radio" name="n-karat" value="21k" data-key="karat"><span class="chip-t">21k</span></label>
           </fieldset>
 
-          <fieldset data-field="len" data-label="Chain length">
+          <fieldset data-field="len" data-item="necklace" data-label="Chain length">
             <legend class="field-label" id="n-len-label">Chain length</legend>
             <select class="select" data-key="len" aria-labelledby="n-len-label">
               <option>40 cm</option>
               <option>42 cm</option>
               <option selected>45 cm</option>
               <option>50 cm</option>
+            </select>
+          </fieldset>
+
+          <fieldset data-field="wrist" data-label="Bracelet length" data-item="bracelet">
+            <legend class="field-label" id="n-wrist-label">Bracelet length</legend>
+            <select class="select" data-key="wrist" aria-labelledby="n-wrist-label">
+              <option selected>Not sure</option>
+              <option>12 cm</option>
+              <option>13 cm</option>
+              <option>14 cm</option>
+              <option>15 cm</option>
+              <option>16 cm</option>
+              <option>17 cm</option>
+              <option>18 cm</option>
+              <option>19 cm</option>
             </select>
           </fieldset>
 
@@ -368,7 +421,6 @@
             <label class="chip"><input type="radio" name="b-piece" value="pendant" data-key="piece" checked><span class="chip-t">Pendant</span></label>
             <label class="chip"><input type="radio" name="b-piece" value="initial" data-key="piece"><span class="chip-t">Initial disc</span></label>
             <label class="chip"><input type="radio" name="b-piece" value="ring" data-key="piece"><span class="chip-t">Ring</span></label>
-            <label class="chip"><input type="radio" name="b-piece" value="bracelet" data-key="piece"><span class="chip-t">Name bracelet</span></label>
             <label class="chip"><input type="radio" name="b-piece" value="earrings" data-key="piece"><span class="chip-t">Earrings</span></label>
           </fieldset>
 
@@ -505,8 +557,33 @@
         <label class="chip"><input type="radio" name="filter" value="pendant"><span class="chip-t">Pendants</span></label>
         <label class="chip"><input type="radio" name="filter" value="earrings"><span class="chip-t">Earrings</span></label>
         <label class="chip"><input type="radio" name="filter" value="bracelet"><span class="chip-t">Bracelets</span></label>
+        <label class="chip"><input type="radio" name="filter" value="pin"><span class="chip-t">Pins</span></label>
       </fieldset>
       <ul class="gallery">
+        <li data-cat="pin">
+          <img src="img/name-pin-480.webp" srcset="img/name-pin-480.webp 480w, img/name-pin.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Name pin in Arabic with a hamsa, a blue evil eye and an engraved coin, in an Empire Jewelry box">
+          <p class="cap">Name pin with hamsa, evil eye and engraved coin</p>
+          <p class="price">Price on request</p>
+          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"item":"pin","style":"calligraphy","accent":"hamsa,eye,coin","nameColor":"metal","goto":"name"}'>Make it custom</button></div>
+        </li>
+        <li data-cat="pin">
+          <img src="img/pins-bracelet-480.webp" srcset="img/pins-bracelet-480.webp 480w, img/pins-bracelet.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Two name pins in Arabic with small charms, and a name bracelet in blue enamel with a teddy bear and a car">
+          <p class="cap">Name pins and a name bracelet for children</p>
+          <p class="price">Price on request</p>
+          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"item":"bracelet","style":"pacifico","nameColor":"blue","accent":"teddy,car","charmPos":"chain","goto":"name"}'>Make it custom</button></div>
+        </li>
+        <li data-cat="name">
+          <img src="img/kids-name-necklace-480.webp" srcset="img/kids-name-necklace-480.webp 480w, img/kids-name-necklace.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Name necklace with the name in blue enamel, a small car and a teddy bear on the chain, in an Empire Jewelry box">
+          <p class="cap">Name necklace in blue enamel with a car and a teddy</p>
+          <p class="price">Price on request</p>
+          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"item":"necklace","style":"pacifico","nameColor":"blue","accent":"car,teddy","charmPos":"chain","goto":"name"}'>Make it custom</button></div>
+        </li>
+        <li data-cat="name">
+          <img src="img/two-names-heart-480.webp" srcset="img/two-names-heart-480.webp 480w, img/two-names-heart.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Gold necklace with two names in script and a small heart on the chain, in a pink box">
+          <p class="cap">Two names and a heart on one chain</p>
+          <p class="price">Price on request</p>
+          <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"item":"necklace","style":"script","nameColor":"metal","goto":"name"}'>Make it custom</button></div>
+        </li>
         <li data-cat="pendant">
           <img src="img/lebanon-map-480.webp" srcset="img/lebanon-map-480.webp 480w, img/lebanon-map.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Four gold pendants shaped like Lebanon, one with the flag in enamel and one with colourful buildings">
           <p class="cap">Lebanon map pendants</p>
@@ -601,7 +678,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=29" defer></script>
+  <script src="js/main.js?v=30" defer></script>
   <script src="js/ring.js?v=6" defer></script>
   <script src="js/music.js?v=3" defer></script>
 </body>
