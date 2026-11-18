@@ -32,7 +32,7 @@
   <!-- Schriften für die Namenskette -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
-  <link rel="stylesheet" href="../css/style.css?v=18">
+  <link rel="stylesheet" href="../css/style.css?v=19">
 </head>
 <body>
   <a class="skip" href="#main">انتقل إلى المحتوى</a>
@@ -633,11 +633,15 @@
     <!-- Über uns: Text mit dem Geschäft abstimmen -->
     <section class="about" id="about" aria-labelledby="about-title">
       <div class="about-grid">
-        <img src="../img/lebanon-map.webp" width="900" height="900" loading="lazy" alt="تعاليق ذهبية بشكل خريطة لبنان في علبة مجوهرات">
+        <img src="../img/workshop-bench.webp" srcset="../img/workshop-bench-480.webp 480w, ../img/workshop-bench.webp 960w" sizes="(min-width: 960px) 40vw, 100vw" width="960" height="1200" loading="lazy" alt="صائغ يعمل على طاولته في مشغل Empire Jewelry">
         <div>
           <h2 id="about-title">من نحن</h2>
           <p class="lead">Empire Jewelry محل مجوهرات في النبطية، لبنان. نصنع قطعاً من الذهب حسب رغبتك: أسماء وحروف وأشكال وأفكارك الخاصة.</p>
-          <p><span class="ph">[بضع جمل عن الأشخاص وراء Empire Jewelry: من هم، ومنذ متى، وماذا يحبون في صناعة المجوهرات.]</span></p>
+          <p>كل قطعة تُصنع في مشغلنا الخاص: يدوياً على طاولة الصائغ، مع الحفر بالليزر للأحرف الدقيقة واللحام بالليزر للوصلات الصغيرة.</p>
+          <div class="owner">
+            <div class="owner-ph" role="img" aria-label="صورة صاحبة المحل (قريباً)"><span>[صورة صاحبة المحل]</span></div>
+            <p><span class="ph">[بضع جمل عن الأشخاص وراء Empire Jewelry: من هم، ومنذ متى، وماذا يحبون في صناعة المجوهرات.]</span></p>
+          </div>
           <ul class="facts">
             <li>مجوهرات ذهب</li>
             <li>حسب الطلب</li>
@@ -646,6 +650,12 @@
           </ul>
         </div>
       </div>
+      <h3 class="workshop-title">مشغلنا</h3>
+      <ul class="workshop">
+        <li><img src="../img/workshop-room-360.webp" srcset="../img/workshop-room-360.webp 360w, ../img/workshop-room.webp 600w" sizes="(min-width: 960px) 22vw, 33vw" width="600" height="800" loading="lazy" alt="مشغل Empire Jewelry مع طاولات العمل والآلات"><p>المشغل</p></li>
+        <li><img src="../img/workshop-laser-360.webp" srcset="../img/workshop-laser-360.webp 360w, ../img/workshop-laser.webp 600w" sizes="(min-width: 960px) 22vw, 33vw" width="600" height="800" loading="lazy" alt="آلة الحفر بالليزر مع الكمبيوتر"><p>الحفر بالليزر</p></li>
+        <li><img src="../img/workshop-welding-360.webp" srcset="../img/workshop-welding-360.webp 360w, ../img/workshop-welding.webp 600w" sizes="(min-width: 960px) 22vw, 33vw" width="600" height="800" loading="lazy" alt="آلة اللحام بالليزر مع مجهر"><p>اللحام بالليزر</p></li>
+      </ul>
     </section>
 
     <!-- Kontakt -->
@@ -655,7 +665,6 @@
       <ul class="contact">
         <li><a href="https://wa.me/96170894976" target="_blank" rel="noopener">واتساب <span dir="ltr">+961 70 894 976</span></a></li>
         <li><a href="https://www.instagram.com/empirejewellery__/" target="_blank" rel="noopener">إنستغرام <span dir="ltr">@empirejewellery__</span></a></li>
-        <li><span class="ph">[عنوان المحل في النبطية، إن وجد]</span></li>
         <li><span class="ph">[ساعات العمل]</span></li>
       </ul>
     </section>

@@ -368,7 +368,25 @@ html[dir="rtl"] .charm-pop-t { margin: 0 0 .45rem 1.6rem; }
 
 /* ---------- Über uns ---------- */
 .about-grid { display: grid; gap: 2rem; align-items: center; }
-.about-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 22px; }
+.about-grid img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 22px; }
+/* Foto der Besitzerin (noch Platzhalter) neben dem Text über die Menschen */
+.about-grid .lead + p { margin-block-start: .8rem; }
+.owner { display: flex; gap: 1rem; align-items: center; margin-block-start: 1.1rem; }
+.owner p { margin: 0; }
+.owner-ph {
+  flex: 0 0 auto; width: 88px; height: 88px; border-radius: 50%; display: grid; place-items: center;
+  padding: .5rem; text-align: center; background: #fff6dc; border: 1px dashed var(--gold);
+  color: var(--gold-text); font-size: .64rem; line-height: 1.25;
+}
+/* Werkstatt-Fotos unter „Über uns“ */
+.workshop-title { margin-block: 2.4rem 1rem; font: 700 clamp(1.35rem, 4.5vw, 1.8rem)/1.2 var(--font-show); }
+.workshop { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.workshop img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 16px; background: #e9e9e3; }
+.workshop p { margin-block-start: .45rem; font-size: .9rem; color: var(--ink-2); }
+@media (max-width: 599px) {
+  .workshop { gap: .5rem; }
+  .workshop p { font-size: .78rem; }
+}
 .about-grid .ph { margin-block-start: 1rem; }
 .facts { list-style: none; margin: 1.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
 .facts li { padding: .4rem .9rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-size: .9rem; }
