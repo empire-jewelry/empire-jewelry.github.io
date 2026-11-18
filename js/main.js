@@ -2195,7 +2195,7 @@
       es.forEach(en => { if (en.isIntersecting) near.add(en.target); else near.delete(en.target); });
       waFloat.classList.toggle('is-away', near.size > 0);
     }, { threshold: 0.1 });
-    document.querySelectorAll('.ring-copy .actions, .custom .actions, .summary').forEach(x => io2.observe(x));
+    document.querySelectorAll('.ring-copy .actions, .summary').forEach(x => io2.observe(x));
   }
 
   // ---------- Weiches Scrollen ----------

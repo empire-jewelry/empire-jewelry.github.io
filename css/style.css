@@ -231,21 +231,6 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-block-start: .3rem; }
 .actions .btn { flex: 1 1 14rem; }
 
-/* ---------- Custom Order ---------- */
-.custom-grid { display: grid; gap: 2rem; align-items: center; }
-.why { list-style: none; margin: 2rem 0; padding: 0; display: grid; gap: 1.25rem; }
-.why li { padding-inline-start: 1.1rem; border-inline-start: 2px solid var(--gold); }
-.why p { color: var(--ink-2); margin-block-start: .25rem; }
-.custom-photo { margin: 0; }
-.custom-photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 22px; }
-.custom-photo figcaption { margin-block-start: .5rem; }
-.ideas-title { margin-block: var(--gap-section) 1.25rem; font-family: var(--font-show); font-weight: 700; font-size: clamp(1.6rem, 5vw, 2.2rem); }
-.ideas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); border-top: 1px solid var(--line); }
-.ideas li { display: grid; gap: .15rem; padding: 1rem 0; border-bottom: 1px solid var(--line); padding-inline-end: 1rem; }
-.idea-t { font-weight: 500; }
-.idea-d { color: var(--ink-2); font-size: .95rem; }
-.ideas-more { margin-block-start: 1.5rem; }
-
 /* ---------- Namenskette ---------- */
 .studio-grid { display: grid; gap: 1.25rem; }
 .studio-stage { position: sticky; top: 4.4rem; z-index: 5; box-shadow: 0 10px 24px -18px rgba(40, 35, 20, .5); }
@@ -338,7 +323,7 @@ html[dir="rtl"] .charm-pop-t { margin: 0 0 .45rem 1.6rem; }
 .map-ico svg { width: 100%; height: 100%; }
 
 /* ---------- Abschnitte allgemein ---------- */
-.custom, .studio, .pieces, .builder, .how, .about, .visit {
+.studio, .pieces, .builder, .how, .about, .visit {
   max-width: var(--max); margin: 0 auto;
   padding: var(--gap-section) var(--pad) 0;
 }
@@ -468,7 +453,6 @@ html[lang="ar"] .how-steps li::before { content: counter(step, arabic-indic); }
   .top-lang { margin-inline-start: 1rem; }
   main section[id] { scroll-margin-top: 5.5rem; }
 
-  .custom-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 4rem; }
   .about-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 4rem; }
   .studio-grid { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: 3.5rem; align-items: start; }
   .studio-stage { top: 6rem; box-shadow: none; }
