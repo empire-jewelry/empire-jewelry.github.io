@@ -1,46 +1,15 @@
 /* Empire Jewelry – Startseite: fotorealistischer Ring (in Blender mit Cycles gerendert)
    und kleine Lichtpunkte, die über die Steine wandern, wie im Juwelier-Schaufenster.
    Die Positionen der Steine kommen aus img/ring-points.json (beim Rendern berechnet).
-   Steinfarbe umschaltbar: dafür gibt es je ein Bild pro Farbe. */
+   Steine nur noch grün (img/ring-emerald.webp). */
 (() => {
   'use strict';
   const stage = document.querySelector('[data-ring]');
   if (!stage) return;
   const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const base = stage.dataset.src;                       // z. B. "img/ring-"
-  const layers = Array.from(stage.querySelectorAll('.ring-img'));
-  // zweite Bildebene zum Überblenden
-  const backImg = layers[0].cloneNode();
-  backImg.classList.remove('is-on');
-  backImg.removeAttribute('src');
-  backImg.removeAttribute('fetchpriority');
-  layers[0].after(backImg);
-  layers.push(backImg);
   const canvas = stage.querySelector('.ring-glints');
   const ctx = canvas.getContext('2d');
-
-  // ---------- Steinfarbe: Bild überblenden ----------
-  let front = 0, current = 'emerald';
-  function show(name) {
-    if (name === current) return;
-    current = name;
-    const back = layers[1 - front];
-    const swap = () => {
-      back.classList.add('is-on');
-      layers[front].classList.remove('is-on');
-      front = 1 - front;
-      burst(10);
-    };
-    back.onload = swap;
-    back.src = base + name + '.webp';
-    if (back.complete && back.naturalWidth) { back.onload = null; swap(); }
-  }
-  document.querySelectorAll('[data-stones] input').forEach(inp => {
-    inp.addEventListener('change', () => { if (inp.checked) show(inp.value); });
-  });
-  // die anderen Farben im Leerlauf vorladen
-  const preload = () => ['ruby', 'sapphire', 'diamond'].forEach(n => { const i = new Image(); i.src = base + n + '.webp'; });
-  if ('requestIdleCallback' in window) requestIdleCallback(preload, { timeout: 3000 }); else setTimeout(preload, 2000);
 
   if (REDUCE) return;
 

@@ -32,7 +32,7 @@
   <!-- Schriften für die Namenskette -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
-  <link rel="stylesheet" href="css/style.css?v=24">
+  <link rel="stylesheet" href="css/style.css?v=27">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -54,20 +54,12 @@
 
   <main id="main">
 
-    <!-- Start: gerenderter Ring mit Lichtpunkten (js/ring.js), Relief-Ornamente (js/main.js) -->
+    <!-- Start: gerenderter Ring mit Lichtpunkten (js/ring.js) -->
     <section class="ring-hero" aria-labelledby="hero-title">
-      <svg class="ornaments" aria-hidden="true"></svg>
-      <div class="ring-stage" data-ring data-src="img/ring-" role="img" aria-label="Gold ring set with rows of small stones">
+      <div class="ring-stage" data-ring data-src="img/ring-" role="img" aria-label="Gold ring set with rows of small green stones">
         <img class="ring-img is-on" src="img/ring-emerald.webp" alt="" width="1000" height="1000" fetchpriority="high">
         <canvas class="ring-glints" aria-hidden="true"></canvas>
       </div>
-      <fieldset class="ring-stones" data-stones>
-        <legend class="field-label">Try a stone colour</legend>
-        <label class="chip chip-dot"><input type="radio" name="ring-stone" value="emerald" checked><span class="dot" style="--c:#1f8f5a" aria-hidden="true"></span><span class="chip-t">Emerald</span></label>
-        <label class="chip chip-dot"><input type="radio" name="ring-stone" value="ruby"><span class="dot" style="--c:#d1284a" aria-hidden="true"></span><span class="chip-t">Ruby</span></label>
-        <label class="chip chip-dot"><input type="radio" name="ring-stone" value="sapphire"><span class="dot" style="--c:#2e5fd4" aria-hidden="true"></span><span class="chip-t">Sapphire</span></label>
-        <label class="chip chip-dot"><input type="radio" name="ring-stone" value="diamond"><span class="dot" style="--c:#f4f7ff" aria-hidden="true"></span><span class="chip-t">Diamond</span></label>
-      </fieldset>
       <div class="ring-copy">
         <h1 id="hero-title">Jewelry made to your wish</h1>
         <p class="lead">Rings, necklaces and names in gold, designed with you and delivered all over Lebanon.</p>
@@ -394,7 +386,7 @@
             </div>
           </div>
           <p class="small pt-status" data-pstatus role="status"></p>
-          <p class="small pt-note">Works best with one face, from the front, with the whole head in the photo and good light. Your photo stays on your device: it only reaches us if you send it.</p>
+          <p class="small pt-note">Works best with one face, from the front, with the whole head in the photo and good light. Your photo stays on your device: it only reaches us if you send it. <a href="privacy.html#photo">Privacy</a></p>
         </div>
 
         <form class="builder-form" data-portrait onsubmit="return false">
@@ -550,13 +542,12 @@
     <!-- Über uns: Text mit dem Geschäft abstimmen -->
     <section class="about" id="about" aria-labelledby="about-title">
       <div class="about-grid">
-        <div class="about-photo-ph" role="img" aria-label="Photo of the owner (coming soon)"><span>[Photo of the owner]</span></div>
         <div>
           <h2 id="about-title">About Empire Jewelry</h2>
-          <p class="lead">Empire Jewelry is a jewelry shop in Nabatieh, Lebanon, with more than 20 years in the gold business. We make gold pieces to your wish: names, initials, motifs and your own ideas.</p>
+          <p class="lead">Empire Jewelry is a jewelry shop in Nabatieh, Lebanon, with more than 35 years in the gold business. We make gold pieces to your wish: names, initials, motifs and your own ideas.</p>
           <p>Every piece is made in our own workshop: by hand at the goldsmith’s bench, with laser engraving for fine lettering and laser welding for tiny joins.</p>
           <ul class="facts">
-            <li>20+ years in gold</li>
+            <li>35+ years in gold</li>
             <li>Gold jewelry</li>
             <li>Made to order</li>
             <li>Delivery all over Lebanon</li>
@@ -587,7 +578,7 @@
   <footer class="foot">
     <img src="img/logo.png" alt="" width="711" height="287">
     <p>© 2026 Empire Jewelry</p>
-    <p><a href="https://www.instagram.com/empirejewellery__/" target="_blank" rel="noopener">Instagram</a> <a href="https://wa.me/96170894976" target="_blank" rel="noopener">WhatsApp</a> <a href="ar/" hreflang="ar" lang="ar">العربية</a></p>
+    <p><a href="https://www.instagram.com/empirejewellery__/" target="_blank" rel="noopener">Instagram</a> <a href="https://wa.me/96170894976" target="_blank" rel="noopener">WhatsApp</a> <a href="privacy.html">Privacy</a> <a href="ar/" hreflang="ar" lang="ar">العربية</a></p>
   </footer>
 
   <a class="wa-float" href="https://wa.me/96170894976" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
@@ -596,8 +587,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=53" defer></script>
-  <script src="js/ring.js?v=6" defer></script>
+  <script src="js/main.js?v=56" defer></script>
+  <script src="js/ring.js?v=7" defer></script>
   <script src="js/music.js?v=3" defer></script>
 </body>
 </html>

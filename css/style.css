@@ -186,16 +186,6 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     radial-gradient(55% 45% at 50% 34%, rgba(255,255,255,.95), rgba(255,255,255,0) 72%),
     linear-gradient(100deg, #e1ede5 0%, #f7f8f5 40%, #faf8f3 60%, #f2e7d2 100%);
 }
-.ornaments { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-.orn-g { filter: drop-shadow(-1.5px -1.5px 1px rgba(255,255,255,.9)) drop-shadow(2px 4px 4px rgba(45,75,58,.1)); }
-.orn { fill: rgba(255,255,255,.5); opacity: 0; transform-box: fill-box; transform-origin: center;
-  animation: orn-in 1.5s cubic-bezier(.2,.7,.2,1) var(--d, 0s) forwards; }
-.ornaments.no-anim .orn { animation: none; opacity: var(--o, 1); }
-@keyframes orn-in {
-  from { opacity: 0; transform: translateY(16px) scale(.9); }
-  to { opacity: var(--o, 1); transform: none; }
-}
-
 .ring-stage { position: relative; width: min(92vw, 560px); aspect-ratio: 1; }
 .ring-img, .ring-glints { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ring-img { opacity: 0; transition: opacity .6s ease; }
@@ -215,8 +205,6 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .hero-start .ring-img, .hero-start .ring-glints { opacity: 0 !important; }
 .hero-piece:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; border-radius: 14px; }
 
-.ring-stones { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-block-start: -2.5rem; }
-.ring-stones > .field-label { width: 100%; text-align: center; font-weight: 400; color: var(--ink-2); }
 .chip-dot { padding: .4rem; min-width: 2.9rem; justify-content: center; }
 .chip-dot .dot { width: 1.45rem; height: 1.45rem; }
 .chip-dot .chip-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -352,14 +340,9 @@ html[dir="rtl"] .charm-pop-t { margin: 0 0 .45rem 1.6rem; }
 .gallery > li[hidden] { display: none; }
 
 /* ---------- Über uns ---------- */
-.about-grid { display: grid; gap: 2rem; align-items: center; }
+.about-grid { display: grid; gap: 2rem; align-items: center; max-width: 44rem; }
 .about-grid img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 22px; }
 .about-grid .lead + p { margin-block-start: .8rem; }
-/* großes Foto der Besitzerin in „Über uns“ (noch Platzhalter) */
-.about-photo-ph {
-  width: 100%; aspect-ratio: 4 / 5; border-radius: 22px; display: grid; place-items: center; padding: 1rem; text-align: center;
-  background: #fff6dc; border: 1px dashed var(--gold); color: var(--gold-text); font-size: .95rem;
-}
 /* Werkstatt-Fotos unter „Über uns“ */
 .workshop-title { margin-block: 2.4rem 1rem; font: 700 clamp(1.35rem, 4.5vw, 1.8rem)/1.2 var(--font-show); }
 .workshop { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
@@ -448,7 +431,6 @@ html[lang="ar"] .how-steps li::before { content: counter(step, arabic-indic); }
   .top-lang { margin-inline-start: 1rem; }
   main section[id] { scroll-margin-top: 5.5rem; }
 
-  .about-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 4rem; }
   .studio-grid { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: 3.5rem; align-items: start; }
   .studio-stage { top: 6rem; box-shadow: none; }
   .studio-stage .preview { max-height: none; }
@@ -465,14 +447,12 @@ html[lang="ar"] .how-steps li::before { content: counter(step, arabic-indic); }
     width: auto; height: min(70svh, 700px); z-index: 0;
   }
   html[dir="rtl"] .ring-stage { left: 44%; }
-  .ring-copy, .ring-stones { position: relative; z-index: 1; }
+  .ring-copy { position: relative; z-index: 1; }
   .ring-copy { grid-column: 1; grid-row: 2; justify-self: start; text-align: start; max-width: 27rem; }
   .ring-copy h1 { font-size: clamp(2.6rem, 3.6vw, 3.4rem); }
   .ring-copy .actions .btn { flex: 0 0 auto; }
   .ring-copy .lead { margin-inline: 0; }
   .ring-copy .actions { justify-content: flex-start; }
-  .ring-stones { grid-column: 2; grid-row: 2; justify-self: end; justify-content: flex-end; margin: 0; }
-  .ring-stones > .field-label { text-align: end; }
 
   .builder-grid { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: 3.5rem; align-items: start; }
 }
@@ -581,3 +561,15 @@ html[lang="ar"] .how-steps li::before { content: counter(step, arabic-indic); }
 @media (min-width: 960px) {
   .pt-left { position: sticky; top: 6rem; }
 }
+
+/* ---------- Datenschutz (privacy.html) ---------- */
+.legal-top { position: sticky; background: rgba(245, 245, 242, .94); border-bottom: 1px solid var(--line); }
+.legal { max-width: 44rem; margin: 0 auto; padding: 3rem var(--pad) 1rem; }
+.legal h1 { font-size: clamp(2.25rem, 8vw, 3.25rem); }
+.legal h2 { font-size: clamp(1.4rem, 4.6vw, 1.75rem); margin-block: 2.4rem .6rem; scroll-margin-top: 5rem; }
+.legal p, .legal li { line-height: 1.7; color: var(--ink-2); }
+.legal p { margin-block: 0 .9rem; }
+.legal ul { margin-block: 0 .9rem; padding-inline-start: 1.25rem; }
+.legal a, .pt-note a { color: var(--green); }
+.legal-back { margin-block-start: 2.5rem; font-weight: 500; }
+.legal .nw { white-space: nowrap; }

@@ -1,5 +1,5 @@
 /* Empire Jewelry – Namenskette (Studio), Baukasten, Glitzer, WhatsApp-Nachrichten,
-   Menü, Kollektion-Filter und Relief-Ornamente.
+   Menü und Kollektion-Filter.
    Läuft ohne Server: Anfragen gehen als vorbereitete WhatsApp-Nachricht raus.
    GSAP und Lenis sind optional; ohne sie (oder bei „weniger Bewegung“) wird alles still gezeichnet. */
 (() => {
@@ -2111,55 +2111,6 @@
     span.appendChild(svg);
   });
 
-  // ---------- Relief-Ornamente im Startbereich ----------
-  const orn = document.querySelector('.ornaments');
-  const ringStage = document.querySelector('.ring-stage');
-  const pts = list => list.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
-  const star8 = R => pts(Array.from({ length: 16 }, (_, i) => {
-    const r = i % 2 ? R * 0.765 : R, a = Math.PI / 8 * i - Math.PI / 2;
-    return [r * Math.cos(a), r * Math.sin(a)];
-  }));
-  const gem = s => pts([[-0.45, -0.36], [0.45, -0.36], [0.75, -0.04], [0, 0.62], [-0.75, -0.04]].map(p => [p[0] * s, p[1] * s]));
-  let ornW = 0;
-  function buildOrnaments() {
-    if (!orn || !ringStage) return;
-    const w = orn.clientWidth, h = orn.clientHeight;
-    if (!w || !h || Math.abs(w - ornW) < 40) return;
-    const first = ornW === 0;
-    ornW = w;
-    const box = orn.getBoundingClientRect(), rs = ringStage.getBoundingClientRect();
-    const cx = rs.left - box.left + rs.width / 2, cy = rs.top - box.top + rs.height * 0.46;
-    const rx = rs.width * 0.5, ry = rs.height * 0.42;
-    const step = w < 700 ? 74 : 112;
-    orn.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
-    orn.replaceChildren();
-    const g = el('g', { class: 'orn-g' }, orn);
-    let seed = 7;
-    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    for (let row = 0, y = step * 0.5; y < h + step; row++, y += step * 0.87) {
-      for (let col = 0, x = (row % 2) * step / 2; x < w + step; col++, x += step) {
-        const dx = (x - cx) / rx, dy = (y - cy) / ry;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        // Gruppen statt Tapete: ein Teil der Plätze bleibt leer
-        const keep = 0.5 + 0.5 * Math.sin(x * 0.011 + 1.3) * Math.cos(y * 0.013 - 0.4);
-        if (d < 1.1 || rnd() > keep + 0.15) continue;
-        const o = Math.min(1, Math.max(0, 1.1 - (d - 1.1) * 0.55));
-        if (o < 0.1) continue;
-        const big = (row + col) % 2 === 0;
-        const holder = el('g', { transform: 'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')' }, g);
-        const p = el('polygon', { class: 'orn', points: big ? star8(step * 0.3) : gem(step * 0.26) }, holder);
-        p.style.setProperty('--o', o.toFixed(2));
-        p.style.setProperty('--d', (0.15 + (d - 1) * 0.35 + Math.random() * 0.2).toFixed(2) + 's');
-      }
-    }
-    if (!first || REDUCE) orn.classList.add('no-anim');
-  }
-  if (orn) {
-    buildOrnaments();
-    let t;
-    new ResizeObserver(() => { clearTimeout(t); t = setTimeout(buildOrnaments, 200); }).observe(orn);
-  }
-
   // ---------- Kopfzeile: Menü am Handy, Hintergrund beim Scrollen, aktiver Menüpunkt ----------
   const top = document.querySelector('[data-top]');
   const menuBtn = document.querySelector('.menu-btn');
@@ -2201,7 +2152,12 @@
   // ---------- Weiches Scrollen ----------
   const lenis = (window.Lenis && !REDUCE) ? new window.Lenis({ autoRaf: true, anchors: { offset: -72 } }) : null;
   const goTo = target => {
-    if (lenis) lenis.scrollTo(target, { offset: -72 });
+    if (lenis) {
+      // „Make it custom“ ändert vorher die Felder; dabei verschiebt der Browser die Seite, Lenis weiß das noch nicht.
+      // Darum erst Lenis auf die echte Position setzen, dann das Ziel selbst ausrechnen.
+      lenis.scrollTo(window.scrollY, { immediate: true, force: true });
+      lenis.scrollTo(target.getBoundingClientRect().top + window.scrollY - 72);
+    }
     else target.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth' });
   };
 
@@ -2681,14 +2637,6 @@
         if (!await pause(5500, my)) return;
       }
     }
-    const restart = delay => {
-      gen++;
-      const my = gen;
-      ringStageEl.classList.remove('show-piece');
-      setTimeout(() => { if (my === gen) run(my); }, delay || 0);
-    };
-    // Steinfarbe am Ring gewählt: Ring zeigen, Wechsel eine Weile anhalten
-    document.querySelectorAll('[data-stones] input').forEach(i => i.addEventListener('change', () => restart(15000)));
     new IntersectionObserver(es => es.forEach(e => { visible = e.isIntersecting; })).observe(ringStageEl);
     // antippen: Gestalter mit genau diesem Stück öffnen
     const openIt = () => {
