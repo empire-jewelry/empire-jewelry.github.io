@@ -369,6 +369,39 @@ html[dir="rtl"] .charm-pop-t { margin: 0 0 .45rem 1.6rem; }
 .summary dt { color: var(--ink-2); }
 .summary dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
 
+/* ---------- Kontakt ---------- */
+.visit > p { margin-block-start: .75rem; color: var(--ink-2); }
+.contact { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: .6rem; }
+.contact a { text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.ph {
+  display: inline-block; padding: .1rem .5rem;
+  background: #fff6dc; border: 1px dashed var(--gold); border-radius: 6px;
+  font-size: .95rem; color: var(--gold-text);
+}
+
+/* ---------- Fuß ---------- */
+.foot {
+  max-width: var(--max); margin: var(--gap-section) auto 0;
+  padding: 2rem var(--pad) 6rem;
+  border-top: 1px solid var(--line);
+  display: grid; gap: .5rem; font-size: .9rem; color: var(--ink-2);
+}
+.foot img { width: 7rem; margin-block-end: .5rem; }
+.foot p a { margin-inline-end: 1rem; }
+
+/* ---------- WhatsApp schwebend ---------- */
+.wa-float {
+  position: fixed; inset-inline-end: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom));
+  width: 3.5rem; height: 3.5rem; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--green); color: #fff; z-index: 40;
+  box-shadow: 0 8px 20px -8px rgba(30, 60, 40, .6);
+}
+.wa-float svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.wa-float:hover { background: var(--green-dark); }
+.wa-float { transition: opacity .2s, transform .2s, background-color .2s; }
+.wa-float.is-away { opacity: 0; transform: scale(.8); pointer-events: none; }
+
 /* ---------- ab Tablet ---------- */
 @media (min-width: 700px) {
   .gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem 1.25rem; }
