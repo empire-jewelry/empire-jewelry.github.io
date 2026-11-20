@@ -2191,7 +2191,6 @@
     Object.assign(state, like);
     if (!('spots' in like)) state.spots = '';
     Object.keys(like).forEach(k => touchedKeys.add(k));
-    const cap = b.closest('li').querySelector('.cap');
     altEdited.textAlt = altEdited.text2Alt = false;
     refreshAlt(); updateSizes(); updateFields(); syncControls(null); updateSamples();
     renderAll(); updateOutputs();
