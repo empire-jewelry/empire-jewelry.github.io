@@ -2069,13 +2069,19 @@
     span.appendChild(svg);
   });
   // Anhänger-Symbole (Namenskette)
+  // Münze und böses Auge sind gezeichnet beide rund: in der Liste darum eigene Symbole (Rand bzw. Ringe)
+  const circ = r => 'M' + r + ' 0A' + r + ' ' + r + ' 0 1 1 ' + (-r) + ' 0A' + r + ' ' + r + ' 0 1 1 ' + r + ' 0Z';
+  const LIST_ICO = { coin: circ(0.5) + circ(0.41) + circ(0.34), eye: circ(0.5) + circ(0.34) + circ(0.17) };
   document.querySelectorAll('.charm-ico').forEach(span => {
-    const d = CHARMS[span.dataset.charm];
+    const own = LIST_ICO[span.dataset.charm], d = own || CHARMS[span.dataset.charm];
     if (!d) return;
     const svg = el('svg', { viewBox: '-0.6 -0.6 1.2 1.2' });
-    el('path', { d, fill: span.dataset.charm === 'infinity' ? 'none' : 'currentColor', stroke: 'currentColor', 'stroke-width': 0.06 }, svg);
+    el('path', { d, fill: span.dataset.charm === 'infinity' ? 'none' : 'currentColor', 'fill-rule': own ? 'evenodd' : 'nonzero',
+      stroke: own ? 'none' : 'currentColor', 'stroke-width': 0.06 }, svg);
     span.appendChild(svg);
   });
+  // nur Symbole: Name als Hinweis beim Darüberfahren
+  document.querySelectorAll('.chips-ico .chip').forEach(l => { const t = l.querySelector('.chip-t'); if (t) l.title = t.textContent.trim(); });
 
   // Karten-Symbole für die Design-Knöpfe (Libanon-Anhänger)
   document.querySelectorAll('.map-ico').forEach((span, i) => {
@@ -2519,8 +2525,9 @@
     const tabs = panel.querySelector('.cc-tabs'), sw = panel.querySelector('.cc-sw');
     makeSwatches(sw);
     const icon = name => {
-      const d = CHARMS[name];
-      return d ? '<span class="charm-ico" aria-hidden="true"><svg viewBox="-0.6 -0.6 1.2 1.2"><path d="' + d + '" fill="currentColor" stroke="currentColor" stroke-width="0.06"/></svg></span>' : '';
+      const own = LIST_ICO[name], d = own || CHARMS[name];
+      return d ? '<span class="charm-ico" aria-hidden="true"><svg viewBox="-0.6 -0.6 1.2 1.2"><path d="' + d + '" fill="currentColor"' +
+        (own ? ' fill-rule="evenodd"' : ' stroke="currentColor" stroke-width="0.06"') + '/></svg></span>' : '';
     };
     const renderPanel = () => {
       const picks = String(state.accent || '').split(',').filter(v => v && v !== 'none');
