@@ -27,7 +27,7 @@
       chain: 'Chain length', ring: 'Ring size', bracelet: 'Bracelet length', notSure: 'Not sure',
       cm: n => n + ' cm', ringSize: n => 'EU ' + n,
       similar: 'Similar to the photo:',
-      fallbackName: 'Layla', amp: '&', sketch: 'Sketch:', menu: 'Menu', close: 'Close',
+      fallbackName: 'Malak', amp: '&', sketch: 'Sketch:', menu: 'Menu', close: 'Close',
       altAr1: 'Name in Arabic letters', altAr2: 'Second name in Arabic letters',
       altEn1: 'Name in English letters', altEn2: 'Second name in English letters',
       linkLabel: 'See my design: ',
@@ -65,7 +65,7 @@
       chain: 'طول السلسلة', ring: 'مقاس الخاتم', bracelet: 'طول الإسوارة', notSure: 'لا أعرف',
       cm: n => n + ' سم', ringSize: n => 'مقاس ' + n,
       similar: 'مثل الصورة:',
-      fallbackName: 'ليلى', amp: 'و', sketch: 'رسم:', menu: 'القائمة', close: 'إغلاق',
+      fallbackName: 'ملاك', amp: 'و', sketch: 'رسم:', menu: 'القائمة', close: 'إغلاق',
       altAr1: 'الاسم بالأحرف العربية', altAr2: 'الاسم الثاني بالأحرف العربية',
       altEn1: 'الاسم بالأحرف الإنجليزية', altEn2: 'الاسم الثاني بالأحرف الإنجليزية',
       linkLabel: 'شاهد تصميمي: ',
@@ -186,7 +186,7 @@
     if ((font().kind === 'arabic') === isArabic(t)) return t;
     return nameText(which === 2 ? state.text2Alt : state.textAlt) || t;
   }
-  const fallbackName = () => (font().kind === 'arabic' ? 'ليلى' : 'Layla');
+  const fallbackName = () => (font().kind === 'arabic' ? 'ملاك' : 'Malak');
   const mismatch = () => { const t = nameText(state.text); return !!t && (font().kind === 'arabic') !== isArabic(t); };
   const altEdited = { textAlt: false, text2Alt: false };
   function refreshAlt() {
@@ -2222,13 +2222,12 @@
   // „Make it custom“: Baukasten oder Namenskette mit dem Foto vorbelegen
   document.querySelectorAll('[data-like]').forEach(b => b.addEventListener('click', () => {
     const like = JSON.parse(b.dataset.like);
-    const goal = like.goto || 'design';
+    const goal = like.goto || 'name';
     delete like.goto;
     Object.assign(state, like);
     if (!('spots' in like)) state.spots = '';
     Object.keys(like).forEach(k => touchedKeys.add(k));
     const cap = b.closest('li').querySelector('.cap');
-    if (goal === 'design') state.notes = TXT.similar + ' ' + cap.textContent.trim();
     altEdited.textAlt = altEdited.text2Alt = false;
     refreshAlt(); updateSizes(); updateFields(); syncControls(null); updateSamples();
     renderAll(); updateOutputs();
@@ -2241,7 +2240,7 @@
   // ---------- Start ----------
   function fontsReady() {
     if (!document.fonts || !document.fonts.load) return Promise.resolve();
-    const sample = TXT.fallbackName + ' Layla ليلى';
+    const sample = TXT.fallbackName + ' Malak ملاك';
     const loads = Object.values(FONTS).map(F => document.fonts.load(F.weight + ' 40px ' + F.family.split(',')[0], sample));
     return Promise.race([Promise.all(loads).catch(() => {}), new Promise(r => setTimeout(r, 3000))]);
   }
@@ -2613,7 +2612,7 @@
     const BASE = { text2: '', textAlt: '', text2Alt: '', join: 'heart', underline: 'none', thick: 'std', chain: 'cable',
       len: '45 cm', wrist: '', stone: 'none', karat: '18k', chainHeart: 'none', spots: '', charmColor: 'metal' };
     const SHOW = [
-      { item: 'necklace', text: AR ? 'ليلى' : 'Layla', style: AR ? 'calligraphy' : 'script', gold: 'yellow', nameColor: 'metal',
+      { item: 'necklace', text: AR ? 'ملاك' : 'Malak', style: AR ? 'calligraphy' : 'script', gold: 'yellow', nameColor: 'metal',
         charmPos: 'below', charmCols: 'heart=red', steps: [[], ['heart'], ['heart', 'star'], ['heart', 'star', 'stone']] },
       { item: 'necklace', text: AR ? 'مايا' : 'Maya', style: AR ? 'modern' : 'pacifico', gold: 'rose', nameColor: 'pink',
         charmPos: 'chain', charmCols: 'butterfly=lilac,flower=pink', steps: [[], ['butterfly'], ['butterfly', 'flower']] },
@@ -2730,7 +2729,7 @@
     renderAll();
     previews.forEach(s => io.observe(s));
     if (shared) {
-      const target = document.getElementById(shared.f === 'studio' ? 'name' : 'design');
+      const target = document.getElementById({ studio: 'name', map: 'lebanon' }[shared.f] || '');
       if (target) setTimeout(() => goTo(target), 300);
     }
     // später nachgeladene Schriften: neu zeichnen, damit Breiten stimmen
@@ -2747,4 +2746,707 @@
       }, 2400);
     }
   });
+  // ---------- Foto als Anhänger: Gesicht finden, freistellen und als Gravur auf Gold zeigen ----------
+  // Gesichtserkennung und Freistellen mit MediaPipe (Google, Apache-2.0), erst beim Hochladen geladen (ca. 4 MB).
+  // Alles läuft im Browser: das Foto verlässt das Gerät nicht, bis der Kunde es selbst schickt.
+  // Die Platte ist immer ein Stück (Kopfform, Ring, Münze oder Herz); die Gesichtszüge sind darauf graviert.
+  (function portraitStudio() {
+    const sec = document.getElementById('portrait');
+    const svg = sec && sec.querySelector('svg.pt-svg');
+    if (!svg) return;
+    const form = sec.querySelector('[data-portrait]');
+    const $ = s => sec.querySelector(s);
+    const T = {
+      en: {
+        hello: 'Hello Empire Jewelry, I designed a photo pendant on your website:',
+        inPic: 'The design is in the picture. I will send you the original photo too.',
+        here: 'Your photo here',
+        loading: 'Loading face detection…',
+        finding: 'Finding the face…',
+        noFace: 'We could not find a face in this photo. Try one where the face is clearly visible from the front.',
+        loadFail: 'Face detection could not load. Please check your internet connection and try again.',
+        photoFail: 'The photo could not be opened. Please try another one.',
+        many: 'There is more than one face in this photo. We used the biggest one.',
+        group: 'All faces in the photo are on the pendant.',
+        small: 'The face is small in this photo. A closer photo gives a sharper pendant.',
+        empty: 'Upload a photo first.',
+        fail: 'The picture could not be made. Please try again.',
+        again: 'Upload another photo',
+        lNotes: 'Notes',
+        aria: has => has ? 'Your photo as an engraved gold pendant on a necklace' : 'Necklace with an empty pendant: upload a photo'
+      },
+      ar: {
+        hello: 'مرحباً Empire Jewelry، صمّمت تعليقة بصورة على موقعكم:',
+        inPic: 'التصميم في الصورة. سأرسل لكم الصورة الأصلية أيضاً.',
+        here: 'صورتك هنا',
+        loading: 'جارٍ تحميل التعرّف على الوجه…',
+        finding: 'نبحث عن الوجه…',
+        noFace: 'لم نجد وجهاً في هذه الصورة. جرّب صورة يظهر فيها الوجه بوضوح من الأمام.',
+        loadFail: 'تعذّر تحميل التعرّف على الوجه. تأكّد من اتصالك بالإنترنت وحاول مرة أخرى.',
+        photoFail: 'تعذّر فتح الصورة. جرّب صورة أخرى.',
+        many: 'في الصورة أكثر من وجه، فاستخدمنا الوجه الأكبر.',
+        group: 'وضعنا كل الوجوه التي في الصورة على التعليقة.',
+        small: 'الوجه صغير في هذه الصورة. صورة أقرب تعطي تعليقة أوضح.',
+        empty: 'ارفع صورة أولاً.',
+        fail: 'تعذّر تجهيز الصورة. حاول مرة أخرى.',
+        again: 'ارفع صورة أخرى',
+        lNotes: 'ملاحظات',
+        aria: has => has ? 'صورتك محفورة على تعليقة ذهب في قلادة' : 'قلادة بتعليقة فارغة: ارفع صورة'
+      }
+    }[LANG];
+
+    const D = { shape: 'oval', gold: 'yellow', detail: 0.5 };
+    // Farbe der Gravur je Gold (warm, nicht grünlich)
+    const ENGC = { yellow: '#3f2806', rose: '#4f271e', white: '#3c3f44' };
+    let an = null, art = null, orig = null, ver = 0, busy = false;
+    const f2 = v => Math.round(v * 100) / 100;
+
+    // ---- Gesicht finden und freistellen (MediaPipe, läuft im Browser; das Foto verlässt das Gerät nicht) ----
+    const MP_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.3';
+    const MODEL_FACE = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
+    const MODEL_SEG = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/selfie_segmenter.tflite';
+    let mpP = null;
+    function loadMP() {
+      if (!mpP) {
+        mpP = (async () => {
+          const V = await import(MP_BASE + '/vision_bundle.mjs');
+          const files = await V.FilesetResolver.forVisionTasks(MP_BASE + '/wasm');
+          const det = await V.FaceDetector.createFromOptions(files, {
+            baseOptions: { modelAssetPath: MODEL_FACE, delegate: 'CPU' }, runningMode: 'IMAGE', minDetectionConfidence: 0.5
+          });
+          const seg = await V.ImageSegmenter.createFromOptions(files, {
+            baseOptions: { modelAssetPath: MODEL_SEG, delegate: 'CPU' }, runningMode: 'IMAGE', outputCategoryMask: false, outputConfidenceMasks: true
+          });
+          return { det, seg };
+        })();
+        mpP.catch(() => { mpP = null; });
+      }
+      return mpP;
+    }
+    const canvasOf = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+
+    // weiches Verwischen: drei Kastenfilter hintereinander (fast wie Gauß)
+    function boxBlur(src, W, H, r) {
+      if (r < 1) return src.slice();
+      const tmp = new Float32Array(W * H), out = new Float32Array(W * H), d = 2 * r + 1;
+      for (let y = 0; y < H; y++) {
+        const o = y * W;
+        let acc = 0;
+        for (let x = -r; x <= r; x++) acc += src[o + Math.min(W - 1, Math.max(0, x))];
+        for (let x = 0; x < W; x++) {
+          tmp[o + x] = acc / d;
+          acc += src[o + Math.min(W - 1, x + r + 1)] - src[o + Math.max(0, x - r)];
+        }
+      }
+      for (let x = 0; x < W; x++) {
+        let acc = 0;
+        for (let y = -r; y <= r; y++) acc += tmp[Math.min(H - 1, Math.max(0, y)) * W + x];
+        for (let y = 0; y < H; y++) {
+          out[y * W + x] = acc / d;
+          acc += tmp[Math.min(H - 1, y + r + 1) * W + x] - tmp[Math.max(0, y - r) * W + x];
+        }
+      }
+      return out;
+    }
+    function gauss(src, W, H, sigma) {
+      if (sigma < 0.4) return Float32Array.from(src);
+      const n = 3, ideal = Math.sqrt(12 * sigma * sigma / n + 1);
+      let wl = Math.floor(ideal);
+      if (wl % 2 === 0) wl--;
+      const wu = wl + 2, m = Math.round((12 * sigma * sigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4));
+      let a = Float32Array.from(src);
+      for (let i = 0; i < n; i++) a = boxBlur(a, W, H, ((i < m ? wl : wu) - 1) / 2);
+      return a;
+    }
+    // zusammenhängende Flächen (8 Nachbarn)
+    function components(bin, W, H) {
+      const lab = new Int32Array(W * H), stack = new Int32Array(W * H), sizes = [0];
+      let n = 0;
+      for (let i = 0; i < W * H; i++) {
+        if (!bin[i] || lab[i]) continue;
+        n++;
+        let sp = 0, cnt = 0;
+        stack[sp++] = i;
+        lab[i] = n;
+        while (sp) {
+          const j = stack[--sp], x = j % W, y = (j - x) / W;
+          cnt++;
+          for (let dy = -1; dy <= 1; dy++) {
+            const yy = y + dy;
+            if (yy < 0 || yy >= H) continue;
+            for (let dx = -1; dx <= 1; dx++) {
+              const xx = x + dx;
+              if (xx < 0 || xx >= W) continue;
+              const k = yy * W + xx;
+              if (bin[k] && !lab[k]) { lab[k] = n; stack[sp++] = k; }
+            }
+          }
+        }
+        sizes.push(cnt);
+      }
+      return { lab, sizes };
+    }
+    function largestOnly(bin, W, H) {
+      const { lab, sizes } = components(bin, W, H);
+      let best = 0;
+      for (let k = 1; k < sizes.length; k++) if (!best || sizes[k] > sizes[best]) best = k;
+      const out = new Uint8Array(W * H);
+      if (best) for (let i = 0; i < W * H; i++) out[i] = lab[i] === best ? 1 : 0;
+      return out;
+    }
+    function dropSmall(bin, W, H, minA) {
+      const { lab, sizes } = components(bin, W, H);
+      const out = new Uint8Array(W * H);
+      for (let i = 0; i < W * H; i++) out[i] = lab[i] && sizes[lab[i]] >= minA ? 1 : 0;
+      return out;
+    }
+    // Löcher füllen: alles, was vom Rand aus nicht erreichbar ist
+    function fillHoles(bin, W, H) {
+      const seen = new Uint8Array(W * H), stack = new Int32Array(W * H);
+      let sp = 0;
+      const push = i => { if (!bin[i] && !seen[i]) { seen[i] = 1; stack[sp++] = i; } };
+      for (let x = 0; x < W; x++) { push(x); push((H - 1) * W + x); }
+      for (let y = 0; y < H; y++) { push(y * W); push(y * W + W - 1); }
+      while (sp) {
+        const j = stack[--sp], x = j % W, y = (j - x) / W;
+        if (x > 0) push(j - 1);
+        if (x < W - 1) push(j + 1);
+        if (y > 0) push(j - W);
+        if (y < H - 1) push(j + W);
+      }
+      const out = new Uint8Array(W * H);
+      for (let i = 0; i < W * H; i++) out[i] = bin[i] || !seen[i] ? 1 : 0;
+      return out;
+    }
+    // weiter bzw. enger machen (rund, über Verwischen)
+    const grow = (bin, W, H, r) => { const g = gauss(bin, W, H, r / 2); return g.map(v => v > 0.12 ? 1 : 0); };
+    const shrink = (bin, W, H, r) => { const g = gauss(bin, W, H, r / 2); return g.map(v => v > 0.88 ? 1 : 0); };
+    const smoothBin = (bin, W, H, r) => { const g = gauss(bin, W, H, r); return g.map(v => v > 0.5 ? 1 : 0); };
+
+    function toFace(d, ox, oy, tw, th) {
+      const b = d.boundingBox;
+      return {
+        x: ox + b.originX, y: oy + b.originY, w: b.width, h: b.height,
+        kp: (d.keypoints || []).map(p => [ox + p.x * tw, oy + p.y * th]),
+        score: d.categories && d.categories[0] ? d.categories[0].score : 0
+      };
+    }
+    // Foto lesen, Gesicht suchen, gerade drehen, Kopf und Schultern ausschneiden, Person vom Hintergrund trennen
+    async function analyze(img) {
+      const mp = await loadMP();
+      const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+      const k = Math.min(1, 1600 / Math.max(iw, ih));
+      const W = Math.max(1, Math.round(iw * k)), H = Math.max(1, Math.round(ih * k));
+      const full = canvasOf(W, H);
+      full.getContext('2d').drawImage(img, 0, 0, W, H);
+      let faces = mp.det.detect(full).detections.map(d => toFace(d, 0, 0, W, H));
+      // kleine Gesichter in großen Fotos: in Ausschnitten weitersuchen
+      for (const f of [0.55, 0.35]) {
+        if (faces.length) break;
+        const tw = Math.round(W * f), th = Math.round(H * f), tile = canvasOf(tw, th), tx = tile.getContext('2d');
+        const steps = Math.ceil(1 / f) + 1;
+        for (let a = 0; a < steps; a++) for (let b = 0; b < steps; b++) {
+          const ox = Math.round((W - tw) * a / (steps - 1)), oy = Math.round((H - th) * b / (steps - 1));
+          tx.clearRect(0, 0, tw, th);
+          tx.drawImage(full, ox, oy, tw, th, 0, 0, tw, th);
+          mp.det.detect(tile).detections.forEach(d => faces.push(toFace(d, ox, oy, tw, th)));
+        }
+        // doppelt gefundene Gesichter zusammenfassen
+        faces.sort((p, q) => q.score - p.score);
+        faces = faces.filter((p, i) => !faces.slice(0, i).some(q => {
+          const ix = Math.max(0, Math.min(p.x + p.w, q.x + q.w) - Math.max(p.x, q.x)), iy = Math.max(0, Math.min(p.y + p.h, q.y + q.h) - Math.max(p.y, q.y));
+          return ix * iy > 0.3 * Math.min(p.w * p.h, q.w * q.h);
+        }));
+      }
+      // nur sichere Treffer (getestet: echte Gesichter 0,71–0,95, Schmuckfotos höchstens 0,66)
+      faces = faces.filter(q => q.score >= 0.68);
+      if (!faces.length) return null;
+      faces.sort((p, q) => q.w * q.h - p.w * p.h);
+      const f = faces[0];
+      // Neigung, Größe und Mitte aus Augen und Mund (der Rahmen des Erkenners ist bei Nahaufnahmen zu groß)
+      const geo = q => {
+        let ang = 0, s0 = Math.max(q.w, q.h), c = [q.x + q.w / 2, q.y + q.h / 2];
+        if (q.kp.length >= 4) {
+          const [e1, e2] = q.kp[0][0] < q.kp[1][0] ? [q.kp[0], q.kp[1]] : [q.kp[1], q.kp[0]];
+          ang = Math.max(-0.6, Math.min(0.6, Math.atan2(e2[1] - e1[1], e2[0] - e1[0])));
+          const em = [(e1[0] + e2[0]) / 2, (e1[1] + e2[1]) / 2], mo = q.kp[3];
+          const de = Math.hypot(e2[0] - e1[0], e2[1] - e1[1]), dm = Math.hypot(mo[0] - em[0], mo[1] - em[1]);
+          s0 = Math.max(2.1 * de, 2.3 * dm);
+          c = [(em[0] + mo[0]) / 2, (em[1] + mo[1]) / 2];
+        }
+        return { ang, s0, c };
+      };
+      const G0 = geo(f);
+      // Familienfoto: alle Gesichter, die mindestens halb so groß sind wie das größte, kommen mit aufs Bild
+      const group = faces.map(geo).filter(g => g.s0 >= 0.5 * G0.s0);
+      let { ang, s0, c } = G0, fs0 = G0.s0;
+      if (group.length > 1) {
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        group.forEach(g => {
+          x0 = Math.min(x0, g.c[0] - 0.75 * g.s0); x1 = Math.max(x1, g.c[0] + 0.75 * g.s0);
+          y0 = Math.min(y0, g.c[1] - 1.05 * g.s0); y1 = Math.max(y1, g.c[1] + 0.9 * g.s0);
+        });
+        ang = 0;
+        fs0 = group.reduce((t, g) => t + g.s0, 0) / group.length;
+        s0 = Math.max(x1 - x0, y1 - y0) * 1.1 / 3;   // ein Drittel des Ausschnitts bleibt die Einheit für die Formen
+        c = [(x0 + x1) / 2, (y0 + y1) / 2 + 0.12 * fs0];
+      }
+      const N = 480, S = 3 * s0, sc = N / S;
+      // Ausschnitt selbst abtasten: gedreht, vergrößert; außerhalb des Fotos wird der Rand fortgesetzt
+      const fd = full.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, W, H).data;
+      const crop = canvasOf(N, N), cx = crop.getContext('2d', { willReadFrequently: true }), cd = cx.createImageData(N, N);
+      const valid = new Uint8Array(N * N), gray = new Float32Array(N * N), near = new Int32Array(N * N);
+      const co = Math.cos(ang), si = Math.sin(ang);
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const dx = (x + 0.5 - N / 2) / sc, dy = (y + 0.5 - N / 2) / sc;
+        let sx = c[0] + dx * co - dy * si - 0.5, sy = c[1] + dx * si + dy * co - 0.5;
+        const i = y * N + x;
+        valid[i] = sx >= -0.5 && sx <= W - 0.5 && sy >= -0.5 && sy <= H - 0.5 ? 1 : 0;
+        sx = Math.max(0, Math.min(W - 1.001, sx)); sy = Math.max(0, Math.min(H - 1.001, sy));
+        if (valid[i]) near[i] = i;
+        else {
+          // nächster Punkt im Foto (für die Fortsetzung der Person über den Fotorand)
+          const px = Math.max(1, Math.min(W - 1, sx + 0.5)) - c[0], py = Math.max(1, Math.min(H - 1, sy + 0.5)) - c[1];
+          const qx = Math.round(N / 2 + (px * co + py * si) * sc - 0.5), qy = Math.round(N / 2 + (-px * si + py * co) * sc - 0.5);
+          near[i] = Math.max(0, Math.min(N - 1, qy)) * N + Math.max(0, Math.min(N - 1, qx));
+        }
+        const x0 = Math.floor(sx), y0 = Math.floor(sy), u = sx - x0, v = sy - y0;
+        const a = (y0 * W + x0) * 4, b = a + 4, cc = a + W * 4, d = cc + 4;
+        for (let ch = 0; ch < 3; ch++) {
+          cd.data[i * 4 + ch] = (fd[a + ch] * (1 - u) + fd[b + ch] * u) * (1 - v) + (fd[cc + ch] * (1 - u) + fd[d + ch] * u) * v;
+        }
+        cd.data[i * 4 + 3] = 255;
+        gray[i] = 0.299 * cd.data[i * 4] + 0.587 * cd.data[i * 4 + 1] + 0.114 * cd.data[i * 4 + 2];
+      }
+      cx.putImageData(cd, 0, 0);
+      const res = mp.seg.segment(crop);
+      const masks = res.confidenceMasks || [];
+      const m = masks[masks.length - 1];
+      const raw = m.getAsFloat32Array(), mw = m.width, mh = m.height;
+      const person = new Float32Array(N * N);
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const sx = Math.min(mw - 1, Math.max(0, (x + 0.5) * mw / N - 0.5)), sy = Math.min(mh - 1, Math.max(0, (y + 0.5) * mh / N - 0.5));
+        const x0 = Math.floor(sx), y0 = Math.floor(sy), x1 = Math.min(mw - 1, x0 + 1), y1 = Math.min(mh - 1, y0 + 1), u = sx - x0, v = sy - y0;
+        person[y * N + x] = ((raw[y0 * mw + x0] * (1 - u) + raw[y0 * mw + x1] * u) * (1 - v) + (raw[y1 * mw + x0] * (1 - u) + raw[y1 * mw + x1] * u) * v);
+      }
+      if (res.close) res.close();
+      const toCrop = p => {
+        const dx = p[0] - c[0], dy = p[1] - c[1], co = Math.cos(-ang), si = Math.sin(-ang);
+        return [N / 2 + (dx * co - dy * si) * sc, N / 2 + (dx * si + dy * co) * sc];
+      };
+      // Gegenprobe: in der Gesichtsmitte muss eine Person sein (sonst hat der Erkenner z. B. Schmuck für ein Gesicht gehalten)
+      let pin = 0, pn = 0;
+      const fc = toCrop(G0.c), rr = G0.s0 * sc * 0.35;
+      for (let y = Math.round(fc[1] - rr); y <= fc[1] + rr; y++) for (let x = Math.round(fc[0] - rr); x <= fc[0] + rr; x++) {
+        if (x >= 0 && y >= 0 && x < N && y < N && (x - fc[0]) ** 2 + (y - fc[1]) ** 2 <= rr * rr) { pin += person[y * N + x]; pn++; }
+      }
+      if (pin / Math.max(1, pn) < 0.5) return null;
+      return { N, s: N / 3, gray, person, valid, near, kp: f.kp.map(toCrop), fs: fs0 * sc, group: group.length, many: faces.length > group.length, small: fs0 / k < 110 };
+    }
+
+    // ---- Anhänger bauen: Platte (Form) und Gravur (Gesichtszüge) ----
+    // Formen im Ausschnitt (Pixel); die Gesichtsmitte liegt bei N/2
+    function shapeTest(shape, N, s) {
+      const cx = N / 2, cy = N / 2 + 0.04 * s;
+      if (shape === 'head') return (x, y) => ((x - cx) / (1.3 * s)) ** 2 + ((y - cy) / (1.42 * s)) ** 2 <= 1;
+      if (shape === 'oval') return (x, y) => ((x - cx) / (1.02 * s)) ** 2 + ((y - N / 2 - 0.1 * s) / (1.36 * s)) ** 2 <= 1;
+      if (shape === 'heart') {
+        const k = 1.25 * s, hy = N / 2 + 0.01 * s;   // ganz im Ausschnitt (Herzkurve: Höhe 2,24 k, Breite 2,28 k)
+        return (x, y) => {
+          const u = (x - cx) / k, v = -(y - hy) / k + 0.08;
+          const a = u * u + v * v - 1;
+          return a * a * a - u * u * v * v * v <= 0;
+        };
+      }
+      const R = 1.44 * s;
+      return (x, y) => (x - cx) ** 2 + (y - cy) ** 2 <= R * R;
+    }
+    // Fotogravur: Graustufen statt Linien (dunkle Stellen tiefer bzw. matter graviert), wie eine Laser-Fotogravur
+    function tone(an, region0, detail) {
+      const { N, s, gray } = an, NN = N * N;
+      const inPhoto = gauss(an.valid, N, N, 0.03 * s);
+      const reg = gauss(region0, N, N, 1.2);
+      const vals = [];
+      for (let i = 0; i < NN; i += 2) if (region0[i] && an.valid[i]) vals.push(gray[i]);
+      const out = new Float32Array(NN);
+      if (vals.length < 50) return out;
+      vals.sort((a, b) => a - b);
+      const lo = vals[Math.floor(vals.length * 0.01)], hi = vals[Math.floor(vals.length * 0.99)], span = Math.max(20, hi - lo);
+      let G = new Float32Array(NN), sum = 0, cnt = 0;
+      for (let i = 0; i < NN; i++) {
+        G[i] = Math.max(0, Math.min(1, (gray[i] - lo) / span));
+        if (region0[i]) { sum += G[i]; cnt++; }
+      }
+      // große Schatten halb ausgleichen, Züge leicht nachschärfen, Rauschen glätten
+      const fs = an.fs || s, mean = sum / Math.max(1, cnt), big = gauss(G, N, N, s * 0.25);
+      for (let i = 0; i < NN; i++) G[i] -= 0.45 * (big[i] - mean);
+      const soft = gauss(G, N, N, 0.7), wide = gauss(G, N, N, fs / 60);
+      const mouthY = an.kp.length >= 4 ? an.kp[3][1] : N / 2 + 0.3 * fs, chin = an.group > 1 ? 1e9 : mouthY + 0.25 * fs;
+      const gam = 1.7 - 0.8 * detail;
+      for (let i = 0; i < NN; i++) {
+        if (reg[i] < 0.01) continue;
+        let v = Math.max(0, Math.min(1, soft[i] + 0.7 * (soft[i] - wide[i])));
+        v = Math.max(0, Math.min(1, 0.5 + (v - 0.5) * 1.35));
+        v = v * v * (3 - 2 * v) * 0.6 + v * 0.4;
+        const y = (i - i % N) / N, below = Math.max(0, Math.min(1, (y - chin) / (0.6 * fs)));
+        out[i] = Math.pow(1 - v, gam) * reg[i] * inPhoto[i] * (1 - 0.45 * below);
+      }
+      return out;
+    }
+    function build(an, shape, detail) {
+      const { N, s } = an, NN = N * N;
+      // Medaille, Oval, Herz: so weit ans Gesicht heranzoomen, dass die Form im Foto liegt (keine leeren Flächen)
+      const flat = shape === 'coin' || shape === 'oval' || shape === 'heart';
+      let k = 1;
+      if (flat) {
+        // bei Familienfotos kaum zoomen, sonst fallen die äußeren Gesichter weg
+        for (k = 1; k > (an.group > 1 ? 0.9 : 0.74); k -= 0.04) {
+          const t = shapeTest(shape, N, s);
+          let tot = 0, bad = 0;
+          for (let y = 0; y < N; y += 3) for (let x = 0; x < N; x += 3) {
+            if (t(N / 2 + (x + 0.5 - N / 2) / k, N / 2 + (y + 0.5 - N / 2) / k)) { tot++; if (!an.valid[y * N + x]) bad++; }
+          }
+          if (bad <= tot * 0.07) break;
+        }
+      }
+      const base = shapeTest(shape, N, s), inShape = (x, y) => base(N / 2 + (x - N / 2) / k, N / 2 + (y - N / 2) / k), sk = s * k;
+      const S = new Uint8Array(NN);
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) S[y * N + x] = inShape(x + 0.5, y + 0.5) ? 1 : 0;
+      // Person; wo das Foto endet, geht sie geradeaus weiter (die Form rundet sie dann ab)
+      // (nur ein Stück weit, mit runden Ecken; sonst entstehen Säulen bis zum Rand der Form)
+      const Pg = gauss(an.person, N, N, 1.5), L = 0.38 * s;
+      let P = new Uint8Array(NN);
+      for (let i = 0; i < NN; i++) {
+        if (an.valid[i]) { P[i] = Pg[i] > 0.5 ? 1 : 0; continue; }
+        const j = an.near[i], dx = i % N - j % N, dy = (i - i % N) / N - (j - j % N) / N;
+        P[i] = Pg[j] > 0.5 && dx * dx + dy * dy <= L * L ? 1 : 0;
+      }
+      // weich rechnen: außerhalb des Fotos stark (runde Kuppe statt flacher Kante), am Fotorand gleitend
+      const Pr = gauss(P, N, N, 0.16 * s), dv = gauss(an.valid, N, N, 0.06 * s);
+      for (let i = 0; i < NN; i++) if (dv[i] < 0.98) {
+        const w = Math.min(1, (1 - dv[i]) * 2);
+        P[i] = (an.valid[i] ? P[i] : 0) * (1 - w) + Pr[i] * w > 0.5 ? 1 : 0;
+      }
+      P = smoothBin(fillHoles(largestOnly(P, N, N), N, N), N, N, 2.5);
+      let plate, region;
+      const headIn = inner => smoothBin(fillHoles(largestOnly(P.map((v, i) => v && inner[i] ? 1 : 0), N, N), N, N), N, N, 2);
+      if (shape === 'head') {
+        plate = headIn(S);
+        region = shrink(plate, N, N, 0.035 * s);
+      } else if (shape === 'ring') {
+        // Kopf im Ring; berührt er den Ring unten nicht (keine Schultern im Foto), wird der Ring kleiner, bis er ihn trägt
+        const top = N / 2 + 0.04 * s - 1.44 * s;
+        let R = 1.44 * s, head = null;
+        for (let pass = 0; pass < 3; pass++) {
+          const cyR = top + R, C = new Uint8Array(NN);
+          for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) C[y * N + x] = (x + 0.5 - N / 2) ** 2 + (y + 0.5 - cyR) ** 2 <= R * R ? 1 : 0;
+          const inner = shrink(C, N, N, 0.13 * s);
+          head = headIn(inner);
+          plate = C.map((v, i) => v && (!inner[i] || head[i]) ? 1 : 0);
+          // schmale Schlitze zwischen Kopf und Ring schließen (sähe aus wie ein Fehler und bricht leicht)
+          const closed = shrink(grow(plate, N, N, 0.08 * s), N, N, 0.08 * s);
+          plate = plate.map((v, i) => v || (closed[i] && C[i]) ? 1 : 0);
+          // kleine eingeschlossene Lücken ganz füllen, die großen Flächen neben dem Kopf bleiben offen
+          const gaps = components(plate.map(v => v ? 0 : 1), N, N), small = 0.12 * s * s;
+          for (let i = 0; i < NN; i++) if (gaps.lab[i] && gaps.sizes[gaps.lab[i]] < small && C[i]) plate[i] = 1;
+          if (components(plate, N, N).sizes.length <= 2) break;
+          let hb = 0;
+          for (let i = 0; i < NN; i++) if (head[i]) hb = Math.max(hb, (i - i % N) / N);
+          R = Math.max(0.95 * s, (hb + 0.1 * s - top) / 2);
+        }
+        if (components(plate, N, N).sizes.length > 2) plate = largestOnly(plate, N, N);
+        region = shrink(head, N, N, 0.035 * s);
+      } else {
+        // Medaille, Oval, Herz: Hintergrund dunkel graviert, nur ein schmaler Rand bleibt blank
+        plate = S;
+        const rim = gauss(shrink(S, N, N, 0.05 * sk), N, N, 0.8);
+        // nur echte Fotofläche zeigt die Person; was außerhalb des Fotos liegt, wird Hintergrund (dunkel)
+        const inPh = shrink(an.valid, N, N, 0.02 * s);
+        const reg = P.map((v, i) => v && rim[i] > 0.5 && inPh[i] ? 1 : 0);
+        const eng = tone(an, reg, detail), Ps = gauss(reg, N, N, 1.2);
+        for (let i = 0; i < NN; i++) eng[i] = Math.max(eng[i], (1 - Ps[i]) * rim[i] * 0.96);
+        return finish(plate, eng, false);
+      }
+      return finish(plate, tone(an, region, detail), shape === 'head');
+    }
+    function finish(plate, eng, highest) {
+      const N = Math.round(Math.sqrt(plate.length));
+      // Aufhängung: oben über dem Schwerpunkt
+      let mx = 0, mc = 0, x0 = N, y0 = N, x1 = 0, y1 = 0;
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (plate[y * N + x]) {
+        mx += x; mc++;
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+      let bx = Math.round(mc ? mx / mc : N / 2);
+      const topAt = x => { for (let y = 0; y < N; y++) if (plate[y * N + x]) return y; return N; };
+      let top = topAt(bx);
+      if (highest) {
+        // höchste Stelle in der Nähe der Mitte suchen (leicht bevorzugt nah an der Mitte)
+        const span = Math.round((x1 - x0) * 0.22);
+        let best = top + 0;
+        for (let x = Math.max(0, bx - span); x <= Math.min(N - 1, bx + span); x++) {
+          const t = topAt(x), score = t + Math.abs(x - bx) * 0.15;
+          if (score < best) { best = score; top = t; bx = x; }
+        }
+      }
+      if (top >= N) top = y0;
+      return { N, plate, eng, bail: [bx, top], box: [x0, y0, x1 + 1, y1 + 1] };
+    }
+    // Graustufen als PNG (weiß mit Deckkraft), doppelt so fein
+    function tonePng(a, N) {
+      const M = N * 2, c = canvasOf(M, M), x = c.getContext('2d'), d = x.createImageData(M, M);
+      for (let y = 0; y < M; y++) for (let xx = 0; xx < M; xx++) {
+        const sx = Math.min(N - 1, Math.max(0, (xx + 0.5) / 2 - 0.5)), sy = Math.min(N - 1, Math.max(0, (y + 0.5) / 2 - 0.5));
+        const a0 = Math.floor(sx), b0 = Math.floor(sy), a1 = Math.min(N - 1, a0 + 1), b1 = Math.min(N - 1, b0 + 1), u = sx - a0, v = sy - b0;
+        const val = (a[b0 * N + a0] * (1 - u) + a[b0 * N + a1] * u) * (1 - v) + (a[b1 * N + a0] * (1 - u) + a[b1 * N + a1] * u) * v;
+        const j = (y * M + xx) * 4;
+        d.data[j] = d.data[j + 1] = d.data[j + 2] = 255;
+        d.data[j + 3] = Math.round(Math.max(0, Math.min(1, val)) * 255);
+      }
+      x.putImageData(d, 0, 0);
+      return c;
+    }
+    // Maske als PNG (weiß mit Deckkraft), doppelt so fein mit weichen Kanten
+    function maskPng(bin, N, soft, lo) {
+      const M = N * 2, g = gauss(bin, N, N, soft || 0.8), l0 = lo === undefined ? 0.3 : lo;
+      const c = canvasOf(M, M), x = c.getContext('2d'), d = x.createImageData(M, M);
+      for (let y = 0; y < M; y++) for (let xx = 0; xx < M; xx++) {
+        const sx = Math.min(N - 1, Math.max(0, (xx + 0.5) / 2 - 0.5)), sy = Math.min(N - 1, Math.max(0, (y + 0.5) / 2 - 0.5));
+        const a0 = Math.floor(sx), b0 = Math.floor(sy), a1 = Math.min(N - 1, a0 + 1), b1 = Math.min(N - 1, b0 + 1), u = sx - a0, v = sy - b0;
+        const val = (g[b0 * N + a0] * (1 - u) + g[b0 * N + a1] * u) * (1 - v) + (g[b1 * N + a0] * (1 - u) + g[b1 * N + a1] * u) * v;
+        const al = Math.max(0, Math.min(1, (val - l0) / 0.4));
+        const j = (y * M + xx) * 4;
+        d.data[j] = d.data[j + 1] = d.data[j + 2] = 255;
+        d.data[j + 3] = Math.round(al * 255);
+      }
+      x.putImageData(d, 0, 0);
+      return c;
+    }
+
+    // ---- Zeichnen ----
+    // Platzhalter, solange kein Foto da ist: Umriss der gewählten Form
+    const BUST = 'M200 104C224 104 240 124 240 150C240 172 230 190 218 198L218 210C246 216 268 230 274 262L126 262C132 230 154 216 182 210L182 198C170 190 160 172 160 150C160 124 176 104 200 104Z';
+    function placeholder(ctx) {
+      const g = el('g', { fill: '#c9a24a', 'fill-opacity': 0.1, stroke: '#9c7726', 'stroke-opacity': 0.55, 'stroke-width': 1.3, 'stroke-dasharray': '5 5' }, ctx.g);
+      if (D.shape === 'heart') el('path', { d: CHARMS.heart, transform: 'translate(200 180) scale(190)', 'stroke-width': 1.3 / 190, 'stroke-dasharray': (5 / 190) + ' ' + (5 / 190) }, g);
+      else if (D.shape === 'coin' || D.shape === 'ring') el('circle', { cx: 200, cy: 183, r: 79 }, g);
+      else if (D.shape === 'oval') el('ellipse', { cx: 200, cy: 183, rx: 60, ry: 79 }, g);
+      if (D.shape === 'head') el('path', { d: BUST }, g);
+      if (D.shape === 'ring') {
+        const cp = el('clipPath', { id: 'pt-phc' }, ctx.defs);
+        el('circle', { cx: 200, cy: 183, r: 79 }, cp);
+        el('path', { d: BUST, transform: 'translate(200 270) scale(.8) translate(-200 -262)', 'clip-path': 'url(#pt-phc)' }, g);
+      }
+      const t = el('text', { x: 200, y: D.shape === 'heart' ? 172 : 160, 'text-anchor': 'middle', 'font-family': 'Alexandria, sans-serif', 'font-size': 14, 'font-weight': 500, fill: '#5b4310', 'fill-opacity': 0.75 }, ctx.g);
+      t.textContent = T.here;
+      return [200, 104];
+    }
+    function paint() {
+      svg.replaceChildren();
+      const defs = el('defs', null, svg);
+      background(svg, 'pt', defs);
+      const m = METALS[D.gold] || METALS.yellow;
+      const grad = el('linearGradient', { id: 'pt-metal', gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 120, y2: 60, spreadMethod: 'reflect' }, defs);
+      m.forEach((c, i) => el('stop', { offset: i / (m.length - 1), 'stop-color': c }, grad));
+      // große Platte: sanfter Verlauf mit einem breiten Glanz, damit die Gravur gut lesbar bleibt
+      const pgrad = el('linearGradient', { id: 'pt-pmetal', gradientUnits: 'userSpaceOnUse', x1: 110, y1: 90, x2: 300, y2: 280 }, defs);
+      [[0, m[1]], [0.32, m[3]], [0.5, m[2]], [0.68, m[3]], [1, m[1]]].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, pgrad));
+      const sh = el('filter', { id: 'pt-sh', x: '-10%', y: '-10%', width: '120%', height: '130%' }, defs);
+      el('feDropShadow', { dx: 0.7, dy: 1.4, stdDeviation: 0.9, 'flood-color': '#3a2412', 'flood-opacity': 0.28 }, sh);
+      const ctx = { id: 'pt', defs, metal: 'url(#pt-metal)', dark: m[0], glints: [], chains: [], linkScale: 1.1 };
+      plateFilter(ctx);
+      ctx.chainG = el('g', { filter: 'url(#pt-sh)' }, svg);
+      ctx.g = el('g', null, svg);
+      let top;
+      if (art) {
+        // Platte so groß wie möglich, oben mittig unter der Kette
+        const bw = art.box[2] - art.box[0], bh = art.box[3] - art.box[1];
+        const u = Math.min(200 / bw, 196 / bh);
+        const ox = 200 - (art.box[0] + art.box[2]) / 2 * u, oy = 98 - art.box[1] * u, wh = art.N * u;
+        const at = { x: f2(ox), y: f2(oy), width: f2(wh), height: f2(wh) };
+        const mask = (id, href) => {
+          const k = el('mask', Object.assign({ id, maskUnits: 'userSpaceOnUse' }, at), defs);
+          el('image', Object.assign({ href, preserveAspectRatio: 'none' }, at), k);
+        };
+        mask('pt-pm', art.plateUrl);
+        const pg = el('g', { filter: 'url(#pt-plate)' }, ctx.g);
+        el('rect', Object.assign({ fill: 'url(#pt-pmetal)', mask: 'url(#pt-pm)' }, at), pg);
+        const engC = ENGC[D.gold] || ENGC.yellow;
+        const eg = el('g', { mask: 'url(#pt-pm)' }, ctx.g);
+        // Fotogravur: Graustufen, dunkle Stellen tiefer graviert
+        mask('pt-em', art.engUrl);
+        el('rect', Object.assign({ fill: engC, 'fill-opacity': 0.94, mask: 'url(#pt-em)' }, at), eg);
+        top = [ox + art.bail[0] * u, oy + art.bail[1] * u];
+      } else top = placeholder(ctx);
+      const [bx, by] = top;
+      linkChain(ctx, 'M48 -12C58 100 ' + f2(bx - 46) + ' ' + f2(by - 42) + ' ' + f2(bx - 1) + ' ' + f2(by - 8));
+      linkChain(ctx, 'M352 -12C342 100 ' + f2(bx + 46) + ' ' + f2(by - 42) + ' ' + f2(bx + 1) + ' ' + f2(by - 8));
+      bail(ctx, bx, by - 3.6);
+      svg._ctx = ctx;
+    }
+
+    // ---- Foto laden, Gesicht finden, Anhänger bauen ----
+    const status = $('[data-pstatus]'), busyBox = $('[data-pbusy]'), busyT = $('[data-pbusy-t]');
+    const photoIn = $('[data-pphoto]'), photoT = $('[data-pphoto-t]'), detailBox = $('[data-pdetail]'), detailR = $('[data-pdetail-r]');
+    function setBusy(text) {
+      busy = !!text;
+      busyBox.hidden = !busy;
+      busyT.textContent = text || '';
+      photoIn.disabled = busy;
+    }
+    async function loadImage(file) {
+      const url = URL.createObjectURL(file);
+      const im = new Image();
+      im.src = url;
+      try { await im.decode(); } finally { URL.revokeObjectURL(url); }
+      return im;
+    }
+    function rebuild() {
+      const b = build(an, D.shape, D.detail);
+      art = Object.assign(b, { plateUrl: maskPng(b.plate, b.N, 1).toDataURL('image/png'), engUrl: tonePng(b.eng, b.N).toDataURL('image/png') });
+      changed(true);
+    }
+    photoIn.addEventListener('change', async e => {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!file || busy) return;
+      status.textContent = '';
+      setBusy(mpP ? T.finding : T.loading);
+      try {
+        let img;
+        try { img = await loadImage(file); } catch (err) { status.textContent = T.photoFail; return; }
+        try { await loadMP(); } catch (err) { status.textContent = T.loadFail; return; }
+        busyT.textContent = T.finding;
+        await new Promise(r => requestAnimationFrame(() => setTimeout(r, 30)));
+        let r = null;
+        try { r = await analyze(img); } catch (err) { status.textContent = T.fail; return; }
+        if (!r) { status.textContent = T.noFace; return; }
+        an = r;
+        orig = file;
+        status.textContent = r.group > 1 ? T.group : r.many ? T.many : r.small ? T.small : '';
+        detailBox.hidden = false;
+        photoT.textContent = T.again;
+        rebuild();
+      } finally {
+        setBusy('');
+      }
+    });
+    let detT = null;
+    detailR.addEventListener('input', () => {
+      D.detail = detailR.value / 100;
+      clearTimeout(detT);
+      detT = setTimeout(() => { if (an) rebuild(); }, 220);
+    });
+    form.addEventListener('change', e => {
+      const t = e.target;
+      if (t.name === 'p-shape') { D.shape = t.value; if (an) { rebuild(); return; } }
+      if (t.name === 'p-gold') D.gold = t.value;
+      changed(t.name === 'p-shape' || t.name === 'p-gold');
+    });
+    form.addEventListener('input', e => { if (e.target.matches('[data-pnotes]')) changed(false); });
+
+    // ---- Angaben, WhatsApp, Bild ----
+    const checkedText = name => { const c = form.querySelector('input[name="' + name + '"]:checked'); return c ? c.closest('label').querySelector('.chip-t').textContent.trim() : ''; };
+    const legend = name => form.querySelector('input[name="' + name + '"]').closest('fieldset').querySelector('legend').textContent.trim();
+    function pLines() {
+      const L = ['p-shape', 'p-gold', 'p-karat'].map(n => [legend(n), checkedText(n)]);
+      const notes = form.querySelector('[data-pnotes]').value.trim();
+      if (notes) L.push([T.lNotes, notes]);
+      return L;
+    }
+    const pMessage = () => T.hello + '\n\n' + pLines().map(([k, v]) => '• ' + k + ': ' + v).join('\n') + '\n\n' + T.inPic + '\n' + TXT.ask;
+    async function exportArt() {
+      const im = await svgImage(svg, '', 1200, 900);
+      const L = pLines();
+      const pad = 56, lh = 42, W = 1200, H = 900;
+      const c = document.createElement('canvas');
+      c.width = W;
+      c.height = H + pad * 2 + 64 + L.length * lh;
+      const x = c.getContext('2d');
+      x.fillStyle = '#ffffff';
+      x.fillRect(0, 0, c.width, c.height);
+      x.drawImage(im, 0, 0, W, H);
+      const rtl = LANG === 'ar';
+      x.direction = rtl ? 'rtl' : 'ltr';
+      x.textAlign = rtl ? 'right' : 'left';
+      const X = rtl ? W - pad : pad;
+      x.fillStyle = '#1d1f1e';
+      x.font = '600 36px Alexandria, sans-serif';
+      x.fillText('Empire Jewelry', X, H + pad + 22);
+      x.font = '400 27px Alexandria, sans-serif';
+      x.fillStyle = '#3d413f';
+      L.forEach(([k, v], i) => x.fillText(k + ': ' + v, X, H + pad + 84 + i * lh));
+      return new Promise(r => c.toBlob(r, 'image/png'));
+    }
+    let png = null, prepT = null;
+    function pngNow() {
+      if (!png || png.ver !== ver) png = { ver, blob: exportArt().catch(() => null) };
+      return png.blob;
+    }
+    const waBtn = $('[data-pwa]'), saveBtn = $('[data-psave]'), saveStatus = $('[data-psave-status]');
+    function changed(repaint) {
+      ver++;
+      if (repaint) paint();
+      const dl = $('[data-psummary]');
+      dl.replaceChildren(...pLines().flatMap(([k, v]) => {
+        const dt = document.createElement('dt'); dt.textContent = k;
+        const dd = document.createElement('dd'); dd.textContent = v;
+        return [dt, dd];
+      }));
+      waBtn.href = wa(pMessage());
+      svg.setAttribute('aria-label', T.aria(!!art));
+      if (art && saveStatus.textContent === T.empty) saveStatus.textContent = '';
+      clearTimeout(prepT);
+      if (art) prepT = setTimeout(pngNow, 900);
+    }
+    waBtn.addEventListener('click', async e => {
+      if (!art) { e.preventDefault(); saveStatus.textContent = T.empty; return; }
+      if (!(navigator.clipboard && window.ClipboardItem)) return;   // dann nur Text
+      e.preventDefault();
+      const href = wa(pMessage());
+      const phone = window.matchMedia('(pointer: coarse)').matches;
+      try {
+        const write = navigator.clipboard.write([new ClipboardItem({ 'image/png': Promise.resolve(pngNow()).then(b => b || Promise.reject(new Error('png'))) })]);
+        await Promise.race([write, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 2500))]);
+        saveStatus.textContent = phone ? TXT.pastePhone : TXT.pasteDesk;
+      } catch (err) {
+        saveStatus.textContent = TXT.pasteFail;
+      }
+      const w = window.open(href, '_blank');
+      if (w) w.opener = null; else location.href = href;
+    });
+    saveBtn.addEventListener('click', async () => {
+      if (!art) { saveStatus.textContent = T.empty; return; }
+      saveBtn.disabled = true;
+      saveStatus.textContent = TXT.making;
+      try {
+        const blob = await pngNow();
+        if (!blob) throw new Error('png');
+        const file = new File([blob], 'empire-jewelry-photo-pendant.png', { type: 'image/png' });
+        const phone = window.matchMedia('(pointer: coarse)').matches;
+        // am Handy: Entwurf und Originalfoto zusammen teilen (z. B. direkt an WhatsApp)
+        const files = orig && navigator.canShare && navigator.canShare({ files: [file, orig] }) ? [file, orig] : [file];
+        if (phone && navigator.canShare && navigator.canShare({ files })) {
+          saveStatus.textContent = '';
+          await navigator.share({ files, text: pMessage() });
+        } else {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = file.name;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+          saveStatus.textContent = TXT.saved;
+        }
+      } catch (err) {
+        saveStatus.textContent = err && err.name === 'AbortError' ? '' : T.fail;
+      }
+      saveBtn.disabled = false;
+    });
+
+    const startNow = () => changed(true);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(startNow); else startNow();
+    window.__portrait = { get an() { return an; }, get art() { return art; }, get D() { return D; }, build, paint };
+  })();
 })();
