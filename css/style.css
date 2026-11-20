@@ -75,9 +75,10 @@ p { margin: 0; }
 .top-in {
   display: flex; align-items: center; gap: .6rem;
   max-width: var(--max); margin: 0 auto;
-  padding: .7rem var(--pad);
+  padding: .6rem var(--pad);
 }
-.top-logo img { width: auto; height: 2.6rem; }
+/* Logo wie bei Firmen üblich: links, gut lesbar (Handy ca. 50 px, PC ca. 60 px hoch) */
+.top-logo img { width: auto; height: 3.1rem; }
 .top-lang {
   margin-inline-start: auto;
   font-size: .95rem; text-decoration: none;
@@ -311,7 +312,7 @@ html[dir="rtl"] .charm-pop-t { margin: 0 0 .45rem 1.6rem; }
 .map-ico svg { width: 100%; height: 100%; }
 
 /* ---------- Abschnitte allgemein ---------- */
-.studio, .pieces, .builder, .how, .about, .visit {
+.studio, .pieces, .builder, .about, .visit {
   max-width: var(--max); margin: 0 auto;
   padding: var(--gap-section) var(--pad) 0;
 }
@@ -342,7 +343,7 @@ html[dir="rtl"] .charm-pop-t { margin: 0 0 .45rem 1.6rem; }
 /* ---------- Über uns ---------- */
 .about-grid { display: grid; gap: 2rem; align-items: center; max-width: 44rem; }
 .about-grid img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 22px; }
-.about-grid .lead + p { margin-block-start: .8rem; }
+.about-grid .lead + p { margin-block-start: .8rem; color: var(--ink-2); }
 /* Werkstatt-Fotos unter „Über uns“ */
 .workshop-title { margin-block: 2.4rem 1rem; font: 700 clamp(1.35rem, 4.5vw, 1.8rem)/1.2 var(--font-show); }
 .workshop { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
@@ -353,8 +354,6 @@ html[dir="rtl"] .charm-pop-t { margin: 0 0 .45rem 1.6rem; }
   .workshop p { font-size: .78rem; }
 }
 .about-grid .ph { margin-block-start: 1rem; }
-.facts { list-style: none; margin: 1.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
-.facts li { padding: .4rem .9rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-size: .9rem; }
 
 /* ---------- Baukasten ---------- */
 .builder-grid { display: grid; gap: 1.25rem; }
@@ -370,60 +369,15 @@ html[dir="rtl"] .charm-pop-t { margin: 0 0 .45rem 1.6rem; }
 .summary dt { color: var(--ink-2); }
 .summary dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
 
-/* ---------- Ablauf ---------- */
-.how-steps { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; gap: 2rem; counter-reset: step; }
-.how-steps li { counter-increment: step; display: grid; grid-template-columns: 3rem 1fr; column-gap: 1rem; }
-.how-steps li::before {
-  content: counter(step);
-  grid-row: span 2;
-  font: 700 2.6rem/1 var(--font-show); color: var(--gold);
-}
-html[lang="ar"] .how-steps li::before { content: counter(step, arabic-indic); }
-.how-steps p { color: var(--ink-2); margin-block-start: .3rem; }
-
-/* ---------- Kontakt ---------- */
-.visit > p { margin-block-start: .75rem; color: var(--ink-2); }
-.contact { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: .6rem; }
-.contact a { text-decoration-thickness: 1px; text-underline-offset: 4px; }
-.ph {
-  display: inline-block; padding: .1rem .5rem;
-  background: #fff6dc; border: 1px dashed var(--gold); border-radius: 6px;
-  font-size: .95rem; color: var(--gold-text);
-}
-
-/* ---------- Fuß ---------- */
-.foot {
-  max-width: var(--max); margin: var(--gap-section) auto 0;
-  padding: 2rem var(--pad) 6rem;
-  border-top: 1px solid var(--line);
-  display: grid; gap: .5rem; font-size: .9rem; color: var(--ink-2);
-}
-.foot img { width: 7rem; margin-block-end: .5rem; }
-.foot p a { margin-inline-end: 1rem; }
-
-/* ---------- WhatsApp schwebend ---------- */
-.wa-float {
-  position: fixed; inset-inline-end: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom));
-  width: 3.5rem; height: 3.5rem; border-radius: 50%;
-  display: grid; place-items: center;
-  background: var(--green); color: #fff; z-index: 40;
-  box-shadow: 0 8px 20px -8px rgba(30, 60, 40, .6);
-}
-.wa-float svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.wa-float:hover { background: var(--green-dark); }
-.wa-float { transition: opacity .2s, transform .2s, background-color .2s; }
-.wa-float.is-away { opacity: 0; transform: scale(.8); pointer-events: none; }
-
 /* ---------- ab Tablet ---------- */
 @media (min-width: 700px) {
   .gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem 1.25rem; }
-  .how-steps { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* ---------- ab Desktop ---------- */
 @media (min-width: 960px) {
-  .top-in { padding-block: 1rem; }
-  .top-logo img { height: 3.1rem; }
+  .top-in { padding-block: .85rem; }
+  .top-logo img { height: 3.75rem; }
   .menu-btn { display: none; }
   .top-nav, .top.is-open .top-nav { display: flex; position: static; gap: 1.6rem; margin-inline-start: auto; padding: 0; background: none; box-shadow: none; }
   .top-nav a { padding: .3rem 0; border: 0; font-size: .95rem; }

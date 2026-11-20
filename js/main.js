@@ -2150,13 +2150,15 @@
   }
 
   // ---------- Weiches Scrollen ----------
-  const lenis = (window.Lenis && !REDUCE) ? new window.Lenis({ autoRaf: true, anchors: { offset: -72 } }) : null;
+  // Abstand für Sprünge: so hoch wie die Kopfzeile (Logo) plus etwas Luft
+  const headH = () => { const t = document.querySelector('[data-top]'); return (t ? t.offsetHeight : 72) + 4; };
+  const lenis = (window.Lenis && !REDUCE) ? new window.Lenis({ autoRaf: true, anchors: { offset: -headH() } }) : null;
   const goTo = target => {
     if (lenis) {
       // „Make it custom“ ändert vorher die Felder; dabei verschiebt der Browser die Seite, Lenis weiß das noch nicht.
       // Darum erst Lenis auf die echte Position setzen, dann das Ziel selbst ausrechnen.
       lenis.scrollTo(window.scrollY, { immediate: true, force: true });
-      lenis.scrollTo(target.getBoundingClientRect().top + window.scrollY - 72);
+      lenis.scrollTo(target.getBoundingClientRect().top + window.scrollY - headH());
     }
     else target.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth' });
   };
