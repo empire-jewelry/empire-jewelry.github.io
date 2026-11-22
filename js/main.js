@@ -2581,9 +2581,7 @@
       { item: 'necklace', text: AR ? 'مايا' : 'Maya', style: AR ? 'modern' : 'pacifico', gold: 'rose', nameColor: 'pink',
         charmPos: 'chain', charmCols: 'butterfly=lilac,flower=pink', steps: [[], ['butterfly'], ['butterfly', 'flower']] },
       { item: 'bracelet', text: AR ? 'آدم' : 'Adam', style: AR ? 'modern' : 'pacifico', gold: 'yellow', nameColor: 'blue',
-        charmPos: 'chain', charmCols: '', steps: [[], ['teddy'], ['teddy', 'car']] },
-      { item: 'pin', text: 'حسن', style: 'calligraphy', gold: 'white', nameColor: 'metal',
-        charmPos: 'below', charmCols: '', steps: [[], ['hamsa'], ['hamsa', 'eye'], ['hamsa', 'eye', 'coin']] }
+        charmPos: 'chain', charmCols: '', steps: [[], ['teddy'], ['teddy', 'car']] }
     ];
     const svg = el('svg', { class: 'hero-piece', viewBox: '0 0 400 300', role: 'link', tabindex: '0', 'aria-label': TXT.heroOpen }, ringStageEl);
     svg.dataset.pid = 'hp';
@@ -2597,8 +2595,8 @@
       charmCols: p.charmCols, accent: accent.length ? accent.join(',') : 'none'
     });
     // mit den Beispielwerten zeichnen, danach die Werte des Kunden zurück
-    // Armband und Anstecknadel sind kleiner als die Kette: im Startbereich näher heranzoomen
-    const ZOOM = { bracelet: '16 42 368 276', pin: '72 50 256 192' };
+    // das Armband ist kleiner als die Kette: im Startbereich näher heranzoomen
+    const ZOOM = { bracelet: '16 42 368 276' };
     const draw = d => {
       const keep = {};
       Object.keys(d).forEach(k => { keep[k] = state[k]; state[k] = d[k]; });

@@ -28,11 +28,11 @@
   <link rel="alternate" hreflang="ar" href="https://empire-jewelry.github.io/ar/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600&family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600&family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@500;600&family=Outfit:wght@700&display=swap">
   <!-- Schriften für die Namenskette -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&family=Sacramento&family=Dancing+Script:wght@500&family=Pacifico&family=Playfair+Display:wght@500&family=Montserrat:wght@500&family=Fredoka:wght@500&family=Amiri:wght@400&family=Gulzar&family=Katibeh&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
-  <link rel="stylesheet" href="css/style.css?v=33">
+  <link rel="stylesheet" href="css/style.css?v=37">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -47,8 +47,12 @@
         <a href="#about">About us</a>
         <a href="#visit">Contact</a>
       </nav>
-      <a class="top-lang" href="ar/" hreflang="ar" lang="ar">العربية</a>
-      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="top-nav"><span class="menu-ico" aria-hidden="true"></span><span class="menu-t">Menu</span></button>
+      <div class="top-tools">
+        <a class="top-ico" href="https://www.instagram.com/empirejewellery__/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.3 6.7h.01"/></svg></a>
+        <a class="top-ico" href="https://wa.me/96170894976" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.4-4.1a8.5 8.5 0 1 1 3.4 3.1z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></svg></a>
+        <a class="top-lang" href="ar/" hreflang="ar" lang="ar">العربية</a>
+        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="top-nav"><span class="menu-ico" aria-hidden="true"></span><span class="menu-t">Menu</span></button>
+      </div>
     </div>
   </header>
 
@@ -61,14 +65,23 @@
         <canvas class="ring-glints" aria-hidden="true"></canvas>
       </div>
       <div class="ring-copy">
-        <h1 id="hero-title">Jewelry made to your wish</h1>
-        <p class="lead">Rings, necklaces and names in gold, designed with you and delivered all over Lebanon.</p>
+        <h1 id="hero-title">Jewelry made<br>to your wish.</h1>
         <div class="actions">
           <a class="btn btn-main" href="#name">Start a custom order</a>
           <a class="btn btn-line" href="#collection">See the collection</a>
         </div>
       </div>
     </section>
+
+    <!-- Bilderreihe unter dem Start: vier Wege in die Seite -->
+    <nav class="tiles" aria-label="Explore">
+      <ul>
+        <li><a href="#name"><img src="img/name-necklace-480.webp" srcset="img/name-necklace-480.webp 480w, img/name-necklace.webp 880w" sizes="(min-width: 700px) 25vw, 50vw" width="880" height="880" loading="lazy" alt=""><span>Name necklaces</span></a></li>
+        <li><a href="#lebanon"><img src="img/lebanon-map-480.webp" srcset="img/lebanon-map-480.webp 480w, img/lebanon-map.webp 900w" sizes="(min-width: 700px) 25vw, 50vw" width="900" height="900" loading="lazy" alt=""><span>Lebanon map</span></a></li>
+        <li><a href="#portrait"><img src="img/mother-child-480.webp" srcset="img/mother-child-480.webp 480w, img/mother-child.webp 900w" sizes="(min-width: 700px) 25vw, 50vw" width="900" height="900" loading="lazy" alt=""><span>Photo pendant</span></a></li>
+        <li><a href="#collection"><img src="img/butterfly-set-480.webp" srcset="img/butterfly-set-480.webp 480w, img/butterfly-set.webp 900w" sizes="(min-width: 700px) 25vw, 50vw" width="900" height="900" loading="lazy" alt=""><span>Collection</span></a></li>
+      </ul>
+    </nav>
 
     <!-- Namenskette: Schrift, Kette, Anhänger, Stein -->
     <section class="studio" id="name" aria-labelledby="name-title">
@@ -267,7 +280,6 @@
     <section class="studio map-studio" id="lebanon" aria-labelledby="lebanon-title">
       <div class="section-head">
         <h2 id="lebanon-title">Lebanon map pendant</h2>
-        <p>Lebanon in gold, in four styles like the pendants in our shop. Choose a style and see it on the neck and up close.</p>
       </div>
       <div class="studio-grid">
         <figure class="stage studio-stage">
@@ -433,7 +445,7 @@
     <section class="pieces" id="collection" aria-labelledby="collection-title">
       <div class="section-head">
         <h2 id="collection-title">Collection</h2>
-        <p>Pieces from our Instagram. Prices on request: ask about a piece on WhatsApp, or make it your own.</p>
+        <p>Pieces from our Instagram.</p>
       </div>
       <fieldset class="chips filter" data-filter>
         <legend class="sr-only">Show</legend>
@@ -448,73 +460,61 @@
         <li data-cat="pin">
           <img src="img/name-pin-480.webp" srcset="img/name-pin-480.webp 480w, img/name-pin.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Name pin in Arabic with a hamsa, a blue evil eye and an engraved coin, in an Empire Jewelry box">
           <p class="cap">Name pin with hamsa, evil eye and engraved coin</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"item":"pin","style":"calligraphy","accent":"hamsa,eye,coin","nameColor":"metal","goto":"name"}'>Make it custom</button></div>
         </li>
         <li data-cat="pin">
           <img src="img/pins-bracelet-480.webp" srcset="img/pins-bracelet-480.webp 480w, img/pins-bracelet.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Two name pins in Arabic with small charms, and a name bracelet in blue enamel with a teddy bear and a car">
           <p class="cap">Name pins and a name bracelet for children</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"item":"bracelet","style":"pacifico","nameColor":"blue","accent":"teddy,car","charmPos":"chain","goto":"name"}'>Make it custom</button></div>
         </li>
         <li data-cat="name">
           <img src="img/kids-name-necklace-480.webp" srcset="img/kids-name-necklace-480.webp 480w, img/kids-name-necklace.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Name necklace with the name in blue enamel, a small car and a teddy bear on the chain, in an Empire Jewelry box">
           <p class="cap">Name necklace in blue enamel with a car and a teddy</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"item":"necklace","style":"pacifico","nameColor":"blue","accent":"car,teddy","charmPos":"chain","goto":"name"}'>Make it custom</button></div>
         </li>
         <li data-cat="name">
           <img src="img/two-names-heart-480.webp" srcset="img/two-names-heart-480.webp 480w, img/two-names-heart.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Gold necklace with two names in script and a small heart on the chain, in a pink box">
           <p class="cap">Two names and a heart on one chain</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"item":"necklace","style":"script","nameColor":"metal","chainHeart":"left","goto":"name"}'>Make it custom</button></div>
         </li>
         <li data-cat="pendant">
           <img src="img/lebanon-map-480.webp" srcset="img/lebanon-map-480.webp 480w, img/lebanon-map.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Four gold pendants shaped like Lebanon, one with the flag in enamel and one with colourful buildings">
           <p class="cap">Lebanon map pendants</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"goto":"lebanon"}'>Make it custom</button></div>
         </li>
         <li data-cat="name">
           <img src="img/name-necklace-480.webp" srcset="img/name-necklace-480.webp 480w, img/name-necklace.webp 880w" sizes="(min-width: 900px) 25vw, 50vw" width="880" height="880" loading="lazy" alt="Gold necklace with an Arabic name in calligraphy">
           <p class="cap">Arabic name necklace</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a><button class="like" type="button" data-like='{"style":"calligraphy","goto":"name"}'>Make it custom</button></div>
         </li>
         <li data-cat="pendant">
           <img src="img/flower-pendants-480.webp" srcset="img/flower-pendants-480.webp 480w, img/flower-pendants.webp 865w" sizes="(min-width: 900px) 25vw, 50vw" width="865" height="865" loading="lazy" alt="Three pendants on fine chains: red enamel flowers, a gold leaf and pink flowers">
           <p class="cap">Flower and leaf pendants</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
         </li>
         <li data-cat="pendant bracelet">
           <img src="img/butterfly-set-480.webp" srcset="img/butterfly-set-480.webp 480w, img/butterfly-set.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Butterfly in mint and pink enamel, as a necklace and as a bracelet">
           <p class="cap">Butterfly necklace and bracelet</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
         </li>
         <li data-cat="pendant name">
           <img src="img/initial-disc-480.webp" srcset="img/initial-disc-480.webp 480w, img/initial-disc.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Rose gold disc with an engraved letter S and a small pink stone">
           <p class="cap">Initial disc with stone</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
         </li>
         <li data-cat="earrings">
           <img src="img/wing-earrings-480.webp" srcset="img/wing-earrings-480.webp 480w, img/wing-earrings.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Gold stud earrings shaped like open butterfly wings">
           <p class="cap">Butterfly wing earrings</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
         </li>
         <li data-cat="pendant">
           <img src="img/enamel-charms-480.webp" srcset="img/enamel-charms-480.webp 480w, img/enamel-charms.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Four enamel charms on gold chains: ice creams, a heart and a hot air balloon">
           <p class="cap">Enamel charms</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
         </li>
         <li data-cat="pendant">
           <img src="img/mother-child-480.webp" srcset="img/mother-child-480.webp 480w, img/mother-child.webp 900w" sizes="(min-width: 900px) 25vw, 50vw" width="900" height="900" loading="lazy" alt="Round gold pendant showing a mother holding her child">
           <p class="cap">Mother and child pendant</p>
-          <p class="price">Price on request</p>
           <div class="piece-actions"><a class="ask" data-ask href="https://wa.me/96170894976" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
         </li>
       </ul>
@@ -531,10 +531,10 @@
       </div>
       <h3 class="workshop-title">Our workshop</h3>
       <ul class="workshop">
-        <li><img src="img/workshop-goldsmith-360.webp" srcset="img/workshop-goldsmith-360.webp 360w, img/workshop-goldsmith.webp 600w" sizes="(min-width: 960px) 22vw, 50vw" width="600" height="800" loading="lazy" alt="Goldsmith working at the bench in the Empire Jewelry workshop"><p>At the bench</p></li>
-        <li><img src="img/workshop-room-360.webp" srcset="img/workshop-room-360.webp 360w, img/workshop-room.webp 600w" sizes="(min-width: 960px) 22vw, 50vw" width="600" height="800" loading="lazy" alt="The Empire Jewelry workshop with its benches and machines"><p>The workshop</p></li>
-        <li><img src="img/workshop-laser-360.webp" srcset="img/workshop-laser-360.webp 360w, img/workshop-laser.webp 600w" sizes="(min-width: 960px) 22vw, 50vw" width="600" height="800" loading="lazy" alt="Laser engraving machine with its computer"><p>Laser engraving</p></li>
-        <li><img src="img/workshop-welding-360.webp" srcset="img/workshop-welding-360.webp 360w, img/workshop-welding.webp 600w" sizes="(min-width: 960px) 22vw, 50vw" width="600" height="800" loading="lazy" alt="Laser welding machine with a microscope"><p>Laser welding</p></li>
+        <li><img src="img/workshop-goldsmith-360.webp" srcset="img/workshop-goldsmith-360.webp 360w, img/workshop-goldsmith.webp 600w" sizes="(min-width: 960px) 22vw, 50vw" width="600" height="800" loading="lazy" alt="Goldsmith working at the bench in the Empire Jewelry workshop"></li>
+        <li><img src="img/workshop-room-360.webp" srcset="img/workshop-room-360.webp 360w, img/workshop-room.webp 600w" sizes="(min-width: 960px) 22vw, 50vw" width="600" height="800" loading="lazy" alt="The Empire Jewelry workshop with its benches and machines"></li>
+        <li><img src="img/workshop-laser-360.webp" srcset="img/workshop-laser-360.webp 360w, img/workshop-laser.webp 600w" sizes="(min-width: 960px) 22vw, 50vw" width="600" height="800" loading="lazy" alt="Laser engraving machine with its computer"></li>
+        <li><img src="img/workshop-welding-360.webp" srcset="img/workshop-welding-360.webp 360w, img/workshop-welding.webp 600w" sizes="(min-width: 960px) 22vw, 50vw" width="600" height="800" loading="lazy" alt="Laser welding machine with a microscope"></li>
       </ul>
     </section>
 
@@ -561,7 +561,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=59" defer></script>
+  <script src="js/main.js?v=60" defer></script>
   <script src="js/ring.js?v=7" defer></script>
   <script src="js/music.js?v=3" defer></script>
 </body>
