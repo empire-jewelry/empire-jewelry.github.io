@@ -13,6 +13,7 @@
   --gold-text: #8a6a1f;
   --gold-light: #e9cf87;
   --rose: #b07276;       /* Start-Titel, Altrosa (Kontrast mind. 3:1 auf dem hellen Hintergrund) */
+  --rose-deep: #a2646a;  /* Knöpfe im Start: etwas dunkler, damit die Schrift gut lesbar ist (4,6:1 zu Weiß) */
 
   --font-ui: "Alexandria", system-ui, sans-serif;
   --font-show: "Aref Ruqaa", "Alexandria", serif;
@@ -233,6 +234,11 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 }
 html[lang="ar"] .ring-copy h1 { letter-spacing: 0; line-height: 1.45; }
 .ring-copy .actions { justify-content: center; margin-block-start: 1.5rem; }
+/* Knöpfe im Start in Rosa wie der Titel */
+.ring-copy .btn-main { background: var(--rose-deep); }
+.ring-copy .btn-main:hover { background: #8c5257; }
+.ring-copy .btn-line { border-color: var(--rose-deep); color: var(--rose-deep); background: var(--paper); }
+.ring-copy .btn-line:hover { background: var(--rose-deep); color: #fff; }
 
 /* ---------- Bilderreihe unter dem Start (vier Bilder mit Link in die Bereiche) ---------- */
 .tiles ul {
